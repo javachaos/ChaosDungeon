@@ -12,6 +12,7 @@ import java.util.Stack;
 /**
  * Edge class, defined by two points (a, b).
  */
+@SuppressWarnings("unused")
 public class Edge {
   
   private Point2D pointA;

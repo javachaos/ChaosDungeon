@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
  * this class is a doubly-circularly linked list of vertices.
  * Each vertex has a next, and previous reference to another vertex.
  */
+@SuppressWarnings("unused")
 public class Vertex {
 
   private static final Logger LOGGER = LogManager.getLogger(Vertex.class);
@@ -407,7 +408,7 @@ public class Vertex {
     this.previous = previous;
   }
 
-  ///////////////////////////////////////// Helper functions ////////////////////////////////////////////
+  ////////////////////////////////////// Helper functions /////////////////////////////////////////
 
   /**
    * Get all the vertices of this polygon as a list of Point2D.
@@ -436,12 +437,12 @@ public class Vertex {
     if (i <= 0) {
       throw new IllegalArgumentException("Index " + i + " out of bounds.");
     }
-    if (next.index - i >= previous.index - i) {
-      //Counterclockwise
-    } else {
-      //Clockwise
-    }
-    Vertex curr = next;
+    //    if (next.index - i >= previous.index - i) {
+    //      //Counterclockwise
+    //    } else {
+    //      //Clockwise
+    //    }
+    //Vertex curr = next;
     updateIndicies();
   }
 

@@ -194,7 +194,6 @@ public class TestVertex {
         new Point2D.Double(0.5, 1.0));
 
     Vertex poly = new Vertex(t);
-    Vertex a = poly;
     Vertex b = poly.getNext();
     Vertex c = poly.getPrevious();
 
@@ -202,7 +201,7 @@ public class TestVertex {
     double theta2 = 63.434948;
     double theta3 = 53.130102;
 
-    assertEquals(a.getAngle(), theta1, 1.0e-6);
+    assertEquals(poly.getAngle(), theta1, 1.0e-6);
     assertEquals(b.getAngle(), theta2, 1.0e-6);
     assertEquals(c.getAngle(), theta3, 1.0e-6);
   }
@@ -216,12 +215,11 @@ public class TestVertex {
         new Point2D.Double(1.0, 1.0));
 
     Vertex poly = new Vertex(s);
-    Vertex a = poly;
     Vertex b = poly.getNext();
     Vertex c = poly.getNext().getNext();
     Vertex d = poly.getNext().getNext().getNext();
 
-    double theta1 = a.calculateAngle();
+    double theta1 = poly.calculateAngle();
     double theta2 = b.calculateAngle();
     double theta3 = c.calculateAngle();
     double theta4 = d.calculateAngle();

@@ -88,12 +88,12 @@ public class SatCollisionDetector {
    * Check collision between two triangle.
    *
    * @param t1 set of points defining the first triangle
-   * @param t1 set of points defining the second triangle
+   * @param t2 set of points defining the second triangle
    * @return true if the two polygons collide
    */
   public static boolean checkCollision(Triangle t1, Triangle t2) {
-    return (t2.contains(t1.getA()) || t2.contains(t1.getB()) || t2.contains(t1.getC())) ||
-        (t1.contains(t2.getA()) || t1.contains(t2.getB()) || t1.contains(t2.getC()));
+    return (t2.contains(t1.getA()) || t2.contains(t1.getB()) || t2.contains(t1.getC()))
+        || (t1.contains(t2.getA()) || t1.contains(t2.getB()) || t1.contains(t2.getC()));
   }
 
   /**
@@ -124,6 +124,7 @@ public class SatCollisionDetector {
     return axes;
   }
 
+  @SuppressWarnings("all")
   private static List<Point2D> getEdgesAsAxes(Set<Point2D> polygon) {
     List<Point2D> axes = new CopyOnWriteArrayList<>();
     List<Point2D> points = new CopyOnWriteArrayList<>(polygon);
