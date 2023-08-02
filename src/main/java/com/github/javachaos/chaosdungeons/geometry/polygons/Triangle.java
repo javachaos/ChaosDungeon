@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * Class to represent a Triangle defined by three Point2D points.
  */
+@SuppressWarnings("unused")
 public class Triangle {
 
   private Point2D pointA;

@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.constants;
 /**
  * Constants file.
  */
+@SuppressWarnings("unused")
 public class Constants {
 
   public static final String FILENAME_REGEX = "^([a-z])+([_]){0,1}([a-z])+$";

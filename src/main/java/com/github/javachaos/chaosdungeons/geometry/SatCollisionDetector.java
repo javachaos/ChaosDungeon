@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 /**
  * Separating Axis Theorem collision detector.
  */
+@SuppressWarnings("unused")
 public class SatCollisionDetector {
 
   //TODO finish cleaning up the style issues.
@@ -60,6 +61,13 @@ public class SatCollisionDetector {
     System.out.println("Runtime: " + (end - start) / 1000000.0 + " ms");
   }
 
+  /**
+   * Check collision between two polygons defined by two sets of points.
+   *
+   * @param polygon1 set of points defining the first polygon
+   * @param polygon2 set of points defining the second polygon
+   * @return true if the two polygons collide
+   */
   public static boolean checkCollision(Set<Point2D> polygon1, Set<Point2D> polygon2) {
     List<Point2D> axes = getAxes(polygon1, polygon2);
     Optional<Point2D> p;
@@ -76,6 +84,25 @@ public class SatCollisionDetector {
     return p.isEmpty();
   }
 
+  /**
+   * Check collision between two triangle.
+   *
+   * @param t1 set of points defining the first triangle
+   * @param t1 set of points defining the second triangle
+   * @return true if the two polygons collide
+   */
+  public static boolean checkCollision(Triangle t1, Triangle t2) {
+    return (t2.contains(t1.getA()) || t2.contains(t1.getB()) || t2.contains(t1.getC())) ||
+        (t1.contains(t2.getA()) || t1.contains(t2.getB()) || t1.contains(t2.getC()));
+  }
+
+  /**
+   * Check collision between two polygons defined by two sets of points.
+   *
+   * @param polygon1 set of points defining the first polygon
+   * @param polygon2 set of points defining the second polygon
+   * @return true if the two polygons collide
+   */
   public static boolean checkCollisionDelaunay(List<Point2D> polygon1, List<Point2D> polygon2) {
     List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1);
     List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2);
@@ -88,11 +115,6 @@ public class SatCollisionDetector {
       }
     }
     return false;
-  }
-
-  public static boolean checkCollision(Triangle t1, Triangle t2) {
-    return (t2.contains(t1.getA()) || t2.contains(t1.getB()) || t2.contains(t1.getC())) ||
-        (t1.contains(t2.getA()) || t1.contains(t2.getB()) || t1.contains(t2.getC()));
   }
 
   private static List<Point2D> getAxes(Set<Point2D> polygon1, Set<Point2D> polygon2) {
@@ -145,6 +167,12 @@ public class SatCollisionDetector {
     return new Projection(min, max);
   }
 
+  /**
+   * Convert a rectangle into it's four points.
+   *
+   * @param rect the rectangle to be converted
+   * @return a list of all four corner points
+   */
   public static List<Point2D> calculateRectanglePoints(Rectangle rect) {
     List<Point2D> points = new ArrayList<>();
     int x = rect.x;
@@ -158,6 +186,16 @@ public class SatCollisionDetector {
     return points;
   }
 
+  /**
+   * Calculates the ellipse points given an ellipse and the number of desired segments.
+   * So given any ellipse, we construct a n sided polygon where n is the desired number
+   * of line segments.
+   * E.g. n = 8 would result in an octagon. Whereas n = 5 a pentagon
+   *
+   * @param ellipse the original ellipse
+   * @param segments the desired number of line segments
+   * @return the set of points representing the final polygon
+   */
   public static Set<Point2D> calculateEllipsePoints(Ellipse2D ellipse, int segments) {
     double centerX = ellipse.getCenterX();
     double centerY = ellipse.getCenterY();

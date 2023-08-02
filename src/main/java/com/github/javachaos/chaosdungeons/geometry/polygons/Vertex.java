@@ -89,11 +89,10 @@ public class Vertex {
   }
 
   /**
-   * Get the bounding box of this polygon.
-   *
-   * @return the Rectangle2D which defines the bounding box
-   * of this polygon.
-   */
+    * Get the bounding box of this polygon.
+    *
+    * @return the Rectangle2D which defines the bounding box of this polygon.
+    */
   public Rectangle getBounds() {
     Point2D maxY = new Point2D.Double(0, Double.MIN_VALUE);
     Point2D minY = new Point2D.Double(0, Double.MAX_VALUE);
