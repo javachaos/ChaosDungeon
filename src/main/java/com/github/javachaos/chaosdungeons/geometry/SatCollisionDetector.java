@@ -34,12 +34,8 @@ public class SatCollisionDetector {
 
     int[] xpoints = {0, 315, 115, 299, 47, 55, 26, 0};
     int[] ypoints = {0, 53, 115, 234, 176, 271, 383, 0};
-    //List<Point2D> pentapoints = new ArrayList<>();
     List<Point2D> pts = generateNonRegularPolygon(100, 100, 120, 100, 100);
     Polygon concavePentagon = new Polygon(xpoints, ypoints, 5);
-    //    for (int i = 0; i < concavePentagon.npoints; i++) {
-    //      pentapoints.add(new Point2D.Double(xpoints[i], ypoints[i]));
-    //    }
 
     // Example usage
     Rectangle redRect = new Rectangle(22, 200, 150, 200);
@@ -54,7 +50,6 @@ public class SatCollisionDetector {
 
     SwingUtilities.invokeLater(() -> new ShapeDrawer(red));
     long start = System.nanoTime();
-    //boolean colliding = checkCollisionDelaunay(pentapoints, blue);
     boolean colliding = checkCollisionDelaunay(pts, blue);
     long end = System.nanoTime();
     System.out.println("Colliding: " + colliding);
