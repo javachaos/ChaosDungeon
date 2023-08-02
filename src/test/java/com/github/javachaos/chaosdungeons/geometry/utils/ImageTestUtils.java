@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.geometry.utils;
 
-import com.github.javachaos.chaosdungeons.geometry.Vertex;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -28,7 +28,7 @@ public class ImageTestUtils {
         jp.printAll(g2d);
         jp.setVisible(true);
         writeBufferedImageToFile(img,
-                    new File(filename));
+                new File(filename));
     }
 
     private static void writeBufferedImageToFile(BufferedImage img, File f) {
@@ -52,7 +52,7 @@ public class ImageTestUtils {
         for (i = 0; i < points.size(); i++) {
             Point2D point = points.get(i);
             String coordinatesText = "P[ " + i + ": x = " + point.getX() + ", y = " + point.getY() + " ]";
-            g2d.drawString(coordinatesText, (int) point.getX(),  (int) point.getY());
+            g2d.drawString(coordinatesText, (int) point.getX(), (int) point.getY());
         }
     }
 }
