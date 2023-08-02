@@ -5,6 +5,7 @@ import static com.github.javachaos.chaosdungeons.constants.Constants.EPSILON;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,8 +17,7 @@ import org.apache.logging.log4j.Logger;
  * Each vertex has a next, and previous reference to another vertex.
  */
 @SuppressWarnings("unused")
-public class Vertex {
-
+public class Vertex implements Iterable<Vertex> {
   private static final Logger LOGGER = LogManager.getLogger(Vertex.class);
   private double px;
   private double py;
@@ -26,6 +26,7 @@ public class Vertex {
   private boolean isAcute;
   private double angle;
   private int index;
+  private HalfEdge outgoingEdge;
 
   public Vertex() {
   }
@@ -491,4 +492,19 @@ public class Vertex {
     return index + " :[" + px + ", " + py + "]";
   }
 
+  @Override
+  public Iterator<Vertex> iterator() { //Test this
+    return new Iterator<>() {
+      final Vertex curr = Vertex.this;
+      @Override
+      public boolean hasNext() {
+        return Vertex.this.next != curr;
+      }
+
+      @Override
+      public Vertex next() {
+        return Vertex.this.next;
+      }
+    };
+  }
 }

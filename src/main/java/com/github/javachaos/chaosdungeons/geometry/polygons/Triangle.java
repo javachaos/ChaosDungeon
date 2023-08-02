@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
-import com.github.javachaos.chaosdungeons.geometry.Matrix3x3Det;
+import com.github.javachaos.chaosdungeons.geometry.math.Matrix3x3Det;
 import java.awt.geom.Point2D;
 import java.util.List;
 

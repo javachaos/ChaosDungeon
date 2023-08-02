@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.javachaos.chaosdungeons.geometry.math.Hull;
+import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.geom.Point2D;
@@ -115,7 +117,7 @@ public class TestVertex {
   void testGetEdges() {
     for (int i = 3; i < 256; i++) {
       List<Point2D> p = GenerationUtils.generateNonRegularPolygon(0, 0, i, 10000, 10000);
-      List<Point2D> hull = Edge.convexHullPoints(p);
+      List<Point2D> hull = Hull.convexHullPoints(p);
       if (hull.size() > 2) {
         Vertex hullPoly = new Vertex(hull);
         double totalAngle = 0.0;
@@ -135,7 +137,7 @@ public class TestVertex {
         assertEquals(i, edges.size());
         System.out.println(
             "Total interior angles for polygon with " + hull.size() + " sides = " + totalAngle);
-        assertTrue(Edge.epsEquals((hull.size() - 2.0) * 180.0, totalAngle));
+        assertTrue(LinearMath.epsEquals((hull.size() - 2.0) * 180.0, totalAngle));
       }
     }
   }
@@ -144,7 +146,7 @@ public class TestVertex {
   void testCalculateAngleTimes() {
     for (int i = 3; i < 51200; i++) {
       List<Point2D> p = GenerationUtils.generateNonRegularPolygon(0, 0, 4, 10000, 10000);
-      List<Point2D> hull = Edge.convexHullPoints(p);
+      List<Point2D> hull = Hull.convexHullPoints(p);
       if (hull.size() > 2) {
         Vertex hullPoly = new Vertex(hull);
         double totalAngle = 0.0;

@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
+import com.github.javachaos.chaosdungeons.geometry.math.Hull;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
@@ -91,7 +92,7 @@ public class DelaunayTriangulation {
   public static List<Edge> constrainDelaunayTriangulation(List<Triangle> triangulation,
                                                           Vertex polygon) {
     List<Edge> originalEdges = polygon.getEdges();
-    List<Edge> badEdges = Edge.convexHull(polygon);
+    List<Edge> badEdges = Hull.convexHull(polygon);
     badEdges.removeAll(originalEdges);
     List<Point2D> badPoints = new ArrayList<>();
     for (Edge be : badEdges) {
@@ -106,20 +107,7 @@ public class DelaunayTriangulation {
     }
     polygon.removeAll(badPoints);
 
-    //TODO figure this shit out more...
-    // 1. We are trying to remove hull points create
-    // the convex hull with the new hull and then repeat this function to remove
-    // bad edges, the problem seems recursive in nature, but maybe it can be done
-    // without recursion.
-    // 2. We check if any two edges from the set difference between the original edge list
-    // and the convex hull share the same points, these are the points we must remove and
-    // recompute
-    // the new convex hull.
-    // 3. Once we have these new edges, compute the set different between the original edges
-    // and this new hull
-    // list. We do this until the set difference between the hull and the original list is
-    // empty.
-    // seems like it should work, need to implement and test.
+    // Use edge flipping technique by sloan
 
     Set<Edge> constrainedTriangulation = new LinkedHashSet<>(originalEdges);
 

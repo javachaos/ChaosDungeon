@@ -1,7 +1,6 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
-import static com.github.javachaos.chaosdungeons.geometry.polygons.Edge.checkIntersection;
-
+import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class GenerationUtils {
       for (int j = i + 2; j < i + numVertices - 1; j++) {
         Point2D p3 = vertices.get(j % numVertices);
         Point2D p4 = vertices.get((j + 1) % numVertices);
-        if (checkIntersection(p1, p2, p3, p4)) {
+        if (LinearMath.checkIntersection(p1, p2, p3, p4)) {
           return generateNonRegularPolygon(xpos, ypos, numVertices, maxX, maxY);
         }
       }
