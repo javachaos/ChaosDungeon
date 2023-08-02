@@ -419,11 +419,11 @@ public class Vertex implements Iterable<Vertex> {
   public List<Point2D> getPoints() {
     List<Point2D> pts = new ArrayList<>();
     Vertex current = this.next;
-    pts.add(getPoint());
     while (current != this) {
       pts.add(current.getPoint());
       current = current.next;
     }
+    pts.add(0, current.getPoint());
     return pts;
   }
 

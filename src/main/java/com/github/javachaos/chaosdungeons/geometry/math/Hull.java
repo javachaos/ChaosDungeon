@@ -88,7 +88,7 @@ public class Hull {
     for (int i = 2; i < n; i++) {
       while (!stack.isEmpty()
           && orientation(
-          stack.get(stack.size() - 2),
+          stack.get(stack.size() - 1), //last
           stack.peek(),
           points.get(i)) <= 0) {
         stack.pop();

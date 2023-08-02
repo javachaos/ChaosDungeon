@@ -6,6 +6,7 @@ import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class ShapeDrawer extends JFrame {
     getRootPane().setBorder(BorderFactory.createTitledBorder(b, "ShapeDrawer"));
     this.shapes = new ArrayList<>();
     setSize(WIDTH, HEIGHT);
+    setLayout(new GridLayout());
     setPreferredSize(new Dimension(WIDTH, HEIGHT));
     setResizable(false);
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -110,14 +112,18 @@ public class ShapeDrawer extends JFrame {
   public void createNewShapes() {
     shapes.forEach(this::remove);
     shapes.clear();
-    shapes.add(new ShapePanel(Color.WHITE,
-        new Vertex(generateNonRegularPolygon(
-            100, 100, 9, 100, 100))));
-    shapes.add(new ShapePanel(Color.WHITE,
-        new Vertex(generateNonRegularPolygon(
-            100, 100, 9, 100, 100))));
+    addShape(5);
+    addShape(10);
+    addShape(15);
+    addShape(20);
     shapes.forEach(this::add);
     pack();
+  }
+
+  private void addShape(int i) {
+    shapes.add(new ShapePanel(Color.WHITE,
+        new Vertex(generateNonRegularPolygon(
+            100, 100, i, 100, 100))));
   }
 
   public void toggleDrawInfo() {
