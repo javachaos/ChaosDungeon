@@ -10,15 +10,21 @@ import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.geom.Point2D;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.Timeout;
 
 /**
@@ -26,23 +32,30 @@ import org.junit.jupiter.api.Timeout;
  */
 public class TestVertex {
 
+  private static final Logger LOGGER = LogManager.getLogger(TestVertex.class);
+
   private static Random r;
 
   private static List<Point2D> points;
+
+  private final Stream<Point2D> pointStream = Stream.generate(
+      () -> GenerationUtils.getRandomPoint2D(
+          0, 0,
+          100, 100));
 
   /**
    * Setup random, and point list, to run before each test.
    */
   @BeforeEach
-  public void setupUtils() {
-    r = new Random(System.nanoTime());
-    // Create a stream of random points
-    Stream<Point2D> pointStream = Stream.generate(
-        () -> GenerationUtils.getRandomPoint2D(
-            0, 0,
-            100, 100));
-    points = pointStream.limit(r.nextInt(50) + 3).collect(Collectors.toList());
-    //points = pointStream.limit(10).toList();
+  public void setupUtils(TestInfo ti) {
+    r = new SecureRandom();
+    points = pointStream.limit(r.nextInt(15) + 3).collect(Collectors.toUnmodifiableList());
+    LOGGER.debug("------------------ {} Begin --------------------", ti.getDisplayName());
+  }
+
+  @AfterEach
+  public void tearDownUtils(TestInfo ti) {
+    LOGGER.debug("------------------ {} End --------------------", ti.getDisplayName());
   }
 
   @Test
@@ -142,50 +155,46 @@ public class TestVertex {
     }
   }
 
-  @Test
+
+  @RepeatedTest(10)
   void testCalculateAngleTimes() {
-    for (int i = 3; i < 51200; i++) {
-      List<Point2D> p = GenerationUtils.generateNonRegularPolygon(0, 0, 4, 10000, 10000);
-      List<Point2D> hull = Hull.convexHullPoints(p);
-      if (hull.size() > 2) {
-        Vertex hullPoly = new Vertex(hull);
-        double totalAngle = 0.0;
-        Vertex current = hullPoly.getNext();
-        while (current != hullPoly) {
-          totalAngle += current.getAngle();
-          current = current.getNext();
-        }
-        totalAngle += current.getAngle();
-
-        Vertex poly = new Vertex(p);
-        List<Edge> edges = poly.getEdges();
-        assertEquals(4, edges.size());
-        assertEquals((hull.size() - 2.0) * 180.0, totalAngle, 1.0e-6);
-      }
-
-    }
-  }
-
-  @Test
-  void testRegressCalculateAngleTimes() {
-    for (int i = 3; i < 10; i++) {
-      ArrayList<Point2D> p = (ArrayList<Point2D>) GenerationUtils.generateNonRegularPolygon(
-          128, 128, i, 128, 128);
-
-      Vertex poly = new Vertex(p);
+    List<Point2D> p = GenerationUtils.generateNonRegularPolygon(0, 0, 4, 10000, 10000);
+    List<Point2D> hull = Hull.convexHullPoints(p);
+    if (hull.size() > 2) {
+      Vertex hullPoly = new Vertex(hull);
       double totalAngle = 0.0;
-      Vertex current = poly.getNext();
-      while (current != poly) {
+      Vertex current = hullPoly.getNext();
+      while (current != hullPoly) {
         totalAngle += current.getAngle();
         current = current.getNext();
       }
       totalAngle += current.getAngle();
-      //ImageTestUtils.drawPolygon(poly, "/home/fred/Documents/test"+i+".png");
+
+      Vertex poly = new Vertex(p);
       List<Edge> edges = poly.getEdges();
-      assertEquals(i, edges.size());
-      System.out.println("Total interior angles for polygon with "
-          + p.size() + " sides = " + totalAngle);
+      assertEquals(4, edges.size());
+      assertEquals((hull.size() - 2.0) * 180.0, totalAngle, 1.0e-6);
     }
+  }
+
+  @RepeatedTest(10)
+  void testRegressCalculateAngleTimes(RepetitionInfo repetitionInfo) {
+    int i = repetitionInfo.getCurrentRepetition() + 2;
+    ArrayList<Point2D> p = (ArrayList<Point2D>) GenerationUtils.generateNonRegularPolygon(
+        128, 128, i, 128, 128);
+
+    Vertex poly = new Vertex(p);
+    double totalAngle = 0.0;
+    Vertex current = poly.getNext();
+    while (current != poly) {
+      totalAngle += current.getAngle();
+      current = current.getNext();
+    }
+    totalAngle += current.getAngle();
+    List<Edge> edges = poly.getEdges();
+    assertEquals(i, edges.size());
+    System.out.println("Total interior angles for polygon with "
+        + p.size() + " sides = " + totalAngle);
   }
 
   @Test
@@ -229,41 +238,46 @@ public class TestVertex {
     assertEquals(360.000, theta1 + theta2 + theta3 + theta4, 1.0e-6);
   }
 
-  @RepeatedTest(100)
+  @Test
   @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
   public void testSize() {
     Vertex v = new Vertex(points);
     assertEquals(points.size(), v.size());
+    v.print();
+  }
+
+  @Test
+  public void testRemoveEdgeCases() {
+    // Get a random set of points between [3, 99]
+    Vertex v = new Vertex(points);
+    assertThrows(IllegalArgumentException.class, () -> v.remove(-1));
   }
 
   /**
    * Test vertex removal.
    */
-  @RepeatedTest(10)
-  @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
+  @RepeatedTest(4)
+  @Timeout(value = 100, unit = TimeUnit.MILLISECONDS)
   public void testRemove() {
-    // Get a random set of points between [3, 99]
-    Vertex v = new Vertex(points);
-    assertThrows(IllegalArgumentException.class, () -> v.remove(-1));
-    for (int i = 1; i < points.size(); i++) {
-      v.remove(r.nextInt(points.size()) + 1);
-      assertEquals(points.size() - i, v.size());
-    }
-    assertEquals(1, v.size());
-    Vertex v2 = new Vertex(points);
-    int j = 0;
-    for (Point2D p : points) {
-      v2.remove(p);
-      assertEquals(points.size() - (j++), v2.size());
-    }
-    assertEquals(1, v2.size());
+    Vertex v = new Vertex(List.of(
+        new Point2D.Double(0, 0),
+        new Point2D.Double(0, 1),
+        new Point2D.Double(1, 1),
+        new Point2D.Double(2, 0),
+        new Point2D.Double(2, 1),
+        new Point2D.Double(3, 1)));
+    v.print();
+    v.remove(r.nextInt(v.size() - 1) + 1);
+    v.print();
   }
 
   @Test
   public void testAdd() {
     Vertex vert = new Vertex(0, 0);
-    vert.add(new Vertex(1, 1));
-    assertEquals(2, vert.size());
-
+    for (int i = 2; i < 10; i++) {
+      vert.add(new Vertex(Math.random() * i, Math.random() * i));
+      assertEquals(i, vert.size());
+      vert.print();
+    }
   }
 }

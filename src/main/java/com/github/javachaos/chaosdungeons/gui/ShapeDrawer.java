@@ -41,7 +41,7 @@ public class ShapeDrawer extends JFrame {
     getRootPane().setBorder(BorderFactory.createTitledBorder(b, "ShapeDrawer"));
     this.shapes = new ArrayList<>();
     setSize(WIDTH, HEIGHT);
-    setLayout(new GridLayout());
+    setLayout(new GridLayout(4, 4, 10, 10));
     setPreferredSize(new Dimension(WIDTH, HEIGHT));
     setResizable(false);
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -112,10 +112,9 @@ public class ShapeDrawer extends JFrame {
   public void createNewShapes() {
     shapes.forEach(this::remove);
     shapes.clear();
-    addShape(5);
-    addShape(10);
-    addShape(15);
-    addShape(20);
+    for (int i = 3; i < 19; i++) {
+      addShape(i);
+    }
     shapes.forEach(this::add);
     pack();
   }
@@ -123,7 +122,7 @@ public class ShapeDrawer extends JFrame {
   private void addShape(int i) {
     shapes.add(new ShapePanel(Color.WHITE,
         new Vertex(generateNonRegularPolygon(
-            100, 100, i, 100, 100))));
+            96, 96, i, 64, 64))));
   }
 
   public void toggleDrawInfo() {

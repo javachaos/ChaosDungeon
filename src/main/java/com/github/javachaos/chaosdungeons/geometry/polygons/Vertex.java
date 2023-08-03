@@ -80,15 +80,14 @@ public class Vertex implements Iterable<Vertex> {
   }
 
   private static void calculateAngles(Vertex vertices) {
-    Vertex current = vertices.next;
-    while (current != vertices) {
+    Vertex current = vertices;
+    do {
       current.angle = current.calculateAngle();
       current.isAcute = current.angle < 180.0;
       current = current.next;
-    }
-    current.angle = current.calculateAngle();
-    current.isAcute = current.angle < 180.0;
+    } while (current != vertices);
   }
+
 
   /**
     * Get the bounding box of this polygon.
@@ -96,33 +95,28 @@ public class Vertex implements Iterable<Vertex> {
     * @return the Rectangle2D which defines the bounding box of this polygon.
     */
   public Rectangle getBounds() {
-    Point2D maxY = new Point2D.Double(0, Double.MIN_VALUE);
-    Point2D minY = new Point2D.Double(0, Double.MAX_VALUE);
-    Point2D maxX = new Point2D.Double(Double.MIN_VALUE, 0);
-    Point2D minX = new Point2D.Double(Double.MAX_VALUE, 0);
-    Vertex current = this.next;
-    while (current != this) {
+    double maxY = Double.MIN_VALUE;
+    double minY = Double.MAX_VALUE;
+    double maxX = Double.MIN_VALUE;
+    double minX = Double.MAX_VALUE;
+    Vertex current = this;
+
+    do {
       Point2D curr = current.getPoint();
-      if (curr.getY() > maxY.getY()) {
-        maxY = curr;
-      }
-      if (curr.getY() < minY.getY()) {
-        minY = curr;
-      }
-      if (curr.getX() > maxX.getX()) {
-        maxX = curr;
-      }
-      if (curr.getX() < minX.getX()) {
-        minX = curr;
-      }
+      double x = curr.getX();
+      double y = curr.getY();
+      maxY = Math.max(maxY, y);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      minX = Math.min(minX, x);
       current = current.next;
-    }
-    double x = minX.getX();
-    double y = maxY.getY();
-    double dx = maxX.getX();
-    double dy = minY.getY();
-    double w = dx - x;
-    double h = dy - y;
+    } while (current != this);
+
+    double x = minX;
+    double y = minY;
+    double w = maxX - x;
+    double h = maxY - y;
+
     return new Rectangle((int) x, (int) y, (int) w, (int) h);
   }
 
@@ -152,12 +146,11 @@ public class Vertex implements Iterable<Vertex> {
    */
   private static double calculateArea(Vertex v) {
     double determinant = 0.0;
-    Vertex current = v.next;
-    while (current != v) {
+    Vertex current = v;
+    do {
       determinant += current.px * current.next.py - current.next.px * current.py;
       current = current.next;
-    }
-    determinant += current.px * current.next.py - current.next.px * current.py;
+    } while (current != v);
     return determinant;
   }
 
@@ -183,12 +176,11 @@ public class Vertex implements Iterable<Vertex> {
    */
   public List<Edge> getEdges() {
     List<Edge> e = new ArrayList<>();
-    Vertex current = this.next;
-    while (current != this) {
+    Vertex current = this;
+    do {
       e.add(new Edge(current.getPoint(), current.next.getPoint()));
       current = current.next;
-    }
-    e.add(new Edge(current.getPoint(), current.next.getPoint()));
+    } while (current != this);
     return e;
   }
 
@@ -285,18 +277,14 @@ public class Vertex implements Iterable<Vertex> {
    * @return true if this polygon contains the edge
    */
   public boolean has(Edge e) {
-    Vertex tempStart = this.next;
-    if (e.equals(new Edge(this.getPoint(), this.next.getPoint()))
-        || e.equals(new Edge(this.next.getPoint(), this.getPoint()))) {
-      return true;
-    }
-    while (tempStart != this) {
+    Vertex tempStart = this;
+    do {
       if (e.equals(new Edge(tempStart.getPoint(), tempStart.next.getPoint()))
           || e.equals(new Edge(tempStart.next.getPoint(), tempStart.getPoint()))) {
         return true;
       }
       tempStart = tempStart.next;
-    }
+    } while (tempStart != this);
     return false;
   }
 
@@ -307,16 +295,13 @@ public class Vertex implements Iterable<Vertex> {
    * @return the vertex if it exists, null otherwise
    */
   public Vertex find(Point2D a) {
-    Vertex current = this.next;
-    while (current != this) {
+    Vertex current = this;
+    do {
       if (current.getPoint().equals(a)) {
         return current;
       }
       current = current.next;
-    }
-    if (current.getPoint().equals(a)) {
-      return current;
-    }
+    } while (current != this);
     return null;
   }
 
@@ -344,14 +329,38 @@ public class Vertex implements Iterable<Vertex> {
    * Print this vertex to the logger.
    */
   public void print() {
+    LOGGER.debug("--------------------------------------------");
     if (this.next == null) {
       LOGGER.debug(this);
     }
-    Vertex current = this.next;
+    Vertex current = this;
     do {
       LOGGER.debug(current);
       current = current.next;
-    } while (current != this.next);
+    } while (current != this);
+    LOGGER.debug("Size: " + size());
+    LOGGER.debug("--------------------------------------------");
+  }
+
+  /**
+   * Print this vertex to the logger.
+   */
+  public String printHelper() {
+    StringBuilder sb = new StringBuilder();
+    if (this.next == null) {
+      sb.append(this);
+      sb.append(System.lineSeparator());
+    }
+    Vertex current = this;
+    do {
+      sb.append(current);
+      sb.append(System.lineSeparator());
+      if (current == null) {
+        break;
+      }
+      current = current.next;
+    } while (current != this);
+    return sb.toString();
   }
 
   /**
@@ -360,20 +369,22 @@ public class Vertex implements Iterable<Vertex> {
    * @param newVertex the new vertex to be added to this polygon
    */
   public void add(Vertex newVertex) {
-    if (this.next == null) {
+    if (this.next == null) { // Next is null, we have a zero sized polygon
       this.next = newVertex;
-      this.next.next = this.next;
-      this.next.previous = this.next;
-    } else {
-      Vertex last = this.next;
-      while (last.next != this.next) {
-        last = last.next;
+      newVertex.next = this;
+      newVertex.previous = this;
+    } else { // Next not null, more than one vertex
+      Vertex curr = this.next;
+      while (curr.next != this) {
+        curr = curr.next;
       }
-      last.next = newVertex;
-      newVertex.next = this.next;
-      newVertex.previous = last;
-      this.next.previous = newVertex;
+      Vertex tmp = curr.next;
+      curr.next = newVertex;
+      newVertex.next = tmp;
+      newVertex.previous = curr;
+      newVertex.next.previous = newVertex;
     }
+    updateIndicies();
   }
 
   public void add(Point2D point) {
@@ -385,12 +396,12 @@ public class Vertex implements Iterable<Vertex> {
     if (this.next == null) {
       return;
     }
-    Vertex current = this.next;
+    Vertex current = this;
     int i = 0;
     do {
       current.index = i++;
       current = current.next;
-    } while (current != this.next);
+    } while (current != this);
   }
 
   public Vertex getNext() {
@@ -418,12 +429,11 @@ public class Vertex implements Iterable<Vertex> {
    */
   public List<Point2D> getPoints() {
     List<Point2D> pts = new ArrayList<>();
-    Vertex current = this.next;
-    while (current != this) {
+    Vertex current = this;
+    do {
       pts.add(current.getPoint());
       current = current.next;
-    }
-    pts.add(0, current.getPoint());
+    } while (current != this);
     return pts;
   }
 
@@ -435,15 +445,16 @@ public class Vertex implements Iterable<Vertex> {
    *                                  attempting to remove the 0th vertex is not possible
    */
   public void remove(int i) {
-    if (i <= 0) {
-      throw new IllegalArgumentException("Index " + i + " out of bounds.");
+    if (i <= 0 || i >= size()) {
+      throw new IllegalArgumentException(
+          "Index " + i + " out of bounds.");
     }
-    //    if (next.index - i >= previous.index - i) {
-    //      //Counterclockwise
-    //    } else {
-    //      //Clockwise
-    //    }
-    //Vertex curr = next;
+    Vertex curr = this;
+    int j = 0;
+    while (j++ != (i - 1)) {
+      curr = curr.next;
+    }
+    curr.next = curr.next.next;
     updateIndicies();
   }
 
@@ -455,7 +466,7 @@ public class Vertex implements Iterable<Vertex> {
    */
   public void remove(Point2D point) {
     Vertex current = this;
-    while (current.next != this) {
+    do {
       if (current.next.getPoint().equals(point)) {
         current.next = current.next.next;
         current.next.previous = current;
@@ -463,7 +474,7 @@ public class Vertex implements Iterable<Vertex> {
       }
       current.previous = current;
       current = current.next;
-    }
+    } while (current.next != this);
     updateIndicies();
   }
 

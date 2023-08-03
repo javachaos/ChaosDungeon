@@ -38,7 +38,7 @@ public class SatCollisionDetector {
     Polygon concavePentagon = new Polygon(xpoints, ypoints, 5);
 
     // Example usage
-    Rectangle redRect = new Rectangle(22, 200, 150, 200);
+    Rectangle redRect = new Rectangle(0, 0, 150, 200);
     Rectangle blueRect = new Rectangle(466, 88, 80, 65);
     Ellipse2D ellipse2D = new Ellipse2D.Double();
     ellipse2D.setFrame(redRect);

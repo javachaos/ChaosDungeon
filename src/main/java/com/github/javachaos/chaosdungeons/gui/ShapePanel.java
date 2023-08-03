@@ -20,6 +20,7 @@ import javax.swing.JPanel;
  */
 public class ShapePanel extends JPanel {
 
+  private final Rectangle bounds;
   private boolean drawInfo;
   private boolean drawTriangulation;
   private final Vertex polygon;
@@ -31,7 +32,7 @@ public class ShapePanel extends JPanel {
    */
   public ShapePanel(Color background, Vertex polygon) {
     setBackground(background);
-    Rectangle bounds = polygon.getBounds();
+    bounds = polygon.getBounds();
     setBounds(bounds);
     setPreferredSize(bounds.getSize());
     setBorder(BorderFactory.createLineBorder(Color.RED));
@@ -52,6 +53,7 @@ public class ShapePanel extends JPanel {
       for (Edge e : edges) {
         g2d.setPaint(Color.GREEN);
         g2d.draw(new Line2D.Double(e.getA(), e.getB()));
+        g2d.draw(bounds);
         g2d.setPaint(Color.GREEN);
       }
     } else {
