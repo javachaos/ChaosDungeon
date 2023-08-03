@@ -2,10 +2,14 @@ package com.github.javachaos.chaosdungeons.ecs;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Simple Entity class.
@@ -15,17 +19,24 @@ import java.util.TreeMap;
 @SuppressWarnings("unused")
 public abstract class Entity extends Component {
 
+  private static final int REMOVAL_THRESHOLD = 256;
+
+  /**
+   * Executor for removing items from entities.
+   */
+  private static final Executor executor = Executors.newSingleThreadExecutor();
+
   /**
    * Basic idea here, each entity has a list of components.
    * Store these components via class type, if there are multiples of
    * the same class type, we store them via their id.
    * If two components share the same id, then only one instance is kept.
    */
-  private final Map<Class<? extends Component>, SortedMap<Integer, Component>> components;
+  private static final Map<Class<? extends Component>, SortedMap<Integer, Component>> components =
+      Collections.synchronizedMap(new HashMap<>());
 
   public Entity(int id) {
     super(id);
-    components = new HashMap<>();
   }
 
   /**
@@ -51,7 +62,7 @@ public abstract class Entity extends Component {
   }
 
   public <T extends Component> void removeComponent(T c) {
-    components.get(c.getClass()).remove(c.getId());
+    components.get(c.getClass()).get(c.getId()).remove();
   }
 
   public abstract void update(float dt);
@@ -61,7 +72,22 @@ public abstract class Entity extends Component {
    */
   @Override
   public void update(double dt) {
-    components.values().forEach(c -> c.values().forEach(cc -> cc.update(dt)));
+    components.values().forEach(
+        c -> c.values().stream()
+              .filter(v -> !v.isRemoved())
+              .forEach(cc -> cc.update(dt)));
     update((float) dt);
+    checkRemoval();
+  }
+
+  private void checkRemoval() {
+    if (Component.getRemovalCount() > REMOVAL_THRESHOLD) {
+      executor.execute(() -> { // execute potentially long-running operation on a background thread.
+        Set<Component> remove = new HashSet<>();
+        components.values().forEach(c -> c.values().stream().filter(Component::isRemoved)
+            .forEach(remove::add));
+        remove.forEach(c -> components.get(c.getClass()).remove(c.getId()));
+      });
+    }
   }
 }

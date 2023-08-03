@@ -1,10 +1,15 @@
 package com.github.javachaos.chaosdungeons.ecs;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Component class for ECS.
  */
 public abstract class Component {
 
+  private static final AtomicInteger removalCount = new AtomicInteger(0);
+
+  private boolean markedForRemoval;
   private final int id;
 
   /**
@@ -20,5 +25,18 @@ public abstract class Component {
 
   protected int getId() {
     return id;
+  }
+
+  public void remove() {
+    markedForRemoval = true;
+    removalCount.incrementAndGet();
+  }
+
+  public static int getRemovalCount() {
+    return removalCount.get();
+  }
+
+  protected boolean isRemoved() {
+    return markedForRemoval;
   }
 }
