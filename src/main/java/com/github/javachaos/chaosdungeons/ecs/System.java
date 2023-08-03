@@ -32,4 +32,6 @@ public abstract class System {
   public void shutdown() {
     entities.forEach(Entity::destroy);
   }
+
+  public abstract void init();
 }
