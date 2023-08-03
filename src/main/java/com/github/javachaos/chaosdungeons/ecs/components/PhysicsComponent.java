@@ -98,6 +98,7 @@ public class PhysicsComponent extends Component {
     // Check if this entity has a CollisionComponent attached
     List<CollisionComponent> collisionComponents =
         getEntity().getComponents(CollisionComponent.class);
+
     if (collisionComponents != null && !collisionComponents.isEmpty()) {
       // Signal the collision to the CollisionComponent
       collisionComponents.forEach(c -> c.onCollision(otherEntity, this));
@@ -121,7 +122,6 @@ public class PhysicsComponent extends Component {
       prevY = ypos;
       xpos = newX;
       ypos = newY;
-
       getEntity().getComponents(PhysicsComponent.class)
           .forEach(c -> c.handleCollision(getEntity()));
     }

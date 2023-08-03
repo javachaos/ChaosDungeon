@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
 import static com.github.javachaos.chaosdungeons.constants.Constants.EPSILON;
+import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.dotProduct;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -160,13 +161,6 @@ public class Vertex implements Iterable<Vertex> {
     } else {
       return (num1 > 0 && num2 > 0) || (num1 < 0 && num2 < 0);
     }
-  }
-
-  /**
-   * Helper function to calculate the dot product of two 2D vectors.
-   */
-  private static double dotProduct(Point2D a, Point2D b) {
-    return a.getX() * b.getX() + a.getY() * b.getY();
   }
 
   /**

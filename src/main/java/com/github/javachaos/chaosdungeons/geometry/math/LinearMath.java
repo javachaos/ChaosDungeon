@@ -59,4 +59,11 @@ public class LinearMath {
     }
     return (val > 0) ? -1 : 1; // Clockwise or Counterclockwise
   }
+
+  /**
+   * Helper function to calculate the dot product of two 2D vectors.
+   */
+  public static double dotProduct(Point2D a, Point2D b) {
+    return a.getX() * b.getX() + a.getY() * b.getY();
+  }
 }

@@ -98,4 +98,37 @@ public class Edge {
         + " v[" + pointB.getX() + ", " + pointB.getY() + "]";
   }
 
+  /**
+   * Get the normal for this edge.
+   *
+   * @return the normal
+   */
+  @SuppressWarnings("all")
+  public Point2D getNormal() {
+    double dirX = pointB.getX() - pointA.getX();
+    double dirY = pointB.getY() - pointA.getY();
+    return new Point2D.Double(-dirY, dirX);
+  }
+
+
+  public double projectPoint(Point2D point) {
+    Point2D normalizedAxis = normalize(getDirectionVector());
+    return projectPointOnAxis(normalizedAxis, point);
+  }
+
+  private Point2D getDirectionVector() {
+    double dx = pointB.getX() - pointA.getX();
+    double dy = pointB.getY() - pointA.getY();
+    return new Point2D.Double(dx, dy);
+  }
+
+  private double projectPointOnAxis(Point2D axis, Point2D point) {
+    return axis.getX() * (point.getX() - pointA.getX()) + axis.getY()
+        * (point.getY() - pointA.getY());
+  }
+
+  private Point2D normalize(Point2D vector) {
+    double length = Math.sqrt(vector.getX() * vector.getX() + vector.getY() * vector.getY());
+    return new Point2D.Double(vector.getX() / length, vector.getY() / length);
+  }
 }

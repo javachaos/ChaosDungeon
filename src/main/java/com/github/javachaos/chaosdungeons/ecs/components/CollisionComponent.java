@@ -1,9 +1,12 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
+import com.github.javachaos.chaosdungeons.collision.CollisionData;
 import com.github.javachaos.chaosdungeons.ecs.Component;
 import com.github.javachaos.chaosdungeons.ecs.Entity;
 import com.github.javachaos.chaosdungeons.geometry.SatCollisionDetector;
+import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import java.awt.geom.Point2D;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,11 +37,29 @@ public class CollisionComponent extends Component {
    */
   public void onCollision(Entity other, PhysicsComponent otherPhys) {
     CollisionComponent otherCollision = other.getComponent(CollisionComponent.class);
-    if (SatCollisionDetector.checkCollisionDelaunay(shape, otherCollision.getShape())) {
+    CollisionData cdata = SatCollisionDetector.checkCollisionDelaunay(shape,
+        otherCollision.getShape());
+    if (cdata.isColliding()) {
       LOGGER.debug("Collision detected between {} and {}", getEntity(), other);
       PhysicsComponent pyThis = getEntity().getComponent(PhysicsComponent.class);
-      otherPhys.applyForce(pyThis.getVx(), pyThis.getVy());
-      pyThis.applyForce(otherPhys.getVx(), otherPhys.getVy());
+      if (!otherPhys.isStatic()) {
+        otherPhys.applyForce(pyThis.getVx(), pyThis.getVy());
+        pyThis.applyForce(otherPhys.getVx(), otherPhys.getVy());
+      } else {
+        double normalX = cdata.getCollisionNormal().getX();
+        double normalY = cdata.getCollisionNormal().getY();
+        double relativeVelocityX = pyThis.getVx() - otherPhys.getVx();
+        double relativeVelocityY = pyThis.getVy() - otherPhys.getVy();
+        double dotProduct = LinearMath.dotProduct(cdata.getCollisionNormal(),
+            new Point2D.Double(relativeVelocityX, relativeVelocityY));
+        double dotProductSum = pyThis.getMass() + otherPhys.getMass();
+        // Calculate impulse
+        double impulse = -(1 + pyThis.getRestitution()) * dotProduct / dotProductSum;
+        // Update velocity based on collision response (bounce off stationary entity)
+        double impulseX = impulse * normalX;
+        double impulseY = impulse * normalY;
+        pyThis.applyForce(impulseX, impulseY);
+      }
     }
   }
 

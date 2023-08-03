@@ -2,6 +2,9 @@ package com.github.javachaos.chaosdungeons.geometry;
 
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
+import com.github.javachaos.chaosdungeons.collision.CollisionData;
+import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.ShapeDrawer;
@@ -12,6 +15,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -130,20 +134,22 @@ public class SatCollisionDetector {
    *
    * @param polygon1 set of points defining the first polygon
    * @param polygon2 set of points defining the second polygon
-   * @return true if the two polygons collide
+   * @return collision data
    */
-  public static boolean checkCollisionDelaunay(Vertex polygon1, Vertex polygon2) {
+  public static CollisionData checkCollisionDelaunay(Vertex polygon1, Vertex polygon2) {
     List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1.getPoints());
     List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2.getPoints());
 
     for (Triangle t : triangles1) {
       for (Triangle t2 : triangles2) {
         if (checkCollision(t, t2)) {
-          return true;
+          Point2D norm = calculateCollisionNormal(t, t2);
+          double depth = calculatePenetrationDepth(t, t2, norm);
+          return new CollisionData(norm, depth);
         }
       }
     }
-    return false;
+    return new CollisionData(new Point2D.Double(0, 0), 0.0);
   }
 
   private static List<Point2D> getAxes(Set<Point2D> polygon1, Set<Point2D> polygon2) {
@@ -242,6 +248,100 @@ public class SatCollisionDetector {
       points.add(new Point2D.Double(x, y));
     }
     return points;
+  }
+
+  private static Point2D calculateCollisionNormal(Triangle t1, Triangle t2) {
+    // Find the edge of t1 that is intersecting with t2
+    Edge intersectionEdge = Objects.requireNonNull(findIntersectionEdge(t1, t2));
+
+    // Calculate the collision normal as the perpendicular vector to the edge
+    double nx = -(intersectionEdge.getB().getY() - intersectionEdge.getA().getY());
+    double ny = intersectionEdge.getB().getX() - intersectionEdge.getA().getX();
+
+    // Normalize the collision normal
+    double length = Math.sqrt(nx * nx + ny * ny);
+    if (length > 0) {
+      nx /= length;
+      ny /= length;
+    }
+
+    return new Point2D.Double(nx, ny);
+  }
+
+  private static double calculatePenetrationDepth(Triangle t1, Triangle t2,
+                                                  Point2D collisionNormal) {
+    // Find the edge of t1 that is intersecting with t2
+    Edge intersectionEdge = Objects.requireNonNull(findIntersectionEdge(t1, t2));
+
+    // Project the vertices of t1 onto the collision normal to find the minimum overlap
+    double minOverlap = Double.POSITIVE_INFINITY;
+    for (Point2D point : t1.getPoints()) {
+      double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+          * point.getY();
+      double overlap = projection - intersectionEdge.projectPoint(point);
+      minOverlap = Math.min(minOverlap, overlap);
+    }
+
+    // Project the vertices of t2 onto the collision normal to find the minimum overlap
+    for (Point2D point : t2.getPoints()) {
+      double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+          * point.getY();
+      double overlap = intersectionEdge.projectPoint(point) - projection;
+      minOverlap = Math.min(minOverlap, overlap);
+    }
+
+    return minOverlap;
+  }
+
+  private static Edge findIntersectionEdge(Triangle t1, Triangle t2) {
+    for (Edge edge1 : t1.getEdges()) {
+      for (Edge edge2 : t2.getEdges()) {
+        if (edge1.intersects(edge2)) {
+          // If the edges intersect, return the edge with the smallest overlap
+          double overlap1 = calculateEdgeOverlap(edge1, t1, t2);
+          double overlap2 = calculateEdgeOverlap(edge2, t1, t2);
+
+          if (Math.abs(overlap1) < Math.abs(overlap2)) {
+            return edge1;
+          } else {
+            return edge2;
+          }
+        }
+      }
+    }
+    // If no intersection edge is found, you may handle this case based on your needs
+    // For example, return an arbitrary edge, throw an exception, or return null.
+    // In the context of your physics simulation, you may want to handle this differently.
+    return null;
+  }
+
+  private static double calculateEdgeOverlap(Edge edge, Triangle t1, Triangle t2) {
+    Point2D normal = edge.getNormal(); // Get the normal vector of the edge
+    double minProjection1 = Double.POSITIVE_INFINITY;
+    double maxProjection1 = Double.NEGATIVE_INFINITY;
+    double minProjection2 = Double.POSITIVE_INFINITY;
+    double maxProjection2 = Double.NEGATIVE_INFINITY;
+
+    // Project the vertices of triangle 1 onto the edge's normal vector
+    for (Point2D vertex : t1.getPoints()) {
+      double projection = LinearMath.dotProduct(normal,
+          new Point2D.Double(vertex.getX() - edge.getA().getX(),
+          vertex.getY() - edge.getA().getY()));
+      minProjection1 = Math.min(minProjection1, projection);
+      maxProjection1 = Math.max(maxProjection1, projection);
+    }
+
+    // Project the vertices of triangle 2 onto the edge's normal vector
+    for (Point2D vertex : t2.getPoints()) {
+      double projection = LinearMath.dotProduct(normal,
+          new Point2D.Double(vertex.getX() - edge.getA().getX(),
+              vertex.getY() - edge.getA().getY()));
+      minProjection2 = Math.min(minProjection2, projection);
+      maxProjection2 = Math.max(maxProjection2, projection);
+    }
+
+    // Calculate the overlap as the difference between the maximum and minimum projections
+    return Math.min(maxProjection1, maxProjection2) - Math.max(minProjection1, minProjection2);
   }
 
   static class Projection {
