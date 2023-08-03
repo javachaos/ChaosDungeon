@@ -1,7 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
-import com.github.javachaos.chaosdungeons.ecs.Component;
-import com.github.javachaos.chaosdungeons.ecs.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import java.util.List;
 
 /**
@@ -122,8 +121,8 @@ public class PhysicsComponent extends Component {
       prevY = ypos;
       xpos = newX;
       ypos = newY;
-      getEntity().getComponents(PhysicsComponent.class)
-          .forEach(c -> c.handleCollision(getEntity()));
+      //getEntity().getComponents(PhysicsComponent.class)
+      //    .forEach(c -> c.handleCollision(getEntity()));
     }
   }
 

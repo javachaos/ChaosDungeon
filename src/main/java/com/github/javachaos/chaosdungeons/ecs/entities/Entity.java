@@ -1,6 +1,7 @@
-package com.github.javachaos.chaosdungeons.ecs;
+package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,4 +178,26 @@ public abstract class Entity extends Component {
     }
   }
 
+  /**
+   * Returns true if this entity contains at least 1 instance of component.
+   *
+   * @param component the component to look for.
+   * @return true if this entity contains at least 1 of component
+   */
+  public boolean hasComponent(Component component) {
+    return components.get(getClass()).containsValue(component);
+  }
+
+  /**
+   * Returns true if this entity contains at least 1 instance of component.
+   *
+   * @param component the component to look for.
+   * @return true if this entity contains at least 1 of component
+   */
+  public boolean hasComponent(Class<? extends Component> component) {
+    return components.get(getClass())
+        .values()
+        .stream()
+        .anyMatch(c -> c.getClass().equals(component));
+  }
 }

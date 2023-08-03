@@ -1,5 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs;
 
+import com.github.javachaos.chaosdungeons.ecs.systems.PhysicsSystem;
+import com.github.javachaos.chaosdungeons.ecs.systems.RenderSystem;
+import com.github.javachaos.chaosdungeons.ecs.systems.System;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,57 +10,53 @@ import java.util.List;
  * Main game loop class.
  */
 public class GameLoop {
-  private static final long targetFps = 60;
-  private static final long targetTime = 1000 / targetFps;
+  private final long targetFps = 60;
+  private long targetTime = 1000 / targetFps;
 
-  private static boolean init;
-
-  private static List<System> systems;
+  private List<System> systems;
+  private RenderSystem renderSystem;
 
   /**
    * Initialize the game loop.
    */
-  public static void init() {
+  public void init() {
+    renderSystem = new RenderSystem();
     systems = new ArrayList<>();
     systems.add(new PhysicsSystem());
-    systems.add(new RenderSystem());
+    systems.add(renderSystem);
     // add more later
     systems.forEach(System::init);
-    init = true;
   }
 
-  @SuppressWarnings("all")
-  public static void run() {
-    boolean isRunning = true;
-    while (isRunning) {
-      if (!init) {
-        init();
-      }
-      long startTime = java.lang.System.nanoTime();
-      // Update the game logic
-      update();
-      // Calculate the time taken for update and render
-      long elapsedTime = java.lang.System.nanoTime() - startTime;
-      // Calculate the time to sleep to achieve the target FPS
-      long sleepTime = targetTime - elapsedTime;
-      if (sleepTime > 0) {
-        try {
-          Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          throw new RuntimeException("GameLoop interrupted.");
-        }
-      }
-    }
+  public long getTargetTime() {
+    return targetTime;
   }
 
-  private static void update() {
-    // Compute delta time here and pass it to the update method of each game object
-    // For example, if you have a list of RenderComponents, you can call their update methods
-    double dt = (double) targetTime / 1000.0; // Assuming fixed timestep
-    for (System s : systems) {
-      s.update(dt);
-    }
+  /**
+   * Update render system.
+   *
+   * @param dt the time between calls to update and render
+   */
+  public void render(double dt) {
+    renderSystem.update((float) dt);
   }
 
+  /**
+   * Update systems.
+   *
+   * @param dt the time between render and update calls.
+   */
+  public void update(double dt) {
+    systems.stream()
+        .filter(s -> !(s instanceof RenderSystem))
+        .forEach(t -> t.update(dt));
+  }
+
+  public void setTargetTime(long elapsedTime) {
+    this.targetTime = elapsedTime;
+  }
+
+  public void shutdown() {
+    systems.forEach(System::shutdown);
+  }
 }

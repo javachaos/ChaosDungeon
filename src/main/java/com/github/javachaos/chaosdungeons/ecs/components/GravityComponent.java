@@ -1,7 +1,5 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
-import com.github.javachaos.chaosdungeons.ecs.Component;
-
 /**
  * A gravity component.
  */

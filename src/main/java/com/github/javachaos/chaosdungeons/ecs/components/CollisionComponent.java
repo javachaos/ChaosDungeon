@@ -1,8 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.collision.CollisionData;
-import com.github.javachaos.chaosdungeons.ecs.Component;
-import com.github.javachaos.chaosdungeons.ecs.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.geometry.SatCollisionDetector;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;

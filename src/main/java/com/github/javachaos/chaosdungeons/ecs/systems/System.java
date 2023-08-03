@@ -1,5 +1,7 @@
-package com.github.javachaos.chaosdungeons.ecs;
+package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,7 +9,11 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public abstract class System {
-  private List<Entity> entities;
+  private final List<Entity> entities;
+
+  public System() {
+    entities = new ArrayList<>();
+  }
 
   /**
    * Update method for this system.

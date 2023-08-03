@@ -1,5 +1,6 @@
-package com.github.javachaos.chaosdungeons.ecs;
+package com.github.javachaos.chaosdungeons.ecs.components;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -23,13 +24,13 @@ public abstract class Component {
     this.id = id;
   }
 
-  protected void setEntity(Entity e) {
+  public void setEntity(Entity e) {
     this.entity = e;
   }
 
   public abstract void update(double dt);
 
-  protected int getId() {
+  public int getId() {
     return id;
   }
 
@@ -46,7 +47,7 @@ public abstract class Component {
     return entity;
   }
 
-  protected boolean isRemoved() {
+  public boolean isRemoved() {
     return markedForRemoval;
   }
 
