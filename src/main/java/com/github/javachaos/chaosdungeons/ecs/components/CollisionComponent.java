@@ -14,7 +14,7 @@ public class CollisionComponent extends Component {
 
   private static final Logger LOGGER = LogManager.getLogger(CollisionComponent.class);
 
-  private final Vertex shape;
+  private Vertex shape;
 
   /**
    * Create a new component with id.
@@ -52,12 +52,11 @@ public class CollisionComponent extends Component {
   }
 
   @Override
-  public void update(double dt) {
-
+  public void update(double dt) { //Unused
   }
 
   @Override
   public void destroy() {
-
+    shape = null;
   }
 }
