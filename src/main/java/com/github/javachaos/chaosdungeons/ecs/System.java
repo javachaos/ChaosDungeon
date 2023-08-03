@@ -28,4 +28,8 @@ public abstract class System {
   public List<Entity> getEntities() {
     return entities;
   }
+
+  public void shutdown() {
+    entities.forEach(Entity::destroy);
+  }
 }

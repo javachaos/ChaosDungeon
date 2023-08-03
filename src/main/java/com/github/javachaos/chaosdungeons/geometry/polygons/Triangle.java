@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.geometry.polygons;
 import com.github.javachaos.chaosdungeons.geometry.math.Matrix3x3Det;
 import java.awt.geom.Point2D;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to represent a Triangle defined by three Point2D points.
@@ -102,8 +103,8 @@ public class Triangle {
     return pointA.equals(p) || pointB.equals(p) || pointC.equals(p);
   }
 
-  public List<Point2D> getPoints() {
-    return List.of(pointA, pointB, pointC);
+  public Set<Point2D> getPoints() {
+    return Set.of(pointA, pointB, pointC);
   }
 
   public boolean isBad() {

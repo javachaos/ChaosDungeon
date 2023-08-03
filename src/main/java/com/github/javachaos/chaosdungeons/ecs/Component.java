@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Component {
 
+  private Entity entity;
+
   private static final AtomicInteger removalCount = new AtomicInteger(0);
 
   private boolean markedForRemoval;
@@ -21,7 +23,11 @@ public abstract class Component {
     this.id = id;
   }
 
-  abstract void update(double dt);
+  protected void setEntity(Entity e) {
+    this.entity = e;
+  }
+
+  public abstract void update(double dt);
 
   protected int getId() {
     return id;
@@ -36,7 +42,13 @@ public abstract class Component {
     return removalCount.get();
   }
 
+  public Entity getEntity() {
+    return entity;
+  }
+
   protected boolean isRemoved() {
     return markedForRemoval;
   }
+
+  public abstract void destroy();
 }

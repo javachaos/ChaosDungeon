@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs;
 
+import com.github.javachaos.chaosdungeons.constants.Constants;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Simple Entity class.
@@ -19,12 +24,14 @@ import java.util.concurrent.Executors;
 @SuppressWarnings("unused")
 public abstract class Entity extends Component {
 
+  private static final Logger LOGGER = LogManager.getLogger(Entity.class);
+
   private static final int REMOVAL_THRESHOLD = 256;
 
   /**
    * Executor for removing items from entities.
    */
-  private static final Executor executor = Executors.newSingleThreadExecutor();
+  private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
   /**
    * Basic idea here, each entity has a list of components.
@@ -32,7 +39,7 @@ public abstract class Entity extends Component {
    * the same class type, we store them via their id.
    * If two components share the same id, then only one instance is kept.
    */
-  private static final Map<Class<? extends Component>, SortedMap<Integer, Component>> components =
+  private static final Map<Class<? extends Entity>, SortedMap<Integer, Component>> components =
       Collections.synchronizedMap(new HashMap<>());
 
   public Entity(int id) {
@@ -43,26 +50,75 @@ public abstract class Entity extends Component {
    * Add a component to this entity.
    *
    * @param c the component to add.
-   * @param <T> the component type
    */
-  public <T extends Component> void addComponent(T c) {
-    if (components.containsKey(c.getClass())) {
-      components.get(c.getClass()).put(c.getId(), c);
+  public void addComponent(Component c) {
+    if (components.containsKey(getClass())) {
+      c.setEntity(this);
+      components.get(getClass()).put(c.getId(), c);
     } else {
-      components.put(c.getClass(), Collections.synchronizedSortedMap(new TreeMap<>()));
+      components.put(getClass(), Collections.synchronizedSortedMap(new TreeMap<>()));
     }
   }
 
-  public <T extends Component> Component getComponent(Class<T> clazz, int id) {
-    return components.get(clazz).get(id);
+  /**
+   * Get a component from this entity with the id, id.
+   *
+   * @param id the id of the desired component
+   * @return the component with id, id
+   */
+  public Component getComponent(int id) {
+    return components.get(getClass()).get(id);
   }
 
-  public <T extends Component> List<Component> getComponents(Class<T> clazz) {
-    return (List<Component>) components.get(clazz).values();
+  /**
+   * Get a component for this entity based on it's class type.
+   *
+   * @param clazz the type of component.
+   * @return the component of type clazz
+   *
+   */
+  public <T extends Component> T getComponent(Class<T> clazz) {
+    return components.get(getClass()).values()
+           .stream()
+           .filter(x -> x.getClass().equals(clazz))
+           .findFirst()
+           .map(clazz::cast)
+           .orElse(null);
   }
 
-  public <T extends Component> void removeComponent(T c) {
-    components.get(c.getClass()).get(c.getId()).remove();
+  /**
+   * Get all components of type clazz for this entity.
+   *
+   * @param clazz the type of components
+   * @return the list of components of type clazz
+   */
+  public <T extends Component> List<T> getComponents(Class<T> clazz) {
+    return components.get(getClass()).values()
+           .stream()
+           .filter(x -> x.getClass().equals(clazz))
+           .map(clazz::cast) // Cast the component to the desired type
+           .collect(Collectors.toList());
+  }
+
+  /**
+   * Return the list of components associated with this Entity.
+   *
+   * @return the components of this entity.
+   */
+  public List<Component> getComponents() {
+    return (List<Component>) components.get(getClass()).values();
+  }
+
+  /**
+   * Remove the component c from this entity if it exists.
+   *
+   * @param c the component to be removed.
+   */
+  public void removeComponent(Component c) {
+    List<Component> comps = (List<Component>) components.get(getClass()).values();
+    if (comps.contains(c)) {
+      components.get(c.getClass()).get(c.getId()).remove();
+    }
   }
 
   public abstract void update(float dt);
@@ -86,8 +142,39 @@ public abstract class Entity extends Component {
         Set<Component> remove = new HashSet<>();
         components.values().forEach(c -> c.values().stream().filter(Component::isRemoved)
             .forEach(remove::add));
+        remove.forEach(Component::destroy);
         remove.forEach(c -> components.get(c.getClass()).remove(c.getId()));
       });
     }
   }
+
+  public abstract void destroy();
+
+  /**
+   * Release all components in the ECS framework.
+   */
+  public void shutdownComponentRegistry() {
+    executor.execute(
+        () -> components.values().forEach(v -> v.values().forEach(Component::destroy)));
+    try {
+      int i = 0;
+      // Wait for the executor to terminate, specifying a reasonable timeout
+      while (!executor.awaitTermination(Constants.DEFAULT_SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)
+             && i < 10) {
+        LOGGER.debug("Component registry shutdown attempt {}.", i);
+        i++;
+      }
+      executor.shutdownNow();
+      if (executor.awaitTermination(Constants.DEFAULT_SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)) {
+        LOGGER.debug("Component registry shutdown forcibly.");
+      } else {
+        LOGGER.error("Component registry failed to shutdown.");
+        throw new RuntimeException("Component registry failed to shutdown.");
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
+    }
+  }
+
 }

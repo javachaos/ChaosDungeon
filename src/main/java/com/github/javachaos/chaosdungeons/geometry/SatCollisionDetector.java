@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.geometry;
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.ShapeDrawer;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -87,8 +88,20 @@ public class SatCollisionDetector {
    * @return true if the two polygons collide
    */
   public static boolean checkCollision(Triangle t1, Triangle t2) {
-    return (t2.contains(t1.getA()) || t2.contains(t1.getB()) || t2.contains(t1.getC()))
-        || (t1.contains(t2.getA()) || t1.contains(t2.getB()) || t1.contains(t2.getC()));
+    List<Point2D> axes = getAxes(t1.getPoints(), t2.getPoints());
+    Optional<Point2D> p;
+    if (axes.size() > 100) {
+      p = axes.parallelStream()
+          .filter(x -> isSeparatingAxis(x, t1.getPoints(), t2.getPoints())).findAny();
+    } else {
+      for (Point2D point : axes) {
+        if (isSeparatingAxis(point, t1.getPoints(), t2.getPoints())) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return p.isEmpty();
   }
 
   /**
@@ -101,6 +114,27 @@ public class SatCollisionDetector {
   public static boolean checkCollisionDelaunay(List<Point2D> polygon1, List<Point2D> polygon2) {
     List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1);
     List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2);
+
+    for (Triangle t : triangles1) {
+      for (Triangle t2 : triangles2) {
+        if (checkCollision(t, t2)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check collision between two polygons defined by two sets of points.
+   *
+   * @param polygon1 set of points defining the first polygon
+   * @param polygon2 set of points defining the second polygon
+   * @return true if the two polygons collide
+   */
+  public static boolean checkCollisionDelaunay(Vertex polygon1, Vertex polygon2) {
+    List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1.getPoints());
+    List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2.getPoints());
 
     for (Triangle t : triangles1) {
       for (Triangle t2 : triangles2) {

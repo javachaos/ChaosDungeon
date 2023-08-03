@@ -11,6 +11,11 @@ public class Constants {
   public static final double EPSILON = 1e-6;
 
   /**
+   * Timeout in milliseconds.
+   */
+  public static final long DEFAULT_SHUTDOWN_TIMEOUT = 5000;
+
+  /**
    * Unused constructor.
    */
   private Constants() {

@@ -32,7 +32,7 @@ public class Vertex implements Iterable<Vertex> {
   }
 
   public Vertex(Triangle t) {
-    this(t.getPoints());
+    this(new ArrayList<>(t.getPoints()));
   }
 
   public Vertex(double x, double y) {
