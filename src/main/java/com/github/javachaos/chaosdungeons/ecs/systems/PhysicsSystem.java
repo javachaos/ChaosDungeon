@@ -40,7 +40,6 @@ public class PhysicsSystem extends System {
           .handleCollision(e));
       e.update(dt);
     });
-    LOGGER.debug("Physics Delta: {}", dt);
   }
 
   @Override

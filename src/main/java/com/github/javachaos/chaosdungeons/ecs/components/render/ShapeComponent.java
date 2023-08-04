@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL30;
 /**
  * Shape Renderer class.
  */
+@SuppressWarnings("unused")
 public class ShapeComponent extends RenderComponent {
 
   private static final Logger LOGGER = LogManager.getLogger(ShapeComponent.class);
@@ -30,12 +31,16 @@ public class ShapeComponent extends RenderComponent {
   }
 
   public void setColor(Color c) {
+    LOGGER.debug("ShapeComponent color changed. {}", c);
     this.color = c;
+  }
+
+  public Vertex getShape() {
+    return shape;
   }
 
   @Override
   public void render() {
-    LOGGER.debug("Rendering shape {}.", shape);
     GL11.glColor3f(color.getRed()   / 255.0f,
                   color.getGreen() / 255.0f,
                   color.getBlue()  / 255.0f); // Red color

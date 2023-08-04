@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
  */
 public class ShapeEntity extends Entity {
   private static final Logger LOGGER = LogManager.getLogger(ShapeEntity.class);
-  private final Vertex shape;
 
   /**
    * Create a new Shape Entity.
@@ -20,17 +19,15 @@ public class ShapeEntity extends Entity {
    */
   public ShapeEntity(Vertex shape) {
     super();
-    this.shape = shape;
     addComponent(new ShapeComponent(shape, Color.DARK_GRAY));
   }
 
   @Override
   public void update(float dt) {
-    LOGGER.debug("Updating shape {}.", shape);
   }
 
   @Override
   public void destroy() {
-
+    LOGGER.debug("ShapeEntity destroyed.");
   }
 }

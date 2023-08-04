@@ -37,7 +37,6 @@ public class RenderSystem extends System {
   @Override
   public void update(float dt) {
     getEntities().forEach(e -> e.update(dt));
-    LOGGER.debug("Render Delta: {}", dt);
   }
 
   @Override
