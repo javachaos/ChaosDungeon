@@ -1,7 +1,9 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import java.util.List;
+import org.joml.Vector3f;
 
 /**
  * A simple physics component.
@@ -9,56 +11,45 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class PhysicsComponent extends Component {
 
-  // Position and velocity properties
-  private double xpos;   // Current x position
-  private double ypos;   // Current y position
-  private double prevX;  // Previous x position
-  private double prevY;  // Previous y position
-  private double vx;     // Velocity in x direction
-  private double vy;     // Velocity in y direction
-
-  // Other physics-related properties
+  private final Vector3f velocity;
+  private final Vector3f prevPos;
   private final double mass;
   private final double restitution; // Coefficient of restitution for bounciness
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
+  private GameEntity gameEntity;
 
   /**
    * Create a new physics component.
    *
-   * @param x the initial x position
-   * @param y the initial y position
    * @param mass the mass of this object
    * @param restitution the restitution
    * @param isStatic true if this is a static object
    */
-  public PhysicsComponent(double x, double y,
-                          double mass, double restitution,
+  public PhysicsComponent(double mass, double restitution, Vector3f initialVelocity,
                           boolean isStatic) {
     super();
-    this.xpos = x;
-    this.ypos = y;
-    this.prevX = x;
-    this.prevY = y;
+    this.velocity = initialVelocity;
     this.mass = mass;
     this.restitution = restitution;
     this.isStatic = isStatic;
+    this.prevPos = new Vector3f(0, 0, 0);
   }
 
   // Getter and setter methods
   public double getXpos() {
-    return xpos;
+    return ((GameEntity) getEntity()).getPosition().x;
   }
 
   public double getYpos() {
-    return ypos;
+    return gameEntity.getPosition().y;
   }
 
   public double getVx() {
-    return vx;
+    return velocity.x;
   }
 
   public double getVy() {
-    return vy;
+    return velocity.y;
   }
 
   public double getMass() {
@@ -73,6 +64,45 @@ public class PhysicsComponent extends Component {
     return isStatic;
   }
 
+
+  public Vector3f getPosition() {
+    return gameEntity.getPosition();
+  }
+
+  /**
+   * Set the position of this physic object.
+   *
+   * @param x x-pos
+   * @param y y-pos
+   * @param z z-pos
+   */
+  public void setPosition(float x, float y, float z) {
+    gameEntity.setPosition(x, y, z);
+  }
+
+  public float getScale() {
+    return gameEntity.getScale();
+  }
+
+  public void setScale(float scale) {
+    gameEntity.setScale(scale);
+  }
+
+  public Vector3f getRotation() {
+    return gameEntity.getRotation();
+  }
+
+  /**
+   * Set the rotation of this Physics object.
+   *
+   * @param x x-rot
+   * @param y y-rot
+   * @param z z-rot
+   */
+  public void setRotation(float x, float y, float z) {
+    gameEntity.setRotation(x, y, z);
+  }
+
   /**
    * Method to apply forces to the entity.
    *
@@ -83,8 +113,8 @@ public class PhysicsComponent extends Component {
     if (!isStatic) {
       double ax = forceX / mass;
       double ay = forceY / mass;
-      vx += ax;
-      vy += ay;
+      velocity.x += (float) ax;
+      velocity.y += (float) ay;
     }
   }
 
@@ -110,17 +140,17 @@ public class PhysicsComponent extends Component {
   @Override
   public void update(double dt) {
     if (!isStatic) {
-      double newVx = vx + (xpos - prevX);
-      double newVy = vy + (ypos - prevY);
+      double newVx = velocity.x + (getPosition().x - prevPos.x);
+      double newVy = velocity.y + (getPosition().y - prevPos.y);
 
-      double newX = xpos + newVx * dt + 0.5 * newVx * dt * dt;
-      prevX = xpos;
-      double newY = ypos + newVy * dt + 0.5 * newVy * dt * dt;
-      prevY = ypos;
-      xpos = newX;
-      ypos = newY;
-      //getEntity().getComponents(PhysicsComponent.class)
-      //    .forEach(c -> c.handleCollision(getEntity()));
+      double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
+      prevPos.x = getPosition().x;
+      double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
+      prevPos.y = getPosition().y;
+      getPosition().x = (float) newX;
+      getPosition().y = (float) newY;
+
+      //TODO add rotation
     }
   }
 
@@ -128,4 +158,5 @@ public class PhysicsComponent extends Component {
   public void destroy() {
     isStatic = true;
   }
+
 }

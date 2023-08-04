@@ -505,8 +505,8 @@ public class Vertex implements Iterable<Vertex> {
       pos[i] = (float) p.getX();
       pos[i + 1] = (float) p.getY();
     }
-    int[] indecies = IntStream.range(0, size()).toArray();
-    return MeshLoader.createMesh(pos, indecies, 2);
+    int[] indices = IntStream.range(0, size()).toArray();
+    return MeshLoader.createMesh(pos, indices, 2);
   }
 
   @Override

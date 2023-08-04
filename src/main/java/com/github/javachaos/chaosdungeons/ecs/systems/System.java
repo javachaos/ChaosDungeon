@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.gui.Projection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class System {
   private static final List<Entity> entities = new CopyOnWriteArrayList<>();
 
-  public System() {
+  public System(Projection world) {
   }
 
   /**
@@ -40,4 +41,6 @@ public abstract class System {
   }
 
   public abstract void init();
+
+  public abstract void destroy();
 }

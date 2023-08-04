@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs;
 import com.github.javachaos.chaosdungeons.ecs.systems.PhysicsSystem;
 import com.github.javachaos.chaosdungeons.ecs.systems.RenderSystem;
 import com.github.javachaos.chaosdungeons.ecs.systems.System;
+import com.github.javachaos.chaosdungeons.gui.Projection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +19,10 @@ public class GameLoop {
   /**
    * Initialize the game loop.
    */
-  public void init() {
-    renderSystem = new RenderSystem();
+  public void init(Projection world) {
+    renderSystem = new RenderSystem(world);
     systems = new ArrayList<>();
-    systems.add(new PhysicsSystem());
+    systems.add(new PhysicsSystem(world));
     systems.add(renderSystem);
     // add more later
     systems.forEach(System::init);
