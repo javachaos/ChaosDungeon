@@ -19,12 +19,10 @@ public class CollisionComponent extends Component {
   private Vertex shape;
 
   /**
-   * Create a new component with id.
-   *
-   * @param id the id of this component
+   * Create a new component.
    */
-  public CollisionComponent(int id, Vertex shape) {
-    super(id);
+  public CollisionComponent(Vertex shape) {
+    super();
     this.shape = shape;
   }
 

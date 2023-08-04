@@ -10,9 +10,8 @@ import java.util.List;
  * Main game loop class.
  */
 public class GameLoop {
-  private final long targetFps = 60;
-  private long targetTime = 1000 / targetFps;
 
+  private boolean init;
   private List<System> systems;
   private RenderSystem renderSystem;
 
@@ -26,19 +25,14 @@ public class GameLoop {
     systems.add(renderSystem);
     // add more later
     systems.forEach(System::init);
-  }
-
-  public long getTargetTime() {
-    return targetTime;
+    init = true;
   }
 
   /**
    * Update render system.
-   *
-   * @param dt the time between calls to update and render
    */
-  public void render(double dt) {
-    renderSystem.update((float) dt);
+  public void render() {
+    renderSystem.update((float) 0.0);
   }
 
   /**
@@ -49,14 +43,14 @@ public class GameLoop {
   public void update(double dt) {
     systems.stream()
         .filter(s -> !(s instanceof RenderSystem))
-        .forEach(t -> t.update(dt));
-  }
-
-  public void setTargetTime(long elapsedTime) {
-    this.targetTime = elapsedTime;
+        .forEach(t -> t.update((float) dt));
   }
 
   public void shutdown() {
     systems.forEach(System::shutdown);
+  }
+
+  public boolean isInitialized() {
+    return init;
   }
 }

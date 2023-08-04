@@ -2,12 +2,16 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Physics system class.
  */
 @SuppressWarnings("unused")
 public class PhysicsSystem extends System {
+
+  private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
 
   public PhysicsSystem() {
     super();
@@ -30,10 +34,13 @@ public class PhysicsSystem extends System {
   public void update(float dt) {
     getEntities().forEach(e -> {
       getEntities()
+          .stream()
+          .filter(f -> f.hasComponent(PhysicsComponent.class))
           .forEach(entity -> entity.getComponent(PhysicsComponent.class)
-              .handleCollision(e));
+          .handleCollision(e));
       e.update(dt);
     });
+    LOGGER.debug("Physics Delta: {}", dt);
   }
 
   @Override

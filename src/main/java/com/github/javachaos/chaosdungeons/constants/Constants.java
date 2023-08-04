@@ -15,6 +15,9 @@ public class Constants {
    */
   public static final long DEFAULT_SHUTDOWN_TIMEOUT = 5000;
 
+  public static final String TITLE = "Chaos Dungeons";
+  public static final double ONETHOUSAND = 1000.0;
+
   /**
    * Unused constructor.
    */

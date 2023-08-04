@@ -10,7 +10,7 @@ public class PlayerEntity extends Entity {
    * Create a new player entity.
    */
   public PlayerEntity() {
-    super(0);
+    super();
   }
 
   @Override

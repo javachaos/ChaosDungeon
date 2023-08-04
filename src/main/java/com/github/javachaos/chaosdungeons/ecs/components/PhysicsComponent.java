@@ -25,18 +25,16 @@ public class PhysicsComponent extends Component {
   /**
    * Create a new physics component.
    *
-   * @param id the component id
    * @param x the initial x position
    * @param y the initial y position
    * @param mass the mass of this object
    * @param restitution the restitution
    * @param isStatic true if this is a static object
    */
-  public PhysicsComponent(int id,
-                          double x, double y,
+  public PhysicsComponent(double x, double y,
                           double mass, double restitution,
                           boolean isStatic) {
-    super(id);
+    super();
     this.xpos = x;
     this.ypos = y;
     this.prevX = x;

@@ -7,12 +7,10 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 public class GravityComponent extends Component {
 
   /**
-   * Create a new component with id.
-   *
-   * @param id the id of this component
+   * Create a new component.
    */
-  public GravityComponent(int id) {
-    super(id);
+  public GravityComponent() {
+    super();
   }
 
   @Override

@@ -1,18 +1,17 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * System class for ECS.
  */
 @SuppressWarnings("unused")
 public abstract class System {
-  private final List<Entity> entities;
+  private static final List<Entity> entities = new CopyOnWriteArrayList<>();
 
   public System() {
-    entities = new ArrayList<>();
   }
 
   /**
@@ -20,10 +19,11 @@ public abstract class System {
    *
    * @param dt the delta time between updates
    */
-  public abstract void update(float dt);
+  protected abstract void update(float dt);
 
   public void update(double dt) {
     getEntities().forEach(e -> e.update(dt));
+    update((float) dt);
   }
 
   /**

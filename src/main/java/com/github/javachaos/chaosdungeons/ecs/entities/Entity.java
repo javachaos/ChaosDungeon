@@ -43,8 +43,8 @@ public abstract class Entity extends Component {
   private static final Map<Class<? extends Entity>, SortedMap<Integer, Component>> components =
       Collections.synchronizedMap(new HashMap<>());
 
-  public Entity(int id) {
-    super(id);
+  public Entity() {
+    super();
   }
 
   /**
@@ -53,12 +53,14 @@ public abstract class Entity extends Component {
    * @param c the component to add.
    */
   public void addComponent(Component c) {
-    if (components.containsKey(getClass())) {
-      c.setEntity(this);
-      components.get(getClass()).put(c.getId(), c);
-    } else {
+    if (!components.containsKey(getClass())) {
       components.put(getClass(), Collections.synchronizedSortedMap(new TreeMap<>()));
     }
+    c.setEntity(this);
+    if (components.get(getClass()).containsKey(c.getId())) {
+      c.setId(c.getId() + 1);
+    }
+    components.get(getClass()).put(c.getId(), c);
   }
 
   /**
@@ -122,7 +124,7 @@ public abstract class Entity extends Component {
     }
   }
 
-  public abstract void update(float dt);
+  protected abstract void update(float dt);
 
   /**
    * Update order based on id value. (Lower ids are updated first)
@@ -194,10 +196,10 @@ public abstract class Entity extends Component {
    * @param component the component to look for.
    * @return true if this entity contains at least 1 of component
    */
-  public boolean hasComponent(Class<? extends Component> component) {
+  public <T extends Component> boolean hasComponent(Class<T> component) {
     return components.get(getClass())
         .values()
         .stream()
-        .anyMatch(c -> c.getClass().equals(component));
+        .anyMatch(c -> component.isAssignableFrom(c.getClass()));
   }
 }

@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -490,6 +491,22 @@ public class Vertex implements Iterable<Vertex> {
       current = current.next;
     } while (current != this);
     return count;
+  }
+
+  /**
+   * Create a mesh for this vertex polygon.
+   *
+   * @return the mesh
+   */
+  public Mesh createMesh() {
+    float[] pos = new float[size() * 2];
+    for (int i = 0; i < pos.length; i += 2) {
+      Point2D p = get(i);
+      pos[i] = (float) p.getX();
+      pos[i + 1] = (float) p.getY();
+    }
+    int[] indecies = IntStream.range(0, size()).toArray();
+    return MeshLoader.createMesh(pos, indecies, 2);
   }
 
   @Override

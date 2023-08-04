@@ -13,15 +13,13 @@ public abstract class Component {
   private static final AtomicInteger removalCount = new AtomicInteger(0);
 
   private boolean markedForRemoval;
-  private final int id;
+  private int id;
 
   /**
    * Create a new component with id.
    *
-   * @param id the id of this component
    */
-  public Component(int id) {
-    this.id = id;
+  public Component() {
   }
 
   public void setEntity(Entity e) {
@@ -32,6 +30,10 @@ public abstract class Component {
 
   public int getId() {
     return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
   }
 
   public void remove() {
