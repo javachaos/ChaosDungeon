@@ -42,10 +42,13 @@ public abstract class Entity extends Component {
    */
   private static final Map<Class<? extends Entity>, SortedMap<Integer, Component>> components =
       Collections.synchronizedMap(new HashMap<>());
+  private boolean init;
 
   public Entity() {
     super();
   }
+
+  public abstract void init();
 
   /**
    * Add a component to this entity.
@@ -57,6 +60,9 @@ public abstract class Entity extends Component {
       components.put(getClass(), Collections.synchronizedSortedMap(new TreeMap<>()));
     }
     c.setEntity(this);
+    if (this instanceof GameEntity) {
+      c.onAdded((GameEntity) this);
+    }
     if (components.get(getClass()).containsKey(c.getId())) {
       c.setId(c.getId() + 1);
     }
@@ -131,6 +137,10 @@ public abstract class Entity extends Component {
    */
   @Override
   public void update(double dt) {
+    if (!init) {
+      init();
+      init = true;
+    }
     components.values().forEach(
         c -> c.values().stream()
               .filter(v -> !v.isRemoved())
@@ -145,6 +155,9 @@ public abstract class Entity extends Component {
         Set<Component> remove = new HashSet<>();
         components.values().forEach(c -> c.values().stream().filter(Component::isRemoved)
             .forEach(remove::add));
+        if (Entity.this instanceof GameEntity) {
+          remove.forEach(c -> onRemoved((GameEntity) Entity.this));
+        }
         remove.forEach(Component::destroy);
         remove.forEach(c -> components.get(c.getClass()).remove(c.getId()));
       });

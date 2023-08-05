@@ -20,6 +20,7 @@ public class RandomShapeEntity extends Entity {
   private final Vector2i pos;
   private final Vector2d size;
   private final int numEdges;
+  private final Color color;
 
   /**
    * Create a new Random shape entity.
@@ -30,21 +31,35 @@ public class RandomShapeEntity extends Entity {
    * @param maxX max x vertex
    * @param maxY max y vertex
    */
-  public RandomShapeEntity(int x, int y, int numEdges, double maxX, double maxY) {
+  public RandomShapeEntity(int x, int y, int numEdges, double maxX, double maxY, Color c) {
     super();
     this.pos = new Vector2i(x, y);
     this.size = new Vector2d(maxX, maxY);
     this.numEdges = numEdges;
+    this.color = c;
+  }
+
+  @Override
+  public void init() {
     addComponent(new ShapeComponent(new Vertex(generateNonRegularPolygon(
-        pos.x, pos.y, numEdges, size.x, size.y)), Color.DARK_GRAY));
+        pos.x, pos.y, numEdges, size.x, size.y)), color));
   }
 
   @Override
   public void update(float dt) {
-    getComponents().forEach(c -> c.update(dt));
   }
 
   @Override
   public void destroy() {
+    LOGGER.debug("Random Shape Destroyed!");
+  }
+
+  @Override
+  public void onAdded(GameEntity e) {
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+
   }
 }

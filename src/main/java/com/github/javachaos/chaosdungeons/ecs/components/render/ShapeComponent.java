@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Mesh;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.Color;
@@ -31,7 +32,6 @@ public class ShapeComponent extends RenderComponent {
   }
 
   public void setColor(Color c) {
-    LOGGER.debug("ShapeComponent color changed. {}", c);
     this.color = c;
   }
 
@@ -49,5 +49,15 @@ public class ShapeComponent extends RenderComponent {
     GL11.glDrawElements(GL11.GL_POLYGON, mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
     GL20.glDisableVertexAttribArray(0);
     GL30.glBindVertexArray(0);
+  }
+
+  @Override
+  public void onAdded(GameEntity e) {
+
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+
   }
 }

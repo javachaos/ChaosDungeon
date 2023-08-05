@@ -1,12 +1,10 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.DefaultCameraEntity;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import com.github.javachaos.chaosdungeons.ecs.entities.ShapeEntity;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import com.github.javachaos.chaosdungeons.gui.Projection;
-import java.awt.geom.Point2D;
-import java.util.List;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.FireballEntity;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,8 +16,8 @@ public class RenderSystem extends System {
 
   private static final Logger LOGGER = LogManager.getLogger(RenderSystem.class);
 
-  public RenderSystem(Projection world) {
-    super(world);
+  public RenderSystem(GameWindow window) {
+    super(window);
   }
 
   /**
@@ -28,29 +26,19 @@ public class RenderSystem extends System {
    * @param e the entity e to be added.
    */
   public void addEntity(Entity e) {
-    if (e.hasComponent(RenderComponent.class)) {
-      getEntities().add(e);
-    } else {
-      throw new IllegalArgumentException("Entity must have a render component.");
-    }
+    getEntities().add(e);
   }
 
   @Override
   public void update(float dt) {
-    getEntities().forEach(e -> e.update(dt));
+    getEntities().stream().filter(n -> n.hasComponent(RenderComponent.class))
+        .forEach(e -> e.update(dt));
   }
 
   @Override
-  public void init() {
-    Vertex v = new Vertex(List.of(new Point2D.Double(-0.5, -0.5),
-        new Point2D.Double(0.5, -0.5),
-        new Point2D.Double(0, 0.5)));
-    addEntity(new ShapeEntity(v));
-//    for (int i = 0; i < 100; i++) {
-//      addEntity(new RandomShapeEntity(
-//          0, 0, 10, 1.0, 1.0));
-//    }
-    //Init code.
+  public void initSystem() {
+    addEntity(new DefaultCameraEntity());
+    addEntity(new FireballEntity());
   }
 
   @Override

@@ -27,14 +27,41 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.opengl.GL11.GL_ALWAYS;
+import static org.lwjgl.opengl.GL11.GL_BACK;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CCW;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_CW;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_FILL;
+import static org.lwjgl.opengl.GL11.GL_FRONT;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_NEVER;
+import static org.lwjgl.opengl.GL11.GL_NONE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_PACK_ROW_LENGTH;
+import static org.lwjgl.opengl.GL11.GL_POLYGON_OFFSET_POINT;
+import static org.lwjgl.opengl.GL11.GL_POLYGON_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_STENCIL_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11C.GL_LINE;
+import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
+import static org.lwjgl.opengl.GL30.GL_RASTERIZER_DISCARD;
+import static org.lwjgl.opengl.GL31.GL_PRIMITIVE_RESTART;
+import static org.lwjgl.opengl.GL43.GL_PRIMITIVE_RESTART_FIXED_INDEX;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
-import com.github.javachaos.chaosdungeons.geometry.math.Transformation;
 import com.github.javachaos.chaosdungeons.utils.ShaderProgram;
+import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -51,17 +78,18 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
+/**
+ * Game window.
+ */
 public class GameWindow {
 
-  private ShaderProgram shaderProgram;
   private static final int TARGET_FPS = 60;
   private static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS; // Time per frame in nanoseconds
   private static final long MAX_SKIP_FRAMES = 10;
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
-  private Projection projection;
-  private Transformation transformation;
+  private static Projection projection;
   private long window;
-  private GLFWWindowSizeCallback windowSizeCallback;
+  private static ShaderProgram shaderProgram;
 
   /**
    * Run the game!.
@@ -96,31 +124,22 @@ public class GameWindow {
     GL.createCapabilities();
     shaderProgram = new ShaderProgram("vertex.glsl",
         "fragment.glsl");
-
     initView();
     long lastUpdateTime = System.nanoTime();
     long lastRenderTime = System.nanoTime();
     int frameCount = 0;
     long fpsTimer = System.currentTimeMillis();
-    double accumulator = 0.0;
     while (!glfwWindowShouldClose(window)) {
       if (!gameLoop.isInitialized()) {
         shaderProgram.init();
-        gameLoop.init(projection);
+        gameLoop.init(this);
       }
-      GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+      GL11.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
       lastUpdateTime = now;
-      accumulator += dt;
 
-      // Determine the number of update steps to perform
-      int updateSteps = 0;
-      while (accumulator >= dt && updateSteps < MAX_SKIP_FRAMES) {
-        gameLoop.update(accumulator);
-        accumulator -= dt;
-        updateSteps++;
-      }
+      gameLoop.update(dt);
       shaderProgram.bind();
       // Render the game
       gameLoop.render();
@@ -152,24 +171,17 @@ public class GameWindow {
     int w = projection.getWidth();
     int h = projection.getHeight();
 
+    glEnable(GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
     GL11.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
     GL11.glMatrixMode(GL11.GL_PROJECTION);
     GL11.glLoadIdentity();
     GL11.glOrtho(0, w, 0, h, 1, 1);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
+    glEnable(GL_TEXTURE_2D);
+    GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
-    // Enable blending
-    GL11.glEnable(GL11.GL_BLEND);
-    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-    // Enable depth testing
-    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_COLOR);
-    GL11.glEnable(GL11.GL_DEPTH_TEST);
-    GL11.glDepthFunc(GL11.GL_LEQUAL);
-    GL11.glShadeModel(GL11.GL_SMOOTH);
-
-    transformation = new Transformation();
   }
 
   private void setupLogging() {
@@ -199,7 +211,7 @@ public class GameWindow {
   }
 
   private void addWindowResizeCallback() {
-    glfwSetWindowSizeCallback(window, windowSizeCallback = new GLFWWindowSizeCallback() {
+    glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
       @Override
       public void invoke(long window, int width, int height) {
         projection.updateProjection(width, height);
@@ -247,4 +259,15 @@ public class GameWindow {
     glfwShowWindow(window);
   }
 
+  public Rectangle2D getBounds() {
+    return new Rectangle2D.Double(0, 0, projection.getWidth(), projection.getHeight());
+  }
+
+  public static Projection getProjection() {
+    return projection;
+  }
+
+  public static ShaderProgram getShader() {
+    return shaderProgram;
+  }
 }

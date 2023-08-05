@@ -1,5 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+
 /**
  * A gravity component.
  */
@@ -21,5 +23,15 @@ public class GravityComponent extends Component {
 
   @Override
   public void destroy() {
+  }
+
+  @Override
+  public void onAdded(GameEntity e) {
+
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+
   }
 }

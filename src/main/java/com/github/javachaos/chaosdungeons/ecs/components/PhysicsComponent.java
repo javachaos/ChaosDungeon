@@ -159,4 +159,14 @@ public class PhysicsComponent extends Component {
     isStatic = true;
   }
 
+  @Override
+  public void onAdded(GameEntity e) {
+
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+
+  }
+
 }

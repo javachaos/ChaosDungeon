@@ -1,5 +1,7 @@
 package com.github.javachaos.chaosdungeons.gui;
 
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
@@ -8,17 +10,34 @@ import org.joml.Vector3f;
 public class Camera {
 
   private final Vector3f position;
-
-  private final Vector3f rotation;
+  private final Quaternionf rotation;
+  private final Matrix4f projection;
 
   public Camera() {
     position = new Vector3f(0, 0, 0);
-    rotation = new Vector3f(0, 0, 0);
+    rotation = new Quaternionf();
+    projection = new Matrix4f();
   }
 
-  public Camera(Vector3f position, Vector3f rotation) {
+  public Camera(Vector3f position, Quaternionf rotation, Matrix4f projection) {
     this.position = position;
     this.rotation = rotation;
+    this.projection = projection;
+  }
+
+  public Matrix4f getTransformation() {
+    Matrix4f r = new Matrix4f();
+    r.rotate(rotation.conjugate(new Quaternionf()));
+    r.translate(position.mul(-1, new Vector3f()));
+    return r;
+  }
+
+  public void setOrtho2D(float l, float r, float t, float b) {
+    projection.setOrtho2D(l, r, t, b);
+  }
+
+  public void setPerspective(float fov, float aspectRatio, float near, float far) {
+    projection.setPerspective(fov, aspectRatio, near, far);
   }
 
   public Vector3f getPosition() {
@@ -36,6 +55,10 @@ public class Camera {
     position.x = x;
     position.y = y;
     position.z = z;
+  }
+
+  public void setPosition(Vector3f pos) {
+    this.position.set(pos);
   }
 
   /**
@@ -57,7 +80,7 @@ public class Camera {
     position.y += offsetY;
   }
 
-  public Vector3f getRotation() {
+  public Quaternionf getRotation() {
     return rotation;
   }
 
@@ -67,11 +90,16 @@ public class Camera {
    * @param x x-rot
    * @param y y-rot
    * @param z z-rot
+   * @param w w-rot
    */
-  public void setRotation(float x, float y, float z) {
+  public void setRotation(float x, float y, float z, float w) {
     rotation.x = x;
     rotation.y = y;
     rotation.z = z;
+    rotation.w = w;
+  }
+  public void setRotation(Quaternionf rot) {
+    rotation.set(rot);
   }
 
   /**
@@ -85,5 +113,9 @@ public class Camera {
     rotation.x += offsetX;
     rotation.y += offsetY;
     rotation.z += offsetZ;
+  }
+
+  public Matrix4f getProjection() {
+    return projection;
   }
 }

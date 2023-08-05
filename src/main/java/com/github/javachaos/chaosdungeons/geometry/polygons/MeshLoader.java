@@ -1,9 +1,14 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
+import static org.lwjgl.opengl.GL11.GL_FALSE;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -15,6 +20,9 @@ import org.lwjgl.opengl.GL30;
  */
 @SuppressWarnings("all")
 public class MeshLoader {
+
+  private static final Logger LOGGER = LogManager.getLogger(MeshLoader.class);
+
   private static List<Integer> vaos = new ArrayList<>();
   private static List<Integer> vbos = new ArrayList<>();
 
@@ -34,8 +42,8 @@ public class MeshLoader {
   private static void storeData(int attribute, int dimensions, float[] data) {
     int vbo = GL15.glGenBuffers(); //Creates a VBO ID
     vbos.add(vbo);
-    GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo); //Loads the current VBO to store the data
     FloatBuffer buffer = createFloatBuffer(data);
+    GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo); //Loads the current VBO to store the data
     GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
     GL20.glVertexAttribPointer(attribute, dimensions, GL11.GL_FLOAT, false, 0, 0);
     GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0); //Unloads the current VBO when done.
@@ -50,6 +58,8 @@ public class MeshLoader {
   }
 
   public static Mesh createMesh(float[] positions, int[] indices, int dimensions) {
+    LOGGER.debug(Arrays.toString(positions));
+    LOGGER.debug(Arrays.toString(indices));
     int vao = genVAO();
     storeData(0, dimensions, positions);
     bindIndices(indices);

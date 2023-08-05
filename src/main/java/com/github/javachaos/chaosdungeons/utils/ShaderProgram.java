@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
 import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
 import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
 import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glCompileShader;
 import static org.lwjgl.opengl.GL20.glCreateProgram;
 import static org.lwjgl.opengl.GL20.glCreateShader;
@@ -15,6 +16,7 @@ import static org.lwjgl.opengl.GL20.glGetProgrami;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
@@ -23,6 +25,8 @@ import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
+import com.github.javachaos.chaosdungeons.gui.Camera;
+import com.github.javachaos.chaosdungeons.gui.Transform;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +50,10 @@ public class ShaderProgram {
   private final Map<String, Integer> uniforms;
   private final String vertexSrc;
   private final String fragSrc;
+  private int uniMatProjection;
+  private int uniMatTransformWorld;
+  private int uniMatTransformObject;
+  private int uniSampleTexture;
 
 
   /**
@@ -99,6 +107,41 @@ public class ShaderProgram {
       glUniformMatrix4fv(uniforms.get(name), false, fb);
     }
   }
+
+  public void setUniform(String name, int value) {
+    int loc = glGetUniformLocation(programId, name);
+    if (loc != -1) {
+      glUniform1i(loc, value);
+    }
+  }
+
+  public void setSampleTexture(int sample) {
+    if (uniSampleTexture != -1) {
+      glUniform1i(uniSampleTexture, sample);
+    }
+  }
+
+  public void setCamera(Camera camera) {
+    if (uniMatProjection != -1) {
+      float matrix[] = new float[16];
+      camera.getProjection().get(matrix);
+      glUniformMatrix4fv(uniMatProjection, false, matrix);
+    }
+    if (uniMatTransformWorld != -1) {
+      float matrix[] = new float[16];
+      camera.getTransformation().get(matrix);
+      glUniformMatrix4fv(uniMatTransformWorld, false, matrix);
+    }
+  }
+
+  public void setTransform(Transform transform) {
+    if (uniMatTransformObject != -1) {
+      float matrix[] = new float[16];
+      transform.getTransformation().get(matrix);
+      glUniformMatrix4fv(uniMatTransformObject, false, matrix);
+    }
+  }
+
 
   /**
    * Get the location in memory as an integer for the uniform with name n.
@@ -154,6 +197,11 @@ public class ShaderProgram {
       LOGGER.debug("Vertex Source: " + System.lineSeparator() + vertexSrc);
       LOGGER.debug("Fragment Source: " + System.lineSeparator() + fragSrc);
     }
+
+    uniMatProjection = glGetUniformLocation(programId, "cameraProjection");
+    uniMatTransformWorld = glGetUniformLocation(programId, "transformWorld");
+    uniMatTransformObject = glGetUniformLocation(programId, "transformObject");
+    uniSampleTexture = glGetUniformLocation(programId, "sampleTexture");
 
     glDetachShader(programId, vertexShader);
     glDetachShader(programId, fragmentShader);

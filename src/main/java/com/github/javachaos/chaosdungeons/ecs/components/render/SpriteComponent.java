@@ -1,6 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
-import java.awt.image.BufferedImage;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.geometry.SpriteModel;
+import com.github.javachaos.chaosdungeons.utils.Texture;
 
 /**
  * Sprite component class.
@@ -8,16 +10,35 @@ import java.awt.image.BufferedImage;
 @SuppressWarnings("unused")
 public class SpriteComponent extends RenderComponent {
 
-  private BufferedImage png;
+  private final SpriteModel img;
+  private boolean isVisible = true;
 
   /**
    * Create a new component.
    */
-  public SpriteComponent() {
+  public SpriteComponent(SpriteModel img) {
     super();
+    this.img = img;
+  }
+
+  @Override
+  public void onAdded(GameEntity e) {
+
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+    img.delete();
+  }
+
+  public void setVisible(boolean visible) {
+    this.isVisible = visible;
   }
 
   @Override
   public void render() {
+    if (isVisible) {
+      img.render();
+    }
   }
 }

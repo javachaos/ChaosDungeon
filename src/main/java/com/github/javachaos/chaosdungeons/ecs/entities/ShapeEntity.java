@@ -23,11 +23,26 @@ public class ShapeEntity extends Entity {
   }
 
   @Override
+  public void init() {
+
+  }
+
+  @Override
   public void update(float dt) {
   }
 
   @Override
   public void destroy() {
     LOGGER.debug("ShapeEntity destroyed.");
+  }
+
+  @Override
+  public void onAdded(GameEntity e) {
+
+  }
+
+  @Override
+  public void onRemoved(GameEntity e) {
+
   }
 }

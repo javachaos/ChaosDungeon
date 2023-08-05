@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.Projection;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
@@ -15,8 +16,8 @@ public class PhysicsSystem extends System {
 
   private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
 
-  public PhysicsSystem(Projection world) {
-    super(world);
+  public PhysicsSystem(GameWindow window) {
+    super(window);
   }
 
   /**
@@ -48,7 +49,7 @@ public class PhysicsSystem extends System {
   }
 
   @Override
-  public void init() {
+  public void initSystem() {
   }
 
   @Override

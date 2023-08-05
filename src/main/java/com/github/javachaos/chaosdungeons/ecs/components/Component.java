@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,9 +37,16 @@ public abstract class Component {
     this.id = id;
   }
 
+  /**
+   * Mark this component for removal. It will no longer be updated
+   * but will remain in memory until a set number of components
+   * are ready to be removed, then they are removed in one batch
+   * removal operation.
+   */
   public void remove() {
     markedForRemoval = true;
     removalCount.incrementAndGet();
+    onRemoved((GameEntity) getEntity());
   }
 
   public static int getRemovalCount() {
@@ -54,4 +62,6 @@ public abstract class Component {
   }
 
   public abstract void destroy();
+  public abstract void onAdded(GameEntity e);
+  public abstract void onRemoved(GameEntity e);
 }
