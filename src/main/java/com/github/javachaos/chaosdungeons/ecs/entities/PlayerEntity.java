@@ -1,5 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import com.github.javachaos.chaosdungeons.ecs.components.ui.CameraComponent;
+
 /**
  * Player entity class.
  */
@@ -10,12 +12,12 @@ public class PlayerEntity extends GameEntity {
    * Create a new player entity.
    */
   public PlayerEntity() {
-    super();
+    super("assets/textures/player.png");
   }
 
   @Override
   public void init() {
-
+    addComponent(new CameraComponent());
   }
 
   @Override

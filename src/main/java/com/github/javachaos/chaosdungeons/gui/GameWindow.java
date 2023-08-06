@@ -139,10 +139,10 @@ public class GameWindow {
       lastUpdateTime = now;
 
       gameLoop.update(dt);
-      shaderProgram.bind();
+      //shaderProgram.bind();
       // Render the game
       gameLoop.render();
-      shaderProgram.unbind();
+      //shaderProgram.unbind();
       frameCount++;
 
       // Sleep to maintain desired FPS

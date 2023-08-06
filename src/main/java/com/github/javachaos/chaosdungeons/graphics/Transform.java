@@ -36,6 +36,19 @@ public class Transform {
     return returnValue;
   }
 
+  /**
+   * Project target onto this transform and return the result.
+   *
+   * @param target the target transform
+   * @return this transform transformed by target.
+   */
+  public Matrix4f getProjection(Matrix4f target) {
+    target.translate(position);
+    target.rotate(rotation);
+    target.scale(scale);
+    return target;
+  }
+
   public Vector3f getPosition() {
     return position;
   }

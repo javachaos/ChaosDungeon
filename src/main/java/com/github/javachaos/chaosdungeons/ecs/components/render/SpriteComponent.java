@@ -1,7 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import com.github.javachaos.chaosdungeons.geometry.SpriteModel;
+import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 
 /**
  * Sprite component class.

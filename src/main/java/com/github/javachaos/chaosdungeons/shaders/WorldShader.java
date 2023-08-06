@@ -2,12 +2,12 @@ package com.github.javachaos.chaosdungeons.shaders;
 
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
-import com.github.javachaos.chaosdungeons.graphics.Camera;
 import com.github.javachaos.chaosdungeons.graphics.Transform;
 
 /**
  * World shader class.
  */
+@SuppressWarnings("unused")
 public class WorldShader extends ShaderProgram {
 
   /**
@@ -28,16 +28,6 @@ public class WorldShader extends ShaderProgram {
       LOGGER.error("Error loading uniforms: {}", e.getMessage());
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * Set the camera for this shader program.
-   *
-   * @param camera the camera instance.
-   */
-  public void setCamera(Camera camera) {
-    setUniform("projection", camera.getProjection());
-    setUniform("view", camera.getTransformation());
   }
 
   /**

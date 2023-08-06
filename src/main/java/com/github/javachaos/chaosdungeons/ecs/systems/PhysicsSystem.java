@@ -34,6 +34,7 @@ public class PhysicsSystem extends System {
 
   @Override
   public void update(float dt) {
+    // update all entities with a PhysicsComponent and handle collisions
     List<Entity> entities = getEntities();
     if (entities != null) {
       for (Entity e : entities) {

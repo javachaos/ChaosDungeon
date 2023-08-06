@@ -25,7 +25,6 @@ public class ShapeEntity extends Entity {
 
   @Override
   public void init() {
-
   }
 
   @Override
@@ -39,11 +38,9 @@ public class ShapeEntity extends Entity {
 
   @Override
   public void onAdded(Entity e) {
-
   }
 
   @Override
   public void onRemoved(Entity e) {
-
   }
 }

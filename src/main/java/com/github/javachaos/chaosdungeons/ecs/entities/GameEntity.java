@@ -1,5 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
+import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
+import com.github.javachaos.chaosdungeons.graphics.Texture;
 import com.github.javachaos.chaosdungeons.graphics.Transform;
 
 /**
@@ -12,13 +15,20 @@ public abstract class GameEntity extends Entity {
    * Transform.
    */
   private Transform transform;
+  private final String texturePath;
 
   /**
    * Create a game entity.
    */
-  public GameEntity() {
+  public GameEntity(String texturePath) {
     super();
-    transform = new Transform();
+    this.texturePath = texturePath;
+    this.transform = new Transform();
+  }
+
+  @Override
+  public void init() {
+    addComponent(new SpriteComponent(new SpriteModel(new Texture(texturePath))));
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.geometry;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import static com.github.javachaos.chaosdungeons.utils.BuffUtils.createBuffer;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -15,10 +15,6 @@ import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-import com.github.javachaos.chaosdungeons.graphics.Texture;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.shaders.ShaderProgram;
-
 /**
  * Sprite model.
  */
@@ -29,7 +25,6 @@ public class SpriteModel {
   private final int textureId;
   private final int indicesId;
   private final Texture texture;
-  private final ShaderProgram shaderProgram;
   float[] vertices = new float[] {
       -0.5f, 0.5f, 0,
       0.5f, 0.5f, 0,
@@ -55,7 +50,6 @@ public class SpriteModel {
    * @param texture the texture for this sprite model.
    */
   public SpriteModel(Texture texture) {
-    this.shaderProgram = GameWindow.getWorldShader();
     this.texture = texture;
     this.drawCount = indices.length;
 
@@ -80,7 +74,6 @@ public class SpriteModel {
    * Render this sprite model on the GPU.
    */
   public void render() {
-    shaderProgram.setSampleTexture(0);
     texture.bind(0);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

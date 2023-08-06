@@ -23,7 +23,7 @@ public abstract class System {
    */
   protected abstract void update(float dt);
 
-  public void update(double dt) {
+  public void update(double dt) { // update all systems.
     getEntities().forEach(e -> e.update(dt));
     update((float) dt);
   }

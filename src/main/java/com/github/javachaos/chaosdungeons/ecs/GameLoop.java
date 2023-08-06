@@ -27,7 +27,9 @@ public class GameLoop {
     systems.add(renderSystem);
     systems.add(new LoadSystem(window));
     // add more later
-    systems.stream().forEachOrdered(System::initSystem);
+    for (System system : systems) {
+      system.initSystem();
+    }
     init = true;
   }
 
@@ -44,7 +46,7 @@ public class GameLoop {
    * @param dt the time between render and update calls.
    */
   public void update(double dt) {
-    systems.stream()
+    systems.stream() // Loop over all system except the render system.
         .filter(s -> !(s instanceof RenderSystem))
         .forEach(t -> t.update((float) dt));
   }

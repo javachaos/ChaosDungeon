@@ -3,13 +3,13 @@ package com.github.javachaos.chaosdungeons.ecs.entities;
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +40,7 @@ public abstract class Entity extends Component {
    * the same class type, we store them via their id.
    * If two components share the same id, then only one instance is kept.
    */
-  private static final Map<Class<? extends Entity>, SortedMap<Integer, Component>> components =
+  private static final Map<Class<? extends Entity>, Deque<Component>> components =
       Collections.synchronizedMap(new HashMap<>());
 
   public Entity() {
@@ -56,24 +56,27 @@ public abstract class Entity extends Component {
    */
   public void addComponent(Component c) {
     if (!components.containsKey(getClass())) {
-      components.put(getClass(), Collections.synchronizedSortedMap(new TreeMap<>()));
+      components.put(getClass(), new ConcurrentLinkedDeque<>());
     }
     c.setEntity(this);
     c.onAdded(this);
-    if (components.get(getClass()).containsKey(c.getId())) {
-      c.setId(c.getId() + 1);
-    }
-    components.get(getClass()).put(c.getId(), c);
+    components.get(getClass()).offerLast(c);
   }
 
   /**
-   * Get a component from this entity with the id, id.
+   * Add a component to this entity.
    *
-   * @param id the id of the desired component
-   * @return the component with id, id
+   * @param front true if the component c should be added to the front
+   *              of the list of components.
+   * @param c the component to add.
    */
-  public Component getComponent(int id) {
-    return components.get(getClass()).get(id);
+  public void addComponent(boolean front, Component c) {
+    if (!components.containsKey(getClass())) {
+      components.put(getClass(), new ConcurrentLinkedDeque<>());
+    }
+    c.setEntity(this);
+    c.onAdded(this);
+    components.get(getClass()).offerFirst(c);
   }
 
   /**
@@ -84,7 +87,7 @@ public abstract class Entity extends Component {
    *
    */
   public <T extends Component> T getComponent(Class<T> clazz) {
-    return components.get(getClass()).values()
+    return components.get(getClass())
            .stream()
            .filter(x -> x.getClass().equals(clazz))
            .findFirst()
@@ -99,7 +102,7 @@ public abstract class Entity extends Component {
    * @return the list of components of type clazz
    */
   public <T extends Component> List<T> getComponents(Class<T> clazz) {
-    return components.get(getClass()).values()
+    return components.get(getClass())
            .stream()
            .filter(x -> x.getClass().equals(clazz))
            .map(clazz::cast) // Cast the component to the desired type
@@ -112,7 +115,7 @@ public abstract class Entity extends Component {
    * @return the components of this entity.
    */
   public List<Component> getComponents() {
-    return components.get(getClass()).values()
+    return components.get(getClass())
         .stream()
         .map(Component.class::cast)
         .collect(Collectors.toList());
@@ -124,10 +127,7 @@ public abstract class Entity extends Component {
    * @param c the component to be removed.
    */
   public void removeComponent(Component c) {
-    List<Component> comps = (List<Component>) components.get(getClass()).values();
-    if (comps.contains(c)) {
-      components.get(c.getClass()).get(c.getId()).remove();
-    }
+    getComponents().remove(c);
   }
 
   protected abstract void update(float dt);
@@ -138,7 +138,7 @@ public abstract class Entity extends Component {
   @Override
   public void update(double dt) {
     components.values().forEach(
-        c -> c.values().stream()
+        c -> c.stream()
               .filter(v -> !v.isRemoved())
               .forEach(cc -> cc.update(dt)));
     update((float) dt);
@@ -149,13 +149,13 @@ public abstract class Entity extends Component {
     if (Component.getRemovalCount() > REMOVAL_THRESHOLD) {
       executor.execute(() -> { // execute potentially long-running operation on a background thread.
         Set<Component> remove = new HashSet<>();
-        components.values().forEach(c -> c.values().stream().filter(Component::isRemoved)
+        components.values().forEach(c -> c.stream().filter(Component::isRemoved)
             .forEach(remove::add));
         if (Entity.this instanceof GameEntity) {
           remove.forEach(c -> onRemoved(Entity.this));
         }
         remove.forEach(Component::destroy);
-        remove.forEach(c -> components.get(c.getClass()).remove(c.getId()));
+        remove.forEach(c -> components.get(c.getClass()).remove(c));
       });
     }
   }
@@ -167,7 +167,7 @@ public abstract class Entity extends Component {
    */
   public void shutdownComponentRegistry() {
     executor.execute(
-        () -> components.values().forEach(v -> v.values().forEach(Component::destroy)));
+        () -> components.values().forEach(v -> v.forEach(Component::destroy)));
     try {
       int i = 0;
       // Wait for the executor to terminate, specifying a reasonable timeout
@@ -196,7 +196,7 @@ public abstract class Entity extends Component {
    * @return true if this entity contains at least 1 of component
    */
   public boolean hasComponent(Component component) {
-    return components.get(getClass()).containsValue(component);
+    return getComponents().contains(component);
   }
 
   /**
@@ -207,7 +207,6 @@ public abstract class Entity extends Component {
    */
   public <T extends Component> boolean hasComponent(Class<T> component) {
     return components.get(getClass())
-        .values()
         .stream()
         .anyMatch(c -> component.isAssignableFrom(c.getClass()));
   }
