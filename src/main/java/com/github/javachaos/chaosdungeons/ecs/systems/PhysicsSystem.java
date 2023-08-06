@@ -3,7 +3,6 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.gui.Projection;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,14 +36,24 @@ public class PhysicsSystem extends System {
   public void update(float dt) {
     List<Entity> entities = getEntities();
     if (entities != null) {
-      entities.forEach(e -> {
-        getEntities()
-            .stream()
-            .filter(f -> f.hasComponent(PhysicsComponent.class))
-            .forEach(entity -> entity.getComponent(PhysicsComponent.class)
-                .handleCollision(e));
+      for (Entity e : entities) {
+        for (Entity f : entities) {
+          if (e.equals(f)) {
+            break;
+          }
+          if (e.hasComponent(PhysicsComponent.class) && f.hasComponent(PhysicsComponent.class)) {
+            PhysicsComponent pc1 = e.getComponent(PhysicsComponent.class);
+            PhysicsComponent pc2 = f.getComponent(PhysicsComponent.class);
+            if (pc1 != null) {
+              pc1.handleCollision(f);
+            }
+            if (pc2 != null) {
+              pc2.handleCollision(e);
+            }
+          }
+        }
         e.update(dt);
-      });
+      }
     }
   }
 

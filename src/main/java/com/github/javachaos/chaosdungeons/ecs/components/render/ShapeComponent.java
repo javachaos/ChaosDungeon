@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Mesh;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -56,11 +56,11 @@ public class ShapeComponent extends RenderComponent {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
+  public void onAdded(Entity e) {
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
 
   }
 }

@@ -1,10 +1,11 @@
 package com.github.javachaos.chaosdungeons.ecs.components.ui;
 
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.gui.Camera;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.gui.Transform;
+import com.github.javachaos.chaosdungeons.utils.Camera;
+import com.github.javachaos.chaosdungeons.utils.Transform;
 
 /**
  * A camera component.
@@ -15,7 +16,7 @@ public class CameraComponent extends Component {
   private final Transform transform = new Transform();
   private float zoom = 512f;
   private float newZoom = 128f;
-  private float easeFactor = 0.1f;
+  private float easeFactor = 0.3f;
 
   @Override
   public void update(double dt) {
@@ -53,10 +54,10 @@ public class CameraComponent extends Component {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
+  public void onAdded(Entity e) {
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
   }
 }

@@ -1,6 +1,7 @@
-package com.github.javachaos.chaosdungeons.gui;
+package com.github.javachaos.chaosdungeons.utils;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -49,6 +50,10 @@ public class Camera {
     return r;
   }
 
+  public void updateTransform(Transform t) {
+
+  }
+
   public void setOrtho2D(float left, float right, float top, float bottom) {
     projection.setOrtho2D(left, right, top, bottom);
   }
@@ -65,8 +70,7 @@ public class Camera {
   public void setOrthographic(float zoom) {
     float tanOfFov = (float) Math.tan(Math.toRadians(Constants.FOV / 2.0));
     float halfHeight = -zoom * tanOfFov;
-    float halfWidth = halfHeight * ((float) GameWindow.getProjection().getWidth()
-        / GameWindow.getProjection().getHeight());
+    float halfWidth = halfHeight * GameWindow.getWindowSize().getAspectRatio();
     setOrtho2D(halfWidth, -halfWidth, halfHeight, -halfHeight);
   }
 

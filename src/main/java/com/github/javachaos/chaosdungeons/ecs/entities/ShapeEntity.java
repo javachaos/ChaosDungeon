@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Simple shape entity class.
  */
+@SuppressWarnings("unused")
 public class ShapeEntity extends Entity {
   private static final Logger LOGGER = LogManager.getLogger(ShapeEntity.class);
 
@@ -37,12 +38,12 @@ public class ShapeEntity extends Entity {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
+  public void onAdded(Entity e) {
 
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
 
   }
 }

@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.utils;
 
-import static org.lwjgl.opengl.GL11.GL_NEAREST;
+import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
@@ -70,8 +70,8 @@ public class Texture {
 
       // Tell OpenGL how to unpack the RGBA bytes. Each component is 1 byte size
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
 
       // Upload the texture data
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,

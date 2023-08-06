@@ -42,6 +42,7 @@ import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.utils.ShaderProgram;
+import com.github.javachaos.chaosdungeons.utils.WindowSize;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -49,7 +50,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
-import org.joml.Vector2i;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -67,9 +67,9 @@ public class GameWindow {
   private static final int TARGET_FPS = 60;
   private static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS; // Time per frame in nanoseconds
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
-  private static Projection projection;
   private long window;
   private static ShaderProgram shaderProgram;
+  private static WindowSize windowSize;
 
   /**
    * Run the game!.
@@ -96,7 +96,8 @@ public class GameWindow {
     window = createGlfwWindow();
     setupInputCallbacks(gameLoop);
     addWindowResizeCallback();
-    projection = new Projection(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+    windowSize = new WindowSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+    //projection = new Projection(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
     showWindow(window);
   }
 
@@ -151,15 +152,15 @@ public class GameWindow {
   }
 
   private void initView() {
-    int w = projection.getWidth();
-    int h = projection.getHeight();
+    int w = windowSize.getWidth();
+    int h = windowSize.getHeight();
 
     glEnable(GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
     GL11.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
     GL11.glMatrixMode(GL11.GL_PROJECTION);
     GL11.glLoadIdentity();
-    GL11.glOrtho(0, w, 0, h, 1, 1);
+    GL11.glOrtho(0, w, 0, h, 1, -1);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
     glEnable(GL_TEXTURE_2D);
     GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -197,7 +198,8 @@ public class GameWindow {
     glfwSetWindowSizeCallback(window, new GLFWWindowSizeCallback() {
       @Override
       public void invoke(long window, int width, int height) {
-        projection.updateProjection(width, height);
+        windowSize.setWidth(width);
+        windowSize.setHeight(height);
         //Updates the matrices
         initView();
       }
@@ -247,12 +249,8 @@ public class GameWindow {
    *
    * @return the bounds of this window.
    */
-  public Vector2i getBounds() {
-    return new Vector2i(projection.getWidth(), projection.getHeight());
-  }
-
-  public static Projection getProjection() {
-    return projection;
+  public static WindowSize getWindowSize() {
+    return windowSize;
   }
 
   public static ShaderProgram getShader() {

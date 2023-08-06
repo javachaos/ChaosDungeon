@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 
 /**
@@ -14,13 +15,15 @@ public class LoadSystem extends System {
   protected void update(float dt) {
   }
 
+  /**
+   * Call the init function for all entities in all systems.
+   */
   @Override
   public void initSystem() {
-    //getEntities().forEach(Entity::init);
+    getEntities().forEach(Entity::init);
   }
 
   @Override
   public void destroy() {
-
   }
 }

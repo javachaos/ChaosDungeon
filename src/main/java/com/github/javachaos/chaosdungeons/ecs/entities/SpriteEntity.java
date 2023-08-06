@@ -17,11 +17,11 @@ public class SpriteEntity extends GameEntity {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
+  public void onAdded(Entity e) {
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
   }
 
   @Override

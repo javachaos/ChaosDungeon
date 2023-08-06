@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
-import com.github.javachaos.chaosdungeons.gui.Transform;
+import com.github.javachaos.chaosdungeons.utils.Transform;
 
 /**
  * Game entity class.

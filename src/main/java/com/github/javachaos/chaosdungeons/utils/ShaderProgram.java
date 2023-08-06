@@ -25,8 +25,6 @@ import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
-import com.github.javachaos.chaosdungeons.gui.Camera;
-import com.github.javachaos.chaosdungeons.gui.Transform;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -53,9 +51,9 @@ public class ShaderProgram {
   private final String vertexSrc;
   private final String fragSrc;
   private int uniMatProjection;
-  private int uniMatTransformWorld;
-  private int uniMatTransformObject;
-  private int uniSampleTexture;
+  private int uniMatView;
+  private int uniMatModel;
+  private int uniSample;
 
 
   /**
@@ -146,8 +144,8 @@ public class ShaderProgram {
    * @param sample the sample value to set.
    */
   public void setSampleTexture(int sample) {
-    if (uniSampleTexture != -1) {
-      glUniform1i(uniSampleTexture, sample);
+    if (uniSample != -1) {
+      glUniform1i(uniSample, sample);
     }
   }
 
@@ -162,10 +160,10 @@ public class ShaderProgram {
       camera.getProjection().get(matrix);
       glUniformMatrix4fv(uniMatProjection, false, matrix);
     }
-    if (uniMatTransformWorld != -1) {
+    if (uniMatView != -1) {
       float[] matrix = new float[16];
       camera.getTransformation().get(matrix);
-      glUniformMatrix4fv(uniMatTransformWorld, false, matrix);
+      glUniformMatrix4fv(uniMatView, false, matrix);
     }
   }
 
@@ -175,10 +173,10 @@ public class ShaderProgram {
    * @param transform the transform to be set.
    */
   public void setTransform(Transform transform) {
-    if (uniMatTransformObject != -1) {
+    if (uniMatModel != -1) {
       float[] matrix = new float[16];
       transform.getTransformation().get(matrix);
-      glUniformMatrix4fv(uniMatTransformObject, false, matrix);
+      glUniformMatrix4fv(uniMatModel, false, matrix);
     }
   }
 
@@ -238,10 +236,10 @@ public class ShaderProgram {
       LOGGER.debug("Fragment Source: " + System.lineSeparator() + fragSrc);
     }
 
-    uniMatProjection = glGetUniformLocation(programId, "cameraProjection");
-    uniMatTransformWorld = glGetUniformLocation(programId, "transformWorld");
-    uniMatTransformObject = glGetUniformLocation(programId, "transformObject");
-    uniSampleTexture = glGetUniformLocation(programId, "sampleTexture");
+    uniMatProjection = glGetUniformLocation(programId, "projection");
+    uniMatView = glGetUniformLocation(programId, "view");
+    uniMatModel = glGetUniformLocation(programId, "model");
+    uniSample = glGetUniformLocation(programId, "sample");
 
     glDetachShader(programId, vertexShader);
     glDetachShader(programId, fragmentShader);

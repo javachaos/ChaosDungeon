@@ -13,6 +13,7 @@ import org.joml.Vector2i;
 /**
  * Random shape entity.
  */
+@SuppressWarnings("unused")
 public class RandomShapeEntity extends Entity {
 
   private static final Logger LOGGER = LogManager.getLogger(RandomShapeEntity.class);
@@ -55,11 +56,11 @@ public class RandomShapeEntity extends Entity {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
+  public void onAdded(Entity e) {
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
 
   }
 }

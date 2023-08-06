@@ -1,20 +1,31 @@
-package com.github.javachaos.chaosdungeons.gui;
+package com.github.javachaos.chaosdungeons.utils;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+/**
+ * A simple transformation matrix class.
+ */
 public class Transform {
   private Vector3f position;
   private Quaternionf rotation;
   private Vector3f scale;
 
+  /**
+   * Create a transform with position and rotation initialized to zero and scale to 1.
+   */
   public Transform() {
     position = new Vector3f();
     rotation = new Quaternionf();
     scale = new Vector3f(1);
   }
 
+  /**
+   * Get the transformation matrix (projection).
+   *
+   * @return the projection
+   */
   public Matrix4f getTransformation() {
     Matrix4f returnValue = new Matrix4f();
 

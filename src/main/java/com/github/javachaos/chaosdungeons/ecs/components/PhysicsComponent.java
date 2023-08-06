@@ -2,7 +2,10 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.utils.Transform;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -18,6 +21,13 @@ public class PhysicsComponent extends Component {
   private final double restitution; // Coefficient of restitution for bounciness
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
   private GameEntity gameEntity;
+
+  /**
+   * Accumulator used for debugging.
+   */
+  private float acc;
+
+  private static final Logger LOGGER = LogManager.getLogger(PhysicsComponent.class);
 
   /**
    * Create a new physics component.
@@ -138,6 +148,11 @@ public class PhysicsComponent extends Component {
    */
   @Override
   public void update(double dt) {
+    if (acc > 1.0) {
+      LOGGER.debug("{} is at [{}, {}, {}]", getEntity(),
+          getPosition().x, getPosition().y, getPosition().z);
+      acc = 0;
+    }
     if (!isStatic) {
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
@@ -146,8 +161,13 @@ public class PhysicsComponent extends Component {
       prevPos.x = getPosition().x;
       double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       prevPos.y = getPosition().y;
-      getPosition().x = (float) newX;
-      getPosition().y = (float) newY;
+      setPosition((float) newX,  (float) newY, getPosition().z);
+      acc += (float) dt;
+      GameEntity ge = ((GameEntity) getEntity());
+      Transform t = ge.getTransform();
+      t.setPosition(t.getPosition());
+      t.setRotation(t.getRotation());
+      t.setScale(t.getScale());
 
       //TODO add rotation
     }
@@ -159,12 +179,13 @@ public class PhysicsComponent extends Component {
   }
 
   @Override
-  public void onAdded(GameEntity e) {
-    this.gameEntity = e;
+  public void onAdded(Entity e) {
+    LOGGER.debug("Physics Component added to: " + e);
+    this.gameEntity = (GameEntity) e;
   }
 
   @Override
-  public void onRemoved(GameEntity e) {
+  public void onRemoved(Entity e) {
   }
 
 }
