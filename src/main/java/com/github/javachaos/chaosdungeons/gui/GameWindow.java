@@ -27,33 +27,14 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-import static org.lwjgl.opengl.GL11.GL_ALWAYS;
-import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_CCW;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
-import static org.lwjgl.opengl.GL11.GL_CW;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_FILL;
-import static org.lwjgl.opengl.GL11.GL_FRONT;
-import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
-import static org.lwjgl.opengl.GL11.GL_NEVER;
-import static org.lwjgl.opengl.GL11.GL_NONE;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_PACK_ROW_LENGTH;
-import static org.lwjgl.opengl.GL11.GL_POLYGON_OFFSET_POINT;
-import static org.lwjgl.opengl.GL11.GL_POLYGON_SMOOTH;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_STENCIL_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11C.GL_LINE;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
-import static org.lwjgl.opengl.GL30.GL_RASTERIZER_DISCARD;
-import static org.lwjgl.opengl.GL31.GL_PRIMITIVE_RESTART;
-import static org.lwjgl.opengl.GL43.GL_PRIMITIVE_RESTART_FIXED_INDEX;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -61,7 +42,6 @@ import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.utils.ShaderProgram;
-import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -69,8 +49,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
+import org.joml.Vector2i;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
@@ -81,11 +61,11 @@ import org.lwjgl.system.MemoryStack;
 /**
  * Game window.
  */
+@SuppressWarnings("unused")
 public class GameWindow {
 
   private static final int TARGET_FPS = 60;
   private static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS; // Time per frame in nanoseconds
-  private static final long MAX_SKIP_FRAMES = 10;
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
   private static Projection projection;
   private long window;
@@ -95,7 +75,7 @@ public class GameWindow {
    * Run the game!.
    */
   @SuppressWarnings("all")
-  public void run(GameLoop gameLoop) throws ShaderLoadException {
+  public void run(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
     init(gameLoop);
@@ -113,14 +93,16 @@ public class GameWindow {
   @SuppressWarnings("all")
   private void init(GameLoop gameLoop) {
     setupLogging();
-    createGlfwWindow();
+    window = createGlfwWindow();
     setupInputCallbacks(gameLoop);
     addWindowResizeCallback();
     projection = new Projection(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
     showWindow(window);
   }
 
-  private void loop(GameLoop gameLoop) throws ShaderLoadException {
+
+  @SuppressWarnings("all")
+  private void loop(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     GL.createCapabilities();
     shaderProgram = new ShaderProgram("vertex.glsl",
         "fragment.glsl");
@@ -149,8 +131,9 @@ public class GameWindow {
       // Sleep to maintain desired FPS
       long renderTime = System.nanoTime() - lastRenderTime;
       long sleepTime = (OPTIMAL_TIME - renderTime) / 1000000; // Convert to milliseconds
+
       if (sleepTime > 0) {
-        GLFW.glfwWaitEventsTimeout(sleepTime);
+        Thread.sleep(sleepTime);
       }
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -259,8 +242,13 @@ public class GameWindow {
     glfwShowWindow(window);
   }
 
-  public Rectangle2D getBounds() {
-    return new Rectangle2D.Double(0, 0, projection.getWidth(), projection.getHeight());
+  /**
+   * Get the bounds of this Window as a Rectangle2D.
+   *
+   * @return the bounds of this window.
+   */
+  public Vector2i getBounds() {
+    return new Vector2i(projection.getWidth(), projection.getHeight());
   }
 
   public static Projection getProjection() {

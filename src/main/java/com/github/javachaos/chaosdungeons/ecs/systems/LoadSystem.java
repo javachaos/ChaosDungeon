@@ -1,6 +1,5 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 
 /**
@@ -17,7 +16,7 @@ public class LoadSystem extends System {
 
   @Override
   public void initSystem() {
-    getEntities().forEach(Entity::init);
+    //getEntities().forEach(Entity::init);
   }
 
   @Override

@@ -2,7 +2,6 @@ package com.github.javachaos.chaosdungeons.ecs.components.render;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.geometry.SpriteModel;
-import com.github.javachaos.chaosdungeons.utils.Texture;
 
 /**
  * Sprite component class.
@@ -23,7 +22,6 @@ public class SpriteComponent extends RenderComponent {
 
   @Override
   public void onAdded(GameEntity e) {
-
   }
 
   @Override
@@ -36,7 +34,7 @@ public class SpriteComponent extends RenderComponent {
   }
 
   @Override
-  public void render() {
+  public void render(double dt) {
     if (isVisible) {
       img.render();
     }

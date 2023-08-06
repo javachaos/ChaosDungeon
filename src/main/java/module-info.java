@@ -12,4 +12,6 @@ module com.github.javachaos.chaosdungeons {
   requires org.lwjgl.stb;
   exports com.github.javachaos.chaosdungeons;
   exports com.github.javachaos.chaosdungeons.gui;
+  exports com.github.javachaos.chaosdungeons.utils;
+  exports com.github.javachaos.chaosdungeons.exceptions;
 }

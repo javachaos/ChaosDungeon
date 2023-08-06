@@ -1,7 +1,6 @@
 package com.github.javachaos.chaosdungeons.constants;
 
 import com.github.javachaos.chaosdungeons.Main;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
 
 /**
  * Constants file.

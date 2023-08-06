@@ -5,10 +5,12 @@ import static org.lwjgl.opengl.GL11.GL_RGBA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_UNPACK_ALIGNMENT;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glPixelStorei;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
@@ -23,19 +25,17 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryStack;
 
 /**
  * Texture class.
  */
+@SuppressWarnings("unused")
 public class Texture {
 
-  private static final Logger LOGGER = LogManager.getLogger(Texture.class);
-  private int width;
-  private int height;
-  private int id;
+  private final int width;
+  private final int height;
+  private final int id;
 
   /**
    * Create a new texture.
@@ -69,7 +69,7 @@ public class Texture {
       glBindTexture(GL_TEXTURE_2D, this.id);
 
       // Tell OpenGL how to unpack the RGBA bytes. Each component is 1 byte size
-      //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -83,10 +83,15 @@ public class Texture {
     }
   }
 
-  public void bind(int sampler) {
-    if (sampler > 0 && sampler <= 31) {
+  /**
+   * Bind this texture to the texture sampler s.
+   *
+   * @param s the sampler index
+   */
+  public void bind(int s) {
+    if (s > 0 && s <= 31) {
       // Bind the texture
-      glActiveTexture(GL_TEXTURE0 + sampler);
+      glActiveTexture(GL_TEXTURE0 + s);
       glBindTexture(GL_TEXTURE_2D, this.id);
     }
   }

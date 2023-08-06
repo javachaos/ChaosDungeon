@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
 import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
 import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
 import static org.lwjgl.opengl.GL20.glAttachShader;
-import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glCompileShader;
 import static org.lwjgl.opengl.GL20.glCreateProgram;
 import static org.lwjgl.opengl.GL20.glCreateShader;
@@ -17,6 +16,7 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform4fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
@@ -39,11 +39,13 @@ import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 /**
  * Class which represents a shader program.
  */
+@SuppressWarnings("unused")
 public class ShaderProgram {
   private static final Logger LOGGER = LogManager.getLogger(ShaderProgram.class);
   private int programId;
@@ -108,6 +110,29 @@ public class ShaderProgram {
     }
   }
 
+  /**
+   * Set the uniform for name.
+   *
+   * @param name the name of the uniform
+   * @param value the 4D vector value
+   */
+  public void setUniform(String name, Vector4f value) {
+    int loc = glGetUniformLocation(programId, name);
+    if (loc != -1) {
+      try (MemoryStack stack = MemoryStack.stackPush()) {
+        FloatBuffer fb = stack.mallocFloat(4);
+        value.get(fb);
+        glUniform4fv(loc, fb);
+      }
+    }
+  }
+
+  /**
+   * Set the uniform for name.
+   *
+   * @param name the name of the uniform
+   * @param value the integer value
+   */
   public void setUniform(String name, int value) {
     int loc = glGetUniformLocation(programId, name);
     if (loc != -1) {
@@ -115,28 +140,43 @@ public class ShaderProgram {
     }
   }
 
+  /**
+   * Set sample value.
+   *
+   * @param sample the sample value to set.
+   */
   public void setSampleTexture(int sample) {
     if (uniSampleTexture != -1) {
       glUniform1i(uniSampleTexture, sample);
     }
   }
 
+  /**
+   * Set the camera for this shader program.
+   *
+   * @param camera the camera instance.
+   */
   public void setCamera(Camera camera) {
     if (uniMatProjection != -1) {
-      float matrix[] = new float[16];
+      float[] matrix = new float[16];
       camera.getProjection().get(matrix);
       glUniformMatrix4fv(uniMatProjection, false, matrix);
     }
     if (uniMatTransformWorld != -1) {
-      float matrix[] = new float[16];
+      float[] matrix = new float[16];
       camera.getTransformation().get(matrix);
       glUniformMatrix4fv(uniMatTransformWorld, false, matrix);
     }
   }
 
+  /**
+   * Set the transform for this shader.
+   *
+   * @param transform the transform to be set.
+   */
   public void setTransform(Transform transform) {
     if (uniMatTransformObject != -1) {
-      float matrix[] = new float[16];
+      float[] matrix = new float[16];
       transform.getTransformation().get(matrix);
       glUniformMatrix4fv(uniMatTransformObject, false, matrix);
     }

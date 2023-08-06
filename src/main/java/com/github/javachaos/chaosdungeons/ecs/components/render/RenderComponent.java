@@ -16,10 +16,10 @@ public abstract class RenderComponent extends Component {
 
   @Override
   public void update(double dt) {
-    render();
+    render(dt);
   }
 
-  public abstract void render();
+  public abstract void render(double dt);
 
   @Override
   public void destroy() {

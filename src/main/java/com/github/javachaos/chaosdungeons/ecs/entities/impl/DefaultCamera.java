@@ -1,8 +1,12 @@
-package com.github.javachaos.chaosdungeons.ecs.entities;
+package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
 import com.github.javachaos.chaosdungeons.ecs.components.ui.CameraComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 
-public class DefaultCameraEntity extends GameEntity {
+/**
+ * Create a new Default game camera.
+ */
+public class DefaultCamera extends GameEntity {
   @Override
   public void onAdded(GameEntity e) {
 

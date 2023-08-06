@@ -10,14 +10,20 @@ import org.joml.AxisAngle4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+/**
+ * A camera component.
+ */
 public class CameraComponent extends Component {
   private final Camera camera = new Camera();
   private final Transform transform = new Transform();
 
   @Override
   public void update(double dt) {
-    transform.setPosition(new Vector3f((float) Math.sin(Math.toRadians(dt)), 0, 0));
-    transform.getRotation().rotateAxis((float) Math.toRadians(0.1), 0, 1, 0);
+    GameEntity ge = ((GameEntity) getEntity());
+    Transform t = ge.getTransform();
+    transform.setPosition(t.getPosition());
+    transform.setRotation(t.getRotation());
+    transform.setScale(t.getScale());
     GameWindow.getShader().setCamera(camera);
     GameWindow.getShader().setTransform(transform);
   }

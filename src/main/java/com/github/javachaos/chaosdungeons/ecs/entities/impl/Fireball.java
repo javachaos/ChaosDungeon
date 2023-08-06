@@ -2,8 +2,11 @@ package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.SpriteEntity;
 
-public class FireballEntity extends SpriteEntity {
-  public FireballEntity() {
+/**
+ * Create a new fireball entity.
+ */
+public class Fireball extends SpriteEntity {
+  public Fireball() {
     super("assets/textures/fireball.png");
   }
 }

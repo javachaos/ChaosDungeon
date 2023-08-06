@@ -2,9 +2,11 @@ package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.geometry.SpriteModel;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.utils.Texture;
 
+/**
+ * Sprite entity class.
+ */
 public class SpriteEntity extends GameEntity {
 
   private final String texturePath;
@@ -25,8 +27,7 @@ public class SpriteEntity extends GameEntity {
   @Override
   public void init() {
     addComponent(new SpriteComponent(
-        new SpriteModel(new Texture(texturePath),
-        GameWindow.getShader())));
+        new SpriteModel(new Texture(texturePath))));
   }
 
   @Override

@@ -1,9 +1,9 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
-import com.github.javachaos.chaosdungeons.ecs.entities.DefaultCameraEntity;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import com.github.javachaos.chaosdungeons.ecs.entities.impl.FireballEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.DefaultCamera;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,13 +37,13 @@ public class RenderSystem extends System {
 
   @Override
   public void initSystem() {
-    addEntity(new DefaultCameraEntity());
-    addEntity(new FireballEntity());
+    addEntity(new DefaultCamera());
+    addEntity(new Fireball());
+    //addEntity(new RandomShapeEntity(0, 0, 10, 1.0, 1.0, Color.CYAN));
   }
 
   @Override
   public void destroy() {
-
   }
 
 }

@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import java.util.List;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
@@ -37,11 +38,11 @@ public class PhysicsComponent extends Component {
 
   // Getter and setter methods
   public double getXpos() {
-    return ((GameEntity) getEntity()).getPosition().x;
+    return gameEntity.getTransform().getPosition().x;
   }
 
   public double getYpos() {
-    return gameEntity.getPosition().y;
+    return gameEntity.getTransform().getPosition().y;
   }
 
   public double getVx() {
@@ -66,7 +67,7 @@ public class PhysicsComponent extends Component {
 
 
   public Vector3f getPosition() {
-    return gameEntity.getPosition();
+    return gameEntity.getTransform().getPosition();
   }
 
   /**
@@ -77,30 +78,28 @@ public class PhysicsComponent extends Component {
    * @param z z-pos
    */
   public void setPosition(float x, float y, float z) {
-    gameEntity.setPosition(x, y, z);
+    gameEntity.getTransform().setPosition(new Vector3f(x, y, z));
   }
 
-  public float getScale() {
-    return gameEntity.getScale();
+  public Vector3f getScale() {
+    return gameEntity.getTransform().getScale();
   }
 
-  public void setScale(float scale) {
-    gameEntity.setScale(scale);
+  public void setScale(Vector3f scale) {
+    gameEntity.getTransform().setScale(scale);
   }
 
-  public Vector3f getRotation() {
-    return gameEntity.getRotation();
+  public Quaternionf getRotation() {
+    return gameEntity.getTransform().getRotation();
   }
 
   /**
    * Set the rotation of this Physics object.
    *
-   * @param x x-rot
-   * @param y y-rot
-   * @param z z-rot
+   * @param rot rotation angle in degrees along the z-axis.
    */
-  public void setRotation(float x, float y, float z) {
-    gameEntity.setRotation(x, y, z);
+  public void setRotation(Quaternionf rot) {
+    gameEntity.getTransform().setRotation(rot);
   }
 
   /**
@@ -161,12 +160,11 @@ public class PhysicsComponent extends Component {
 
   @Override
   public void onAdded(GameEntity e) {
-
+    this.gameEntity = e;
   }
 
   @Override
   public void onRemoved(GameEntity e) {
-
   }
 
 }
