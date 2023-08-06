@@ -64,7 +64,7 @@ public class Camera {
    */
   public void setOrthographic(float zoom) {
     float tanOfFov = (float) Math.tan(Math.toRadians(Constants.FOV / 2.0));
-    float halfHeight = zoom * tanOfFov;
+    float halfHeight = -zoom * tanOfFov;
     float halfWidth = halfHeight * ((float) GameWindow.getProjection().getWidth()
         / GameWindow.getProjection().getHeight());
     setOrtho2D(halfWidth, -halfWidth, halfHeight, -halfHeight);
