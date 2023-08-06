@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.utils;
+package com.github.javachaos.chaosdungeons.shaders;
 
 import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
@@ -44,25 +44,20 @@ import org.lwjgl.system.MemoryStack;
  * Class which represents a shader program.
  */
 @SuppressWarnings("unused")
-public class ShaderProgram {
-  private static final Logger LOGGER = LogManager.getLogger(ShaderProgram.class);
-  private int programId;
-  private final Map<String, Integer> uniforms;
+public abstract class ShaderProgram {
+  protected static final Logger LOGGER = LogManager.getLogger(ShaderProgram.class);
+  private static final Map<String, Integer> uniforms = new HashMap<>();
   private final String vertexSrc;
   private final String fragSrc;
-  private int uniMatProjection;
-  private int uniMatView;
-  private int uniMatModel;
-  private int uniSample;
-
+  private int programId;
 
   /**
    * Create a new shader program.
    *
-   * @param vertexShaderPath path to the vertex shader source, relative to src/main/resources
+   * @param vertexShaderPath   path to the vertex shader source, relative to src/main/resources
    * @param fragmentShaderPath path to the fragment shader source, relative to src/main/resources
    * @throws ShaderLoadException if the file path does not match
-   *     ^([a-z])+([_]){0,1}([a-z])+([.]){1}([a-z])+$
+   *                             ^([a-z])+([_]){0,1}([a-z])+([.]){1}([a-z])+$
    */
   public ShaderProgram(String vertexShaderPath, String fragmentShaderPath) throws
       ShaderLoadException {
@@ -74,8 +69,9 @@ public class ShaderProgram {
     }
     this.vertexSrc = readShaderSource(File.separator + vertexShaderPath);
     this.fragSrc = readShaderSource(File.separator + fragmentShaderPath);
-    this.uniforms = new HashMap<>();
   }
+
+  public abstract void addUniforms();
 
   /**
    * Create a uniform named uniformName.
@@ -94,13 +90,10 @@ public class ShaderProgram {
   /**
    * Set the uniform.
    *
-   * @param name name of the uniform to set
+   * @param name  name of the uniform to set
    * @param value the value to set
    */
-  public void setUniform(String name, Matrix4f value) throws UniformLoadException {
-    if (!uniforms.containsKey(name)) {
-      createUniform(name);
-    }
+  public void setUniform(String name, Matrix4f value) {
     try (MemoryStack stack = MemoryStack.stackPush()) {
       FloatBuffer fb = stack.mallocFloat(16);
       value.get(fb);
@@ -111,7 +104,7 @@ public class ShaderProgram {
   /**
    * Set the uniform for name.
    *
-   * @param name the name of the uniform
+   * @param name  the name of the uniform
    * @param value the 4D vector value
    */
   public void setUniform(String name, Vector4f value) {
@@ -128,7 +121,7 @@ public class ShaderProgram {
   /**
    * Set the uniform for name.
    *
-   * @param name the name of the uniform
+   * @param name  the name of the uniform
    * @param value the integer value
    */
   public void setUniform(String name, int value) {
@@ -144,42 +137,8 @@ public class ShaderProgram {
    * @param sample the sample value to set.
    */
   public void setSampleTexture(int sample) {
-    if (uniSample != -1) {
-      glUniform1i(uniSample, sample);
-    }
+    setUniform("sample", sample);
   }
-
-  /**
-   * Set the camera for this shader program.
-   *
-   * @param camera the camera instance.
-   */
-  public void setCamera(Camera camera) {
-    if (uniMatProjection != -1) {
-      float[] matrix = new float[16];
-      camera.getProjection().get(matrix);
-      glUniformMatrix4fv(uniMatProjection, false, matrix);
-    }
-    if (uniMatView != -1) {
-      float[] matrix = new float[16];
-      camera.getTransformation().get(matrix);
-      glUniformMatrix4fv(uniMatView, false, matrix);
-    }
-  }
-
-  /**
-   * Set the transform for this shader.
-   *
-   * @param transform the transform to be set.
-   */
-  public void setTransform(Transform transform) {
-    if (uniMatModel != -1) {
-      float[] matrix = new float[16];
-      transform.getTransformation().get(matrix);
-      glUniformMatrix4fv(uniMatModel, false, matrix);
-    }
-  }
-
 
   /**
    * Get the location in memory as an integer for the uniform with name n.
@@ -225,6 +184,8 @@ public class ShaderProgram {
       LOGGER.debug("Shaders compiled successfully.");
     }
 
+    addUniforms();
+
     // Validate the shader program (optional but recommended)
     glValidateProgram(programId);
     if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
@@ -232,14 +193,9 @@ public class ShaderProgram {
           + glGetProgramInfoLog(programId, 1024));
     } else {
       LOGGER.debug("Shaders linked successfully.");
-      LOGGER.debug("Vertex Source: " + System.lineSeparator() + vertexSrc);
-      LOGGER.debug("Fragment Source: " + System.lineSeparator() + fragSrc);
+      LOGGER.debug("Vertex Source: " + vertexSrc);
+      LOGGER.debug("Fragment Source: " + fragSrc);
     }
-
-    uniMatProjection = glGetUniformLocation(programId, "projection");
-    uniMatView = glGetUniformLocation(programId, "view");
-    uniMatModel = glGetUniformLocation(programId, "model");
-    uniSample = glGetUniformLocation(programId, "sample");
 
     glDetachShader(programId, vertexShader);
     glDetachShader(programId, fragmentShader);

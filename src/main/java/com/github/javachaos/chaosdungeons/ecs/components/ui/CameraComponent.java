@@ -3,9 +3,9 @@ package com.github.javachaos.chaosdungeons.ecs.components.ui;
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.graphics.Camera;
+import com.github.javachaos.chaosdungeons.graphics.Transform;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.utils.Camera;
-import com.github.javachaos.chaosdungeons.utils.Transform;
 
 /**
  * A camera component.
@@ -32,21 +32,21 @@ public class CameraComponent extends Component {
       zoom -= (float) (newZoom * dt * easeFactor);
     }
     camera.setOrthographic(zoom);
-    GameWindow.getShader().setCamera(camera);
-    GameWindow.getShader().setTransform(transform);
+    GameWindow.getWorldShader().setCamera(camera);
+    GameWindow.getWorldShader().setTransform(transform);
   }
 
   public float getZoom() {
     return zoom;
   }
 
+  public void setZoom(float zoom) {
+    this.zoom = zoom;
+  }
+
   public void setZoomEase(float zoom, float speed) {
     this.newZoom = zoom;
     this.easeFactor = speed;
-  }
-
-  public void setZoom(float zoom) {
-    this.zoom = zoom;
   }
 
   @Override

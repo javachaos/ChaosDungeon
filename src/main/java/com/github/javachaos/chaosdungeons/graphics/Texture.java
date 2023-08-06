@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.utils;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
@@ -16,15 +16,17 @@ import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
-import static org.lwjgl.stb.STBImage.stbi_load;
+import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.file.Paths;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
 
 /**
@@ -32,6 +34,8 @@ import org.lwjgl.system.MemoryStack;
  */
 @SuppressWarnings("unused")
 public class Texture {
+
+  private static final Logger LOGGER = LogManager.getLogger(Texture.class);
 
   private final int width;
   private final int height;
@@ -46,20 +50,36 @@ public class Texture {
    */
   @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
   public Texture(String imagePath) {
+    int initialSize = 1024;
+    LOGGER.debug("Loading texture: {}", imagePath);
     String path;
-    URL resource = Texture.class.getResource(File.separator + imagePath);
-    try {
-      assert resource != null;
-      path = Paths.get(resource.toURI()).toFile().getAbsolutePath();
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+    InputStream resource = Texture.class.getResourceAsStream(File.separator + imagePath);
+    ByteBuffer buffer = BufferUtils.createByteBuffer(initialSize);
+    if (resource == null) {
+      throw new RuntimeException("Texture not found: " + imagePath);
     }
 
+    int pixel;
+    try {
+      while ((pixel = resource.read()) != -1) {
+        buffer.put((byte) pixel);
+        if (buffer.remaining() == 0) {
+          ByteBuffer buff = BufferUtils.createByteBuffer(buffer.capacity() + initialSize);
+          buffer.flip();
+          buff.put(buffer);
+          buffer = buff;
+        }
+      }
+      resource.close();
+    } catch (IOException e) {
+      LOGGER.error(e);
+    }
+    buffer.flip();
     try (MemoryStack stack = stackPush()) {
       IntBuffer w = stack.mallocInt(1);
       IntBuffer h = stack.mallocInt(1);
       IntBuffer components = stack.mallocInt(1);
-      ByteBuffer decodedImage = stbi_load(path, w, h, components, 4);
+      ByteBuffer decodedImage = stbi_load_from_memory(buffer, w, h, components, 4);
       this.width = w.get();
       this.height = h.get();
 
@@ -75,8 +95,8 @@ public class Texture {
 
       // Upload the texture data
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                   this.width, this.height, 0,
-                   GL_RGBA, GL_UNSIGNED_BYTE, decodedImage);
+          this.width, this.height, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, decodedImage);
 
       // Generate Mip Map
       glGenerateMipmap(GL_TEXTURE_2D);

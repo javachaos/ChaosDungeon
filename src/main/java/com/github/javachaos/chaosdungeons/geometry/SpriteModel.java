@@ -15,9 +15,9 @@ import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
+import com.github.javachaos.chaosdungeons.graphics.Texture;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.utils.ShaderProgram;
-import com.github.javachaos.chaosdungeons.utils.Texture;
+import com.github.javachaos.chaosdungeons.shaders.ShaderProgram;
 
 /**
  * Sprite model.
@@ -27,15 +27,13 @@ public class SpriteModel {
   private final int drawCount;
   private final int vertexId;
   private final int textureId;
-  private int colorId;
   private final int indicesId;
   private final Texture texture;
   private final ShaderProgram shaderProgram;
-
   float[] vertices = new float[] {
-      -0.5f,  0.5f, 0,
-      0.5f,  0.5f, 0,
-      0.5f,  -0.5f, 0,
+      -0.5f, 0.5f, 0,
+      0.5f, 0.5f, 0,
+      0.5f, -0.5f, 0,
       -0.5f, -0.5f, 0
   };
   float[] texCoords = new float[] {
@@ -44,13 +42,12 @@ public class SpriteModel {
       1, 1,
       0, 1,
   };
-
   int[] indices = new int[] {
-    0, 1, 2,
-    2, 3, 0
+      0, 1, 2,
+      2, 3, 0
   };
-
   float[] color = new float[] {1.0f, 1.0f, 1.0f};
+  private int colorId;
 
   /**
    * Create a new sprite model for rendering on the GPU.
@@ -58,7 +55,7 @@ public class SpriteModel {
    * @param texture the texture for this sprite model.
    */
   public SpriteModel(Texture texture) {
-    this.shaderProgram = GameWindow.getShader();
+    this.shaderProgram = GameWindow.getWorldShader();
     this.texture = texture;
     this.drawCount = indices.length;
 

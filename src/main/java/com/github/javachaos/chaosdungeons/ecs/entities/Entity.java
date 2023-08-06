@@ -112,7 +112,10 @@ public abstract class Entity extends Component {
    * @return the components of this entity.
    */
   public List<Component> getComponents() {
-    return (List<Component>) components.get(getClass()).values();
+    return components.get(getClass()).values()
+        .stream()
+        .map(Component.class::cast)
+        .collect(Collectors.toList());
   }
 
   /**

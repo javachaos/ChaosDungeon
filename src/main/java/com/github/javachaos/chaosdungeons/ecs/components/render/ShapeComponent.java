@@ -47,7 +47,7 @@ public class ShapeComponent extends RenderComponent {
 
   @Override
   public void render(double dt) {
-    GameWindow.getShader().setSampleTexture(1);
+    GameWindow.getWorldShader().setSampleTexture(1);
     GL30.glBindVertexArray(mesh.getVaoID());
     GL20.glEnableVertexAttribArray(0);
     GL11.glDrawElements(GL11.GL_POLYGON, mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);

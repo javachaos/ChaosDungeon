@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.utils;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -12,16 +12,14 @@ import org.joml.Vector3f;
 @SuppressWarnings("unused")
 public class Camera {
 
-  private final Vector3f position;
-  private final Quaternionf rotation;
+  private final Transform cameraTransform;
   private final Matrix4f projection;
 
   /**
    * Setup a camera with position, rotation and projection set to zero.
    */
   public Camera() {
-    position = new Vector3f(0, 0, 0);
-    rotation = new Quaternionf();
+    cameraTransform = new Transform();
     projection = new Matrix4f();
   }
 
@@ -33,9 +31,10 @@ public class Camera {
    * @param projection the camera projection matrix
    */
   public Camera(Vector3f position, Quaternionf rotation, Matrix4f projection) {
-    this.position = position;
-    this.rotation = rotation;
-    this.projection = projection;
+    this();
+    this.cameraTransform.setPosition(position);
+    this.cameraTransform.setRotation(rotation);
+    this.projection.set(projection);
   }
 
   /**
@@ -45,13 +44,14 @@ public class Camera {
    */
   public Matrix4f getTransformation() {
     Matrix4f r = new Matrix4f();
-    r.rotate(rotation.conjugate(new Quaternionf()));
-    r.translate(position.mul(-1, new Vector3f()));
+    r.rotate(cameraTransform.getRotation().conjugate(new Quaternionf()));
+    r.translate(cameraTransform.getPosition().mul(-1, new Vector3f()));
     return r;
   }
 
   public void updateTransform(Transform t) {
-
+    // figure this out.
+    cameraTransform.getTransformation().mul(t.getTransformation().invert());
   }
 
   public void setOrtho2D(float left, float right, float top, float bottom) {
@@ -75,7 +75,7 @@ public class Camera {
   }
 
   public Vector3f getPosition() {
-    return position;
+    return cameraTransform.getPosition();
   }
 
   /**
@@ -86,13 +86,11 @@ public class Camera {
    * @param z z-pos
    */
   public void setPosition(float x, float y, float z) {
-    position.x = x;
-    position.y = y;
-    position.z = z;
+    this.cameraTransform.setPosition(new Vector3f(x, y, z));
   }
 
   public void setPosition(Vector3f pos) {
-    this.position.set(pos);
+    this.cameraTransform.setPosition(pos);
   }
 
   /**
@@ -104,18 +102,22 @@ public class Camera {
    */
   public void movePosition(float offsetX, float offsetY, float offsetZ) {
     if (offsetZ != 0) {
-      position.x += (float) Math.sin(Math.toRadians(rotation.y)) * -1.0f * offsetZ;
-      position.z += (float) Math.cos(Math.toRadians(rotation.y)) * offsetZ;
+      cameraTransform.getPosition().x += (float) Math.sin(Math.toRadians(
+          cameraTransform.getRotation().y)) * -1.0f * offsetZ;
+      cameraTransform.getPosition().z += (float) Math.cos(Math.toRadians(
+          cameraTransform.getRotation().y)) * offsetZ;
     }
     if (offsetX != 0) {
-      position.x += (float) Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * offsetX;
-      position.z += (float) Math.cos(Math.toRadians(rotation.y - 90)) * offsetX;
+      cameraTransform.getPosition().x += (float) Math.sin(Math.toRadians(
+          cameraTransform.getRotation().y - 90)) * -1.0f * offsetX;
+      cameraTransform.getPosition().z += (float) Math.cos(Math.toRadians(
+          cameraTransform.getRotation().y - 90)) * offsetX;
     }
-    position.y += offsetY;
+    cameraTransform.getPosition().y += offsetY;
   }
 
   public Quaternionf getRotation() {
-    return rotation;
+    return cameraTransform.getRotation();
   }
 
   /**
@@ -127,14 +129,14 @@ public class Camera {
    * @param w w-rot
    */
   public void setRotation(float x, float y, float z, float w) {
-    rotation.x = x;
-    rotation.y = y;
-    rotation.z = z;
-    rotation.w = w;
+    cameraTransform.getRotation().x = x;
+    cameraTransform.getRotation().y = y;
+    cameraTransform.getRotation().z = z;
+    cameraTransform.getRotation().w = w;
   }
 
   public void setRotation(Quaternionf rot) {
-    rotation.set(rot);
+    cameraTransform.getRotation().set(rot);
   }
 
   /**
@@ -145,9 +147,9 @@ public class Camera {
    * @param offsetZ z-pos offset
    */
   public void moveRotation(float offsetX, float offsetY, float offsetZ) {
-    rotation.x += offsetX;
-    rotation.y += offsetY;
-    rotation.z += offsetZ;
+    cameraTransform.getRotation().x += offsetX;
+    cameraTransform.getRotation().y += offsetY;
+    cameraTransform.getRotation().z += offsetZ;
   }
 
   public Matrix4f getProjection() {

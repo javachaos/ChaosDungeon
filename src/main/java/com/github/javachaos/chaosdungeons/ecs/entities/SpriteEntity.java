@@ -2,7 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.geometry.SpriteModel;
-import com.github.javachaos.chaosdungeons.utils.Texture;
+import com.github.javachaos.chaosdungeons.graphics.Texture;
 
 /**
  * Sprite entity class.

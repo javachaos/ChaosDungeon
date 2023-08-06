@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.utils;
+package com.github.javachaos.chaosdungeons.gui;
 
 /**
  * Window size pojo class.

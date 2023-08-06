@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.utils;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

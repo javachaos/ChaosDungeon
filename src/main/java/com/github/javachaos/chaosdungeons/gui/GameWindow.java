@@ -41,8 +41,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
-import com.github.javachaos.chaosdungeons.utils.ShaderProgram;
-import com.github.javachaos.chaosdungeons.utils.WindowSize;
+import com.github.javachaos.chaosdungeons.shaders.UiShader;
+import com.github.javachaos.chaosdungeons.shaders.WorldShader;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -67,9 +67,27 @@ public class GameWindow {
   private static final int TARGET_FPS = 60;
   private static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS; // Time per frame in nanoseconds
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
-  private long window;
-  private static ShaderProgram shaderProgram;
+  private static WorldShader shaderProgram;
+  private static UiShader uiShader;
   private static WindowSize windowSize;
+  private long window;
+
+  /**
+   * Get the bounds of this Window as a Rectangle2D.
+   *
+   * @return the bounds of this window.
+   */
+  public static WindowSize getWindowSize() {
+    return windowSize;
+  }
+
+  public static WorldShader getWorldShader() {
+    return shaderProgram;
+  }
+
+  public static UiShader getUiShader() {
+    return uiShader;
+  }
 
   /**
    * Run the game!.
@@ -97,16 +115,14 @@ public class GameWindow {
     setupInputCallbacks(gameLoop);
     addWindowResizeCallback();
     windowSize = new WindowSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
-    //projection = new Projection(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
     showWindow(window);
   }
-
 
   @SuppressWarnings("all")
   private void loop(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     GL.createCapabilities();
-    shaderProgram = new ShaderProgram("vertex.glsl",
-        "fragment.glsl");
+    uiShader = new UiShader();
+    shaderProgram = new WorldShader();
     initView();
     long lastUpdateTime = System.nanoTime();
     long lastRenderTime = System.nanoTime();
@@ -242,18 +258,5 @@ public class GameWindow {
 
     // Make the window visible
     glfwShowWindow(window);
-  }
-
-  /**
-   * Get the bounds of this Window as a Rectangle2D.
-   *
-   * @return the bounds of this window.
-   */
-  public static WindowSize getWindowSize() {
-    return windowSize;
-  }
-
-  public static ShaderProgram getShader() {
-    return shaderProgram;
   }
 }
