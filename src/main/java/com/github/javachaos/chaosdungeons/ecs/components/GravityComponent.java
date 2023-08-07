@@ -23,7 +23,7 @@ public class GravityComponent extends PhysicsComponent {
   @Override
   public void update(double dt) {
     super.update(dt);
-    super.applyForce(0.0, -9.8);
+    super.applyForce(0.0, -0.98);
   }
 
   @Override
