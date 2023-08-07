@@ -6,6 +6,7 @@ import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Vector3f;
 
 /**
  * Rendering system class.
@@ -37,6 +38,11 @@ public class RenderSystem extends System {
   @Override
   public void initSystem() {
     addEntity(new Fireball());
+    for (int i = 0; i < 20; i++) {
+      addEntity(new Fireball(0, -3f, new Vector3f(((float) Math.random()),
+                   ((float) Math.random() * 3),
+                   0)));
+    }
   }
 
   @Override

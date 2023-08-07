@@ -22,11 +22,6 @@ public class PhysicsComponent extends Component {
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
   private GameEntity gameEntity;
 
-  /**
-   * Accumulator used for debugging.
-   */
-  private float acc;
-
   private static final Logger LOGGER = LogManager.getLogger(PhysicsComponent.class);
 
   /**
@@ -105,6 +100,20 @@ public class PhysicsComponent extends Component {
   }
 
   /**
+   * Apply an angular force to this physics object.
+   *
+   * @param forceX angular force along the x-axis
+   * @param forceY angular force along the y-axis
+   * @param forceZ angular force along the z-axis
+   */
+  public void applyAngularForce(double forceX, double forceY, double forceZ) {
+    double ax = forceX / mass;
+    double ay = forceY / mass;
+    double az = forceZ / mass;
+    angularVelocity.set(new Vector3f((float) ax, (float) ay, (float) az));
+  }
+
+  /**
    *  Collision handling method.
    */
   public void handleCollision(Entity otherEntity) {
@@ -135,20 +144,10 @@ public class PhysicsComponent extends Component {
    */
   @Override
   public void update(double dt) {
-    if (acc > 1.0) {
-      LOGGER.debug("{} is at [{}, {}, {}]", getEntity(),
-          getPosition().x, getPosition().y, getPosition().z);
-      acc = 0;
-    }
     if (!isStatic) {
-      double newVx = velocity.x + (getPosition().x - prevPos.x);
-      double newVy = velocity.y + (getPosition().y - prevPos.y);
 
       prevPos.x = getPosition().x;
-      double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
-      double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       prevPos.y = getPosition().y;
-      acc += (float) dt;
       Vector3f prevRotation = getRotation();
 
       double newRotationX = prevRotation.x + angularVelocity.x * dt;
@@ -165,6 +164,10 @@ public class PhysicsComponent extends Component {
       newRotationY = normalizeAngle(newRotationY);
       newRotationZ = normalizeAngle(newRotationZ);
 
+      double newVx = velocity.x + (getPosition().x - prevPos.x);
+      double newVy = velocity.y + (getPosition().y - prevPos.y);
+      double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
+      double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       GameEntity ge = ((GameEntity) getEntity());
       ge.updateModelMatrix(
           new Vector3f((float) newX,  (float) newY, getPosition().z), //position

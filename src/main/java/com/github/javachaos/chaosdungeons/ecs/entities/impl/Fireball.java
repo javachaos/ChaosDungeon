@@ -9,8 +9,24 @@ import org.joml.Vector3f;
  * Create a new fireball entity.
  */
 public class Fireball extends GameEntity {
+  private final Vector3f initialV;
+
   public Fireball() {
     super("assets/textures/fireball.png");
+    initialV = new Vector3f(0);
+  }
+
+  /**
+   * Create a new fireball!.
+   *
+   * @param x initial x position
+   * @param y initial y position
+   * @param initialV initial velocity
+   */
+  public Fireball(float x, float y, Vector3f initialV) {
+    super("assets/textures/fireball.png",
+        new Vector3f(x, y, 0), new Vector3f(0), new Vector3f(1));
+    this.initialV = initialV;
   }
 
   @Override
@@ -24,7 +40,7 @@ public class Fireball extends GameEntity {
   @Override
   public void init() {
     super.init();
-    addComponent(true, new GravityComponent(100.0, 1.0, new Vector3f(0)));
+    addComponent(new GravityComponent(100.0, 1.0, initialV));
   }
 
   @Override

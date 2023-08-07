@@ -28,6 +28,21 @@ public abstract class GameEntity extends Entity {
     this.modelTransform = new Matrix4f();
   }
 
+  /**
+   * Create a new game entity with initial pos, rotation, and scale.
+   *
+   * @param texturePath texture for this game entity
+   * @param pos initial position of this game entity
+   * @param rot initial rotation of this game entity
+   * @param scale initial scale of this game entity
+   */
+  public GameEntity(String texturePath, Vector3f pos, Vector3f rot, Vector3f scale) {
+    super();
+    this.texturePath = texturePath;
+    this.modelTransform = new Matrix4f();
+    updateModelMatrix(pos, rot, scale);
+  }
+
   @Override
   public void init() {
     addComponent(new SpriteComponent(new SpriteModel(new Texture(texturePath), this)));

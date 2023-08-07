@@ -42,7 +42,7 @@ public abstract class Entity extends Component {
    * the same class type, we store them via their id.
    * If two components share the same id, then only one instance is kept.
    */
-  private static final Map<Class<? extends Entity>, Deque<Component>> components =
+  private final Map<Class<? extends Entity>, Deque<Component>> components =
       Collections.synchronizedMap(new HashMap<>());
 
   public Entity() {
