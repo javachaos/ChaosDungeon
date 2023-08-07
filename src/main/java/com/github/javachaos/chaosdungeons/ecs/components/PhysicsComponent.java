@@ -5,6 +5,7 @@ import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
@@ -23,6 +24,7 @@ public class PhysicsComponent extends Component {
   private GameEntity gameEntity;
 
   private static final Logger LOGGER = LogManager.getLogger(PhysicsComponent.class);
+  private final Quaternionf prevRotation;
 
   /**
    * Create a new physics component.
@@ -39,7 +41,28 @@ public class PhysicsComponent extends Component {
     this.restitution = restitution;
     this.isStatic = isStatic;
     this.prevPos = new Vector3f(0, 0, 0);
+    this.prevRotation = new Quaternionf();
     this.angularVelocity = new Vector3f();
+  }
+
+  /**
+   * Create a new physics component.
+   *
+   * @param mass the mass of this object
+   * @param restitution the restitution
+   * @param isStatic true if this is a static object
+   */
+  public PhysicsComponent(double mass, double restitution,
+                          Vector3f initialVelocity, Vector3f initialAngularVelocity,
+                          boolean isStatic) {
+    super();
+    this.velocity = initialVelocity;
+    this.mass = mass;
+    this.restitution = restitution;
+    this.isStatic = isStatic;
+    this.prevRotation = new Quaternionf();
+    this.prevPos = new Vector3f(0, 0, 0);
+    this.angularVelocity = initialAngularVelocity;
   }
 
   // Getter and setter methods
@@ -80,8 +103,26 @@ public class PhysicsComponent extends Component {
     return gameEntity.getScale();
   }
 
-  public Vector3f getRotation() {
+  public Quaternionf getRotation() {
     return gameEntity.getRotation();
+  }
+
+  /**
+   * Method to apply forces to the entity.
+   *
+   * @param forceX force in the x direction
+   * @param forceY force in the y direction
+   * @param forceZ force in the z direction
+   */
+  public void applyForce(double forceX, double forceY, double forceZ) {
+    if (!isStatic) {
+      double ax = forceX / mass;
+      double ay = forceY / mass;
+      double az = forceZ / mass;
+      velocity.x += (float) ax;
+      velocity.y += (float) ay;
+      velocity.z += (float) az;
+    }
   }
 
   /**
@@ -91,12 +132,7 @@ public class PhysicsComponent extends Component {
    * @param forceY force in the y direction
    */
   public void applyForce(double forceX, double forceY) {
-    if (!isStatic) {
-      double ax = forceX / mass;
-      double ay = forceY / mass;
-      velocity.x += (float) ax;
-      velocity.y += (float) ay;
-    }
+    applyForce(forceX, forceY, 0);
   }
 
   /**
@@ -127,16 +163,6 @@ public class PhysicsComponent extends Component {
     }
   }
 
-  private double normalizeAngle(double angle) {
-    while (angle > Math.PI) {
-      angle -= 2 * Math.PI;
-    }
-    while (angle < -Math.PI) {
-      angle += 2 * Math.PI;
-    }
-    return angle;
-  }
-
   /**
    * Verlet integration method to update position and velocity.
    *
@@ -145,33 +171,34 @@ public class PhysicsComponent extends Component {
   @Override
   public void update(double dt) {
     if (!isStatic) {
-
       prevPos.x = getPosition().x;
       prevPos.y = getPosition().y;
-      Vector3f prevRotation = getRotation();
-
-      double newRotationX = prevRotation.x + angularVelocity.x * dt;
-      double newRotationY = prevRotation.y + angularVelocity.y * dt;
-      double newRotationZ = prevRotation.z + angularVelocity.z * dt;
-
-      // Apply angular momentum damping factor
-      double angularMomentumDamping = 0.95; // Adjust this damping factor as needed
-      newRotationX *= angularMomentumDamping;
-      newRotationY *= angularMomentumDamping;
-      newRotationZ *= angularMomentumDamping;
-
-      newRotationX = normalizeAngle(newRotationX);
-      newRotationY = normalizeAngle(newRotationY);
-      newRotationZ = normalizeAngle(newRotationZ);
-
+      prevPos.z = getPosition().z;
+      getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
+      if (angularVelocity.x < 0) {
+        angularVelocity.x = 0;
+      }
+      if (angularVelocity.y < 0) {
+        angularVelocity.y = 0;
+      }
+      if (angularVelocity.z < 0) {
+        angularVelocity.z = 0;
+      }
+      float angularMomentumDamping = 0.995f;
+      angularVelocity.mul(angularMomentumDamping);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
+      double newVz = velocity.z + (getPosition().z - prevPos.z);
       double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
       double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
+      double newZ = getPosition().z + newVz * dt + 0.5 * newVz * dt * dt;
       GameEntity ge = ((GameEntity) getEntity());
       ge.updateModelMatrix(
-          new Vector3f((float) newX,  (float) newY, getPosition().z), //position
-          new Vector3f((float) newRotationX, (float) newRotationY, (float) newRotationZ), //rotation
+          new Vector3f(
+              (float) newX,
+              (float) newY,
+              (float) newZ), //position
+          getRotation(), //rotation
           getScale()); //scale
     }
   }
@@ -191,4 +218,7 @@ public class PhysicsComponent extends Component {
   public void onRemoved(Entity e) {
   }
 
+  public void setAngularVelocity(Vector3f initialAngularVelocity) {
+    angularVelocity.set(initialAngularVelocity);
+  }
 }

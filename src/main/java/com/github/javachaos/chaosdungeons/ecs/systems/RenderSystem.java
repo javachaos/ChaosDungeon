@@ -31,17 +31,23 @@ public class RenderSystem extends System {
 
   @Override
   public void update(float dt) { // update all entities with a render component.
-    getEntities().stream().filter(n -> n.hasComponent(RenderComponent.class))
+    getEntities().stream().filter(
+        n -> n.hasComponent(RenderComponent.class))
         .forEach(e -> e.update(dt));
   }
 
   @Override
   public void initSystem() {
-    addEntity(new Fireball());
-    for (int i = 0; i < 20; i++) {
-      addEntity(new Fireball(0, -3f, new Vector3f(((float) Math.random()),
-                   ((float) Math.random() * 3),
-                   0)));
+    for (int i = 0; i < 100; i++) {
+      addEntity(new Fireball(0, (float) (-2f * Math.random()),
+          new Vector3f(
+              (float) (Math.random() * 5.1f),
+              (float) (Math.random() * 12.1f),
+              (float) (Math.random() * 5.1f)),
+          new Vector3f(
+              (float) (4f * Math.random()),
+              (float) (4f * Math.random()),
+              (float) (4f * Math.random()))));
     }
   }
 
