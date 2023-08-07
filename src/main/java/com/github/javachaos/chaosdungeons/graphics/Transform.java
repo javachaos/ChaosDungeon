@@ -1,7 +1,5 @@
 package com.github.javachaos.chaosdungeons.graphics;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
@@ -9,7 +7,7 @@ import org.joml.Vector3f;
  */
 public class Transform {
   private Vector3f position;
-  private Quaternionf rotation;
+  private Vector3f rotation;
   private Vector3f scale;
 
   /**
@@ -17,36 +15,8 @@ public class Transform {
    */
   public Transform() {
     position = new Vector3f();
-    rotation = new Quaternionf();
+    rotation = new Vector3f();
     scale = new Vector3f(1);
-  }
-
-  /**
-   * Get the transformation matrix (projection).
-   *
-   * @return the projection
-   */
-  public Matrix4f getTransformation() {
-    Matrix4f returnValue = new Matrix4f();
-
-    returnValue.translate(position);
-    returnValue.rotate(rotation);
-    returnValue.scale(scale);
-
-    return returnValue;
-  }
-
-  /**
-   * Project target onto this transform and return the result.
-   *
-   * @param target the target transform
-   * @return this transform transformed by target.
-   */
-  public Matrix4f getProjection(Matrix4f target) {
-    target.translate(position);
-    target.rotate(rotation);
-    target.scale(scale);
-    return target;
   }
 
   public Vector3f getPosition() {
@@ -57,11 +27,11 @@ public class Transform {
     this.position = position;
   }
 
-  public Quaternionf getRotation() {
+  public Vector3f getRotation() {
     return rotation;
   }
 
-  public void setRotation(Quaternionf rotation) {
+  public void setRotation(Vector3f rotation) {
     this.rotation = rotation;
   }
 

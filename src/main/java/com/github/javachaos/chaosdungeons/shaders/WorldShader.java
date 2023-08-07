@@ -2,7 +2,7 @@ package com.github.javachaos.chaosdungeons.shaders;
 
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
-import com.github.javachaos.chaosdungeons.graphics.Transform;
+import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 
 /**
  * World shader class.
@@ -20,8 +20,8 @@ public class WorldShader extends ShaderProgram {
   @Override
   public void addUniforms() {
     try {
-      createUniform("model");
       createUniform("sample");
+      createUniform("transformation");
       createUniform("view");
       createUniform("projection");
     } catch (UniformLoadException e) {
@@ -31,11 +31,9 @@ public class WorldShader extends ShaderProgram {
   }
 
   /**
-   * Set the transform for this shader.
-   *
-   * @param transform the transform to be set.
+   * Set the projection matrix for this shader.
    */
-  public void setTransform(Transform transform) {
-    setUniform("model", transform.getTransformation());
+  public void loadProjection(float zoom) {
+    setUniform("projection", MatrixUtils.createProjectionMatrix(zoom));
   }
 }

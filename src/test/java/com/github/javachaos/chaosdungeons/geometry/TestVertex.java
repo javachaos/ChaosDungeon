@@ -49,7 +49,7 @@ public class TestVertex {
   @BeforeEach
   public void setupUtils(TestInfo ti) {
     r = new SecureRandom();
-    points = pointStream.limit(r.nextInt(15) + 3).collect(Collectors.toUnmodifiableList());
+    points = pointStream.limit(r.nextInt(15) + 3).collect(Collectors.toList());
     LOGGER.debug("------------------ {} Begin --------------------", ti.getDisplayName());
   }
 

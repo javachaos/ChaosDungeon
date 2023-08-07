@@ -1,6 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
-import com.github.javachaos.chaosdungeons.ecs.components.ui.CameraComponent;
+import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import org.joml.Vector3f;
@@ -15,28 +15,23 @@ public class Fireball extends GameEntity {
 
   @Override
   public void onAdded(Entity e) {
-
   }
 
   @Override
   public void onRemoved(Entity e) {
-
   }
 
   @Override
   public void init() {
     super.init();
-    getTransform().setScale(new Vector3f(2, 2, 1));
-    addComponent(true, new CameraComponent());
+    addComponent(true, new GravityComponent(100.0, 1.0, new Vector3f(0)));
   }
 
   @Override
   protected void update(float dt) {
-
   }
 
   @Override
   public void destroy() {
-
   }
 }

@@ -1,107 +1,74 @@
 package com.github.javachaos.chaosdungeons.graphics;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 /**
  * Camera 2D class.
  */
 @SuppressWarnings("unused")
-public class Camera {
+public class Camera implements GLFWKeyCallbackI {
 
-  private final Transform cameraTransform;
-  private final Matrix4f projection;
+  private float yaw;
+  private float pitch;
+  private float roll;
 
-  /**
-   * Setup a camera with position, rotation and projection set to zero.
-   */
-  public Camera(int width, int height) {
-    cameraTransform = new Transform();
-    projection = new Matrix4f().setOrtho2D(-width / 2f, width / 2f,
-        -height / 2f, height / 2f);
+  private float speed = .01f;
+  private Vector3f pos = new Vector3f(0);
+
+  private static final Logger LOGGER = LogManager.getLogger(Camera.class);
+
+  public Camera() {
   }
 
-  /**
-   * Create a new camere with position, rotation and projection.
-   *
-   * @param position the position of the camera
-   * @param rotation the rotation of the camera
-   * @param projection the camera projection matrix
-   */
-  public Camera(int width, int height, Vector3f position, Quaternionf rotation,
-                Matrix4f projection) {
-    this(width, height);
-    this.cameraTransform.setPosition(position);
-    this.cameraTransform.setRotation(rotation);
-    this.projection.set(projection);
+  public float getYaw() {
+    return yaw;
   }
 
-
-  public void setPosition(Vector3f pos) {
-    this.cameraTransform.setPosition(pos);
+  public float getPitch() {
+    return pitch;
   }
 
-  /**
-   * Move this camera.
-   *
-   * @param offsetX x-pos offset
-   * @param offsetY y-pos offset
-   * @param offsetZ z-pos offset
-   */
-  public void movePosition(float offsetX, float offsetY, float offsetZ) {
-    if (offsetZ != 0) {
-      cameraTransform.getPosition().x += (float) Math.sin(Math.toRadians(
-          cameraTransform.getRotation().y)) * -1.0f * offsetZ;
-      cameraTransform.getPosition().z += (float) Math.cos(Math.toRadians(
-          cameraTransform.getRotation().y)) * offsetZ;
+  public float getRoll() {
+    return roll;
+  }
+
+  public Vector3f getPosition() {
+    return pos;
+  }
+
+  @Override
+  public void invoke(long window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+      glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
     }
-    if (offsetX != 0) {
-      cameraTransform.getPosition().x += (float) Math.sin(Math.toRadians(
-          cameraTransform.getRotation().y - 90)) * -1.0f * offsetX;
-      cameraTransform.getPosition().z += (float) Math.cos(Math.toRadians(
-          cameraTransform.getRotation().y - 90)) * offsetX;
+    if (key == GLFW_KEY_W) {
+      pos.y -= speed;
+      LOGGER.debug("W");
     }
-    cameraTransform.getPosition().y += offsetY;
-  }
+    if (key == GLFW_KEY_A) {
+      pos.x -= speed;
 
-  public Quaternionf getRotation() {
-    return cameraTransform.getRotation();
-  }
+      LOGGER.debug("A");
+    }
+    if (key == GLFW_KEY_S) {
+      pos.y += speed;
+      LOGGER.debug("S");
 
-  /**
-   * Set rotation of this camera.
-   *
-   * @param x x-rot
-   * @param y y-rot
-   * @param z z-rot
-   * @param w w-rot
-   */
-  public void setRotation(float x, float y, float z, float w) {
-    cameraTransform.getRotation().x = x;
-    cameraTransform.getRotation().y = y;
-    cameraTransform.getRotation().z = z;
-    cameraTransform.getRotation().w = w;
-  }
-
-  public void setRotation(Quaternionf rot) {
-    cameraTransform.getRotation().set(rot);
-  }
-
-  /**
-   * Translate the rotation vector for this camera.
-   *
-   * @param offsetX x-pos offset
-   * @param offsetY y-pos offset
-   * @param offsetZ z-pos offset
-   */
-  public void moveRotation(float offsetX, float offsetY, float offsetZ) {
-    cameraTransform.getRotation().x += offsetX;
-    cameraTransform.getRotation().y += offsetY;
-    cameraTransform.getRotation().z += offsetZ;
-  }
-
-  public Matrix4f getProjection() {
-    return projection;
+    }
+    if (key == GLFW_KEY_D) {
+      pos.x += speed;
+      LOGGER.debug("D");
+    }
   }
 }

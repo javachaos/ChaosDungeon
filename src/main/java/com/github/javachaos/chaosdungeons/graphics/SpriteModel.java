@@ -15,6 +15,11 @@ import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
+
 /**
  * Sprite model.
  */
@@ -43,15 +48,17 @@ public class SpriteModel {
   };
   float[] color = new float[] {1.0f, 1.0f, 1.0f};
   private int colorId;
+  private GameEntity ge;
 
   /**
    * Create a new sprite model for rendering on the GPU.
    *
    * @param texture the texture for this sprite model.
    */
-  public SpriteModel(Texture texture) {
+  public SpriteModel(Texture texture, GameEntity ge) {
     this.texture = texture;
     this.drawCount = indices.length;
+    this.ge = ge;
 
     this.vertexId = glGenBuffers();
     glBindBuffer(GL_ARRAY_BUFFER, vertexId);
@@ -60,8 +67,6 @@ public class SpriteModel {
     this.textureId = glGenBuffers();
     glBindBuffer(GL_ARRAY_BUFFER, textureId);
     glBufferData(GL_ARRAY_BUFFER, createBuffer(texCoords), GL_STATIC_DRAW);
-
-    setColor(color);
 
     this.indicesId = glGenBuffers();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
@@ -74,10 +79,11 @@ public class SpriteModel {
    * Render this sprite model on the GPU.
    */
   public void render() {
+    GameWindow.getWorldShader().setSampleTexture(0);
     texture.bind(0);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
+    GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
     glBindBuffer(GL_ARRAY_BUFFER, vertexId);
     int dimensions = 3;
     glVertexAttribPointer(0, dimensions, GL_FLOAT, false, 0, 0);
@@ -86,25 +92,9 @@ public class SpriteModel {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
     glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, colorId);
-    glVertexAttribPointer(2, 3, GL_FLOAT, true, 0, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(vertexId, 0);
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
-  }
-
-  /**
-   * Optionally set the color for this sprite model, which is multiplied by the textures color in
-   * the fragment shader.
-   *
-   * @param c the new color to be multiplied by the current texture color.
-   */
-  public void setColor(float[] c) {
-    this.colorId = glGenBuffers();
-    glBindBuffer(GL_ARRAY_BUFFER, colorId);
-    glBufferData(GL_ARRAY_BUFFER, createBuffer(c), GL_STATIC_DRAW);
   }
 
   /**
@@ -113,33 +103,6 @@ public class SpriteModel {
   public void delete() {
     texture.unbind();
     texture.delete();
-  }
-
-  /**
-   * Get the red color value [0.0-1.0]
-   *
-   * @return the red color value
-   */
-  public float getRed() {
-    return color[0];
-  }
-
-  /**
-   * Get the green color value [0.0-1.0]
-   *
-   * @return the green color value
-   */
-  public float getGreen() {
-    return color[1];
-  }
-
-  /**
-   * Get the blue color value [0.0-1.0]
-   *
-   * @return the blue color value
-   */
-  public float getBlue() {
-    return color[2];
   }
 
 }

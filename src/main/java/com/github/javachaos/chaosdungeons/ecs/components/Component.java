@@ -65,4 +65,9 @@ public abstract class Component {
   public abstract void onAdded(Entity e);
 
   public abstract void onRemoved(Entity e);
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
+  }
 }

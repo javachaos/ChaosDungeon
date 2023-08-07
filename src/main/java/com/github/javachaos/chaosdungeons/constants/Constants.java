@@ -33,9 +33,9 @@ public class Constants {
   public static final float Z_FAR = Main.getPropertyManager()
       .getFloatProperty("game.z_far", 1000.0f);
   public static final float Z_NEAR = Main.getPropertyManager()
-      .getFloatProperty("game.z_near", 0.01f);
+      .getFloatProperty("game.z_near", 0.1f);
   public static final float FOV = (float) Math.toRadians(
-      Main.getPropertyManager().getFloatProperty("game.fov", 60f));
+      Main.getPropertyManager().getFloatProperty("game.fov", 70f));
 
   /**
    * Unused constructor.

@@ -6,7 +6,6 @@ import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 /**
  * Sprite component class.
  */
-@SuppressWarnings("unused")
 public class SpriteComponent extends RenderComponent {
 
   private final SpriteModel img;
@@ -21,6 +20,13 @@ public class SpriteComponent extends RenderComponent {
   }
 
   @Override
+  public void render(double dt) {
+    if (isVisible) {
+      img.render();
+    }
+  }
+
+  @Override
   public void onAdded(Entity e) {
   }
 
@@ -29,14 +35,9 @@ public class SpriteComponent extends RenderComponent {
     img.delete();
   }
 
+  @SuppressWarnings("unused")
   public void setVisible(boolean visible) {
     this.isVisible = visible;
   }
 
-  @Override
-  public void render(double dt) {
-    if (isVisible) {
-      img.render();
-    }
-  }
 }

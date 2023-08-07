@@ -2,11 +2,9 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.graphics.Transform;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
@@ -16,6 +14,8 @@ import org.joml.Vector3f;
 public class PhysicsComponent extends Component {
 
   private final Vector3f velocity;
+  private final Vector3f angularVelocity;
+  private Vector3f angularAcceleration;
   private final Vector3f prevPos;
   private final double mass;
   private final double restitution; // Coefficient of restitution for bounciness
@@ -44,15 +44,16 @@ public class PhysicsComponent extends Component {
     this.restitution = restitution;
     this.isStatic = isStatic;
     this.prevPos = new Vector3f(0, 0, 0);
+    this.angularVelocity = new Vector3f();
   }
 
   // Getter and setter methods
   public double getXpos() {
-    return gameEntity.getTransform().getPosition().x;
+    return gameEntity.getPosition().x;
   }
 
   public double getYpos() {
-    return gameEntity.getTransform().getPosition().y;
+    return gameEntity.getPosition().y;
   }
 
   public double getVx() {
@@ -77,39 +78,15 @@ public class PhysicsComponent extends Component {
 
 
   public Vector3f getPosition() {
-    return gameEntity.getTransform().getPosition();
-  }
-
-  /**
-   * Set the position of this physic object.
-   *
-   * @param x x-pos
-   * @param y y-pos
-   * @param z z-pos
-   */
-  public void setPosition(float x, float y, float z) {
-    gameEntity.getTransform().setPosition(new Vector3f(x, y, z));
+    return gameEntity.getPosition();
   }
 
   public Vector3f getScale() {
-    return gameEntity.getTransform().getScale();
+    return gameEntity.getScale();
   }
 
-  public void setScale(Vector3f scale) {
-    gameEntity.getTransform().setScale(scale);
-  }
-
-  public Quaternionf getRotation() {
-    return gameEntity.getTransform().getRotation();
-  }
-
-  /**
-   * Set the rotation of this Physics object.
-   *
-   * @param rot rotation angle in degrees along the z-axis.
-   */
-  public void setRotation(Quaternionf rot) {
-    gameEntity.getTransform().setRotation(rot);
+  public Vector3f getRotation() {
+    return gameEntity.getRotation();
   }
 
   /**
@@ -141,6 +118,16 @@ public class PhysicsComponent extends Component {
     }
   }
 
+  private double normalizeAngle(double angle) {
+    while (angle > Math.PI) {
+      angle -= 2 * Math.PI;
+    }
+    while (angle < -Math.PI) {
+      angle += 2 * Math.PI;
+    }
+    return angle;
+  }
+
   /**
    * Verlet integration method to update position and velocity.
    *
@@ -157,19 +144,32 @@ public class PhysicsComponent extends Component {
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
 
-      double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
       prevPos.x = getPosition().x;
+      double newX = getPosition().x + newVx * dt + 0.5 * newVx * dt * dt;
       double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       prevPos.y = getPosition().y;
-      setPosition((float) newX,  (float) newY, getPosition().z);
       acc += (float) dt;
-      GameEntity ge = ((GameEntity) getEntity());
-      Transform t = ge.getTransform();
-      t.setPosition(t.getPosition());
-      t.setRotation(t.getRotation());
-      t.setScale(t.getScale());
+      Vector3f prevRotation = getRotation();
 
-      //TODO add rotation
+      double newRotationX = prevRotation.x + angularVelocity.x * dt;
+      double newRotationY = prevRotation.y + angularVelocity.y * dt;
+      double newRotationZ = prevRotation.z + angularVelocity.z * dt;
+
+      // Apply angular momentum damping factor
+      double angularMomentumDamping = 0.95; // Adjust this damping factor as needed
+      newRotationX *= angularMomentumDamping;
+      newRotationY *= angularMomentumDamping;
+      newRotationZ *= angularMomentumDamping;
+
+      newRotationX = normalizeAngle(newRotationX);
+      newRotationY = normalizeAngle(newRotationY);
+      newRotationZ = normalizeAngle(newRotationZ);
+
+      GameEntity ge = ((GameEntity) getEntity());
+      ge.updateModelMatrix(
+          new Vector3f((float) newX,  (float) newY, getPosition().z), //position
+          new Vector3f((float) newRotationX, (float) newRotationY, (float) newRotationZ), //rotation
+          getScale()); //scale
     }
   }
 

@@ -2,8 +2,6 @@ package com.github.javachaos.chaosdungeons.gui;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
@@ -19,7 +17,6 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -34,18 +31,13 @@ import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import com.github.javachaos.chaosdungeons.constants.Constants;
-import com.github.javachaos.chaosdungeons.ecs.GameLoop;
-import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
-import com.github.javachaos.chaosdungeons.shaders.UiShader;
-import com.github.javachaos.chaosdungeons.shaders.WorldShader;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +48,16 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
+
+import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.ecs.GameLoop;
+import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
+import com.github.javachaos.chaosdungeons.graphics.Camera;
+import com.github.javachaos.chaosdungeons.shaders.UiShader;
+import com.github.javachaos.chaosdungeons.shaders.WorldShader;
+import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 
 /**
  * Game window.
@@ -69,6 +70,7 @@ public class GameWindow {
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
   private static WorldShader shaderProgram;
   private static UiShader uiShader;
+  private static Camera camera;
   private static WindowSize windowSize;
   private long window;
 
@@ -89,28 +91,27 @@ public class GameWindow {
     return uiShader;
   }
 
+  public static Camera getCamera() {
+    return camera;
+  }
+
+
   /**
    * Run the game!.
    */
   @SuppressWarnings("all")
   public void run(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
-    System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-
+    LOGGER.debug("Hello LWJGL " + Version.getVersion() + "!");
     init(gameLoop);
     loop(gameLoop);
-
-    // Free the window callbacks and destroy the window
-    glfwFreeCallbacks(window);
-    glfwDestroyWindow(window);
-
-    // Terminate GLFW and free the error callback
-    glfwTerminate();
-    Objects.requireNonNull(glfwSetErrorCallback(null)).free();
+    gameLoop.shutdown();
+    free();
   }
 
   @SuppressWarnings("all")
   private void init(GameLoop gameLoop) {
     setupLogging();
+    camera = new Camera();
     window = createGlfwWindow();
     setupInputCallbacks(gameLoop);
     addWindowResizeCallback();
@@ -121,7 +122,7 @@ public class GameWindow {
   @SuppressWarnings("all")
   private void loop(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     GL.createCapabilities();
-    uiShader = new UiShader();
+    //uiShader = new UiShader();
     shaderProgram = new WorldShader();
     initView();
     long lastUpdateTime = System.nanoTime();
@@ -137,14 +138,15 @@ public class GameWindow {
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
       lastUpdateTime = now;
-
+      
       gameLoop.update(dt);
-      //shaderProgram.bind();
-      // Render the game
+      shaderProgram.bind();
+      shaderProgram.loadProjection(1000.0f);
+      shaderProgram.setUniform("view", MatrixUtils.createViewMatrix(camera));
       gameLoop.render();
-      //shaderProgram.unbind();
+      shaderProgram.unbind();
       frameCount++;
-
+      
       // Sleep to maintain desired FPS
       long renderTime = System.nanoTime() - lastRenderTime;
       long sleepTime = (OPTIMAL_TIME - renderTime) / 1000000; // Convert to milliseconds
@@ -171,17 +173,16 @@ public class GameWindow {
     int w = windowSize.getWidth();
     int h = windowSize.getHeight();
 
-    glEnable(GL_MULTISAMPLE);
+    glEnable(GL20.GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
     GL11.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
     GL11.glMatrixMode(GL11.GL_PROJECTION);
     GL11.glLoadIdentity();
-    GL11.glOrtho(0, w, 0, h, 1, -1);
+    GL11.glOrtho(0, w, 0, h, 1, 1);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
-    glEnable(GL_TEXTURE_2D);
     GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-
+    glEnable(GL_TEXTURE_2D);
   }
 
   private void setupLogging() {
@@ -223,13 +224,7 @@ public class GameWindow {
   }
 
   private void setupInputCallbacks(GameLoop gameLoop) {
-    // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-    glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-      if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-        glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-        gameLoop.shutdown();
-      }
-    });
+    glfwSetKeyCallback(window, camera);
   }
 
   private void showWindow(long window) {
@@ -258,5 +253,15 @@ public class GameWindow {
 
     // Make the window visible
     glfwShowWindow(window);
+  }
+
+  private void free() {
+    // Free the window callbacks and destroy the window
+    glfwFreeCallbacks(window);
+    glfwDestroyWindow(window);
+
+    // Terminate GLFW and free the error callback
+    glfwTerminate();
+    Objects.requireNonNull(glfwSetErrorCallback(null)).free();
   }
 }

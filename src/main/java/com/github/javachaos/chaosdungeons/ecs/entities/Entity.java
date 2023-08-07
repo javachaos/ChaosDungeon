@@ -29,6 +29,8 @@ public abstract class Entity extends Component {
 
   private static final int REMOVAL_THRESHOLD = 256;
 
+  private int updateCount;
+
   /**
    * Executor for removing items from entities.
    */
@@ -137,12 +139,17 @@ public abstract class Entity extends Component {
    */
   @Override
   public void update(double dt) {
-    components.values().forEach(
-        c -> c.stream()
-              .filter(v -> !v.isRemoved())
-              .forEach(cc -> cc.update(dt)));
+    for (Component c : getComponents()) {
+      if (!c.isRemoved()) {
+        if (updateCount % 1000 == 0) {
+          LOGGER.debug("Updating component [{}]", c);
+        }
+        c.update(dt);
+      }
+    }
     update((float) dt);
     checkRemoval();
+    updateCount++;
   }
 
   private void checkRemoval() {
