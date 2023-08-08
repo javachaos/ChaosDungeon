@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.FireballEntityFactory;
+import com.github.javachaos.chaosdungeons.ecs.entities.factory.RandomFireballSpawnData;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.Spawner;
 import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -29,7 +30,7 @@ public class RenderSystem extends System {
   @Override
   public void initSystem() {
     FireballEntityFactory fireballEntityFactory = new FireballEntityFactory();
-    Spawner<Fireball> s = new Spawner<>(fireballEntityFactory, 70f, -1);
+    Spawner<Fireball> s = new Spawner<>(fireballEntityFactory, RandomFireballSpawnData.getData());
     addEntity(s, false);
   }
 

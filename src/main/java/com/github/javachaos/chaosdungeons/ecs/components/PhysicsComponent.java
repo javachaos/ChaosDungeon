@@ -206,18 +206,15 @@ public class PhysicsComponent extends Component {
   @Override
   public void destroy() {
     isStatic = true;
-    LOGGER.debug("PhysicsComponent destroyed [{}].", getEntity());
   }
 
   @Override
   public void onAdded(Entity e) {
-    LOGGER.debug("Physics Component added to: " + e);
     this.gameEntity = (GameEntity) e;
   }
 
   @Override
   public void onRemoved(Entity e) {
-    LOGGER.debug("PhysicsComponent removed [{}].", e);
   }
 
   public void setAngularVelocity(Vector3f initialAngularVelocity) {

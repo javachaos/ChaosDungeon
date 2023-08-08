@@ -72,7 +72,6 @@ public class GravityComponent extends PhysicsComponent {
   @Override
   public void onAdded(Entity e) {
     super.onAdded(e);
-    LOGGER.debug("Added Gravity Component to entity: " + e);
   }
 
   @Override

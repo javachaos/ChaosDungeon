@@ -12,7 +12,8 @@ public interface EntityFactory<T extends GameEntity> {
   /**
    * Create a new entity of type {@link T}.
    *
+   * @param data the spawn data used to create each entity.
    * @return a new instance of this entity.
    */
-  T create();
+  T create(SpawnData data);
 }

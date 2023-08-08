@@ -24,9 +24,7 @@ public class Camera implements GLFWKeyCallbackI {
   private float yaw;
   private float pitch;
   private float roll;
-
-  private float speed = 1.0f;
-  private Vector3f pos = new Vector3f(0);
+  private final Vector3f pos = new Vector3f(0);
 
   private static final Logger LOGGER = LogManager.getLogger(Camera.class);
 
@@ -73,6 +71,7 @@ public class Camera implements GLFWKeyCallbackI {
 
       // Normalize movement vector and apply speed
       movement.normalize();
+      float speed = 10.0f;
       movement.mul(speed);
 
       // Update camera position

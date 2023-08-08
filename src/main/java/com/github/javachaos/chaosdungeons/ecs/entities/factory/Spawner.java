@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
+import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.ecs.systems.System;
@@ -7,7 +8,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joml.Vector3f;
 
 /**
  * A spawner class to spawn other entities.
@@ -19,10 +19,8 @@ public class Spawner<T extends GameEntity> extends GameEntity {
 
   private static final Logger LOGGER = LogManager.getLogger(Spawner.class);
   private final EntityFactory<T> factory;
+  private final SpawnData spawnData;
   private final Deque<T> spawnQueue;
-  private final float spawnRate;
-  private int maxSpawns;
-
   private float timeSinceLastSpawn;
 
   /**
@@ -36,23 +34,10 @@ public class Spawner<T extends GameEntity> extends GameEntity {
    *                  if this number is less than zero there is no maximum.
    */
   public Spawner(EntityFactory<T> factory, float spawnRate, int maxSpawns) {
-    this(factory, spawnRate, maxSpawns,
-        new Vector3f(),     // position
-        new Vector3f(),     // rotation
-        new Vector3f()); // scale
-  }
-
-  /**
-   * Create a spawner with initial rotation and scale set to zero.
-   *
-   * @param factory entity creation factory
-   * @param spawnRate the spawn rate
-   * @param maxSpawns the maximum number of entities to spawn from this spawner
-   *                  if this number is less than zero there is no maximum.
-   * @param pos the initial spawn location
-   */
-  public Spawner(EntityFactory<T> factory, float spawnRate, int maxSpawns, Vector3f pos) {
-    this(factory, spawnRate, maxSpawns, pos, new Vector3f(), new Vector3f());
+    this(factory, new SpawnData.Builder()
+        .setMaxSpawns(maxSpawns)
+        .setSpawnRate(spawnRate)
+        .build());
   }
 
   /**
@@ -61,26 +46,22 @@ public class Spawner<T extends GameEntity> extends GameEntity {
    * maxSpawns is negative, this spawner will spawn entities indefinitely.
    *
    * @param factory the factory instance to create new entities from
-   * @param spawnRate the spawn rate
-   * @param maxSpawns the maximum number of entities to spawn from this spawner
-   *                  if this number is less than zero there is no maximum.
-   * @param pos initial position of this spawner
-   * @param rot initial rotation of this spawner
-   * @param scale initial scale of this spawner
+   * @param data the spawn data used to create each entity provided by the
+   *             factory along with information such as spawnRate and
+   *             maxSpawns.
    */
-  public Spawner(EntityFactory<T> factory, float spawnRate, int maxSpawns,
-                 Vector3f pos, Vector3f rot, Vector3f scale) {
-    super("assets/textures/fireball.png", pos, rot, scale);
+  public Spawner(EntityFactory<T> factory, SpawnData data) {
+    super("assets/textures/fireball.png",
+        data.getPosition(), data.getRotation(), data.getScale());
     this.factory = factory;
-    this.spawnRate = spawnRate;
-    this.maxSpawns = maxSpawns;
+    this.spawnData = data;
     this.spawnQueue = new ArrayDeque<>();
   }
 
   @Override
   public void onAdded(Entity e) {
     LOGGER.debug("New spawner added.");
-    //getComponent(SpriteComponent.class).remove();
+    getComponent(SpriteComponent.class).remove();
   }
 
   @Override
@@ -89,13 +70,13 @@ public class Spawner<T extends GameEntity> extends GameEntity {
 
   @Override
   protected void update(float dt) {
-    if (maxSpawns != 0) {
+    if (spawnData.getMaxSpawns() != 0) {
       timeSinceLastSpawn += dt;
 
-      if (timeSinceLastSpawn >= (1.0f / spawnRate)) {
+      if (timeSinceLastSpawn >= (1.0f / spawnData.getSpawnRate())) {
         spawnQueue.offer(newInstance());
-        if (maxSpawns > 0) {
-          maxSpawns--;
+        if (spawnData.getMaxSpawns() > 0) {
+          spawnData.decrementMaxSpawns();
         }
         timeSinceLastSpawn = 0.0f; // Reset the timer
       }
@@ -107,7 +88,7 @@ public class Spawner<T extends GameEntity> extends GameEntity {
   }
 
   private T newInstance() {
-    return factory.create();
+    return factory.create(spawnData);
   }
 
   private void spawn(T entity) {

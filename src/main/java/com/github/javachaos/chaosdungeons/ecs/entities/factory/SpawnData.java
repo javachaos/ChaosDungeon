@@ -14,8 +14,20 @@ public class SpawnData {
   private final Vector3f angularVelocity;
   private final Vector3f initialVelocity;
   private float spawnRate = 1.0f;
-  private final int maxSpawns;
+  private int maxSpawns;
 
+  /**
+   * Create a new spawn data instance.
+   *
+   * @param initialVelocity the initial velocity
+   * @param angularVelocity the initial angular velocity
+   * @param spawnRate the spawn rate
+   * @param maxSpawns the maximum number of entities to spawn from this spawner
+   *                  if this number is less than zero there is no maximum.
+   * @param position initial position of this spawner
+   * @param rotation initial rotation of this spawner
+   * @param scale initial scale of this spawner
+   */
   private SpawnData(Vector3f rotation,
                     Vector3f position,
                     Vector3f scale,
@@ -35,24 +47,24 @@ public class SpawnData {
   }
 
   public Vector3f getAngularVelocity() {
-    return angularVelocity;
+    return new Vector3f(angularVelocity);
   }
 
   public Vector3f getInitialVelocity() {
-    return initialVelocity;
+    return new Vector3f(initialVelocity);
   }
 
   public Vector3f getScale() {
-    return scale;
+    return new Vector3f(scale);
   }
 
   // Getter methods for rotation and position
   public Vector3f getRotation() {
-    return rotation;
+    return new Vector3f(rotation);
   }
 
   public Vector3f getPosition() {
-    return position;
+    return new Vector3f(position);
   }
 
   public float getSpawnRate() {
@@ -61,6 +73,10 @@ public class SpawnData {
 
   public int getMaxSpawns() {
     return maxSpawns;
+  }
+
+  public void decrementMaxSpawns() {
+    maxSpawns--;
   }
 
   /**
