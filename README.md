@@ -1,5 +1,5 @@
 # ChaosDungeon
-A simple 2D game created by me.
+A simple 2D game engine created by me.
 
 # Project To-Do List
 
