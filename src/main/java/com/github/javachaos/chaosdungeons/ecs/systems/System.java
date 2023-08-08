@@ -53,6 +53,10 @@ public abstract class System {
     }
   }
 
+  public <T extends GameEntity> Deque<GameEntity> getEntities(T clazz) {
+    return entityMap.get(clazz.getClass());
+  }
+
   /**
    * Get all entities associated with this system.
    *

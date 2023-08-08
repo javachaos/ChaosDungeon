@@ -3,7 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
 import org.joml.Vector3f;
 
 /**
@@ -53,8 +53,13 @@ public class Fireball extends GameEntity {
         new Vector3f(x, y, 0),
         new Vector3f(0),
         new Vector3f(scale));
-    this.initialV = initialV;
-    this.initialAngularVelocity = initialAngularVelocity;
+    this.initialV = new Vector3f(initialV);
+    this.initialAngularVelocity = new Vector3f(initialAngularVelocity);
+  }
+
+  public Fireball(SpawnData data) {
+    this(data.getPosition().x, data.getPosition().y,
+        data.getInitialVelocity(), data.getInitialVelocity());
   }
 
   @Override

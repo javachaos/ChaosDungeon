@@ -1,6 +1,5 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
-import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.ecs.systems.System;
@@ -81,7 +80,7 @@ public class Spawner<T extends GameEntity> extends GameEntity {
   @Override
   public void onAdded(Entity e) {
     LOGGER.debug("New spawner added.");
-    getComponent(SpriteComponent.class).remove();
+    //getComponent(SpriteComponent.class).remove();
   }
 
   @Override
