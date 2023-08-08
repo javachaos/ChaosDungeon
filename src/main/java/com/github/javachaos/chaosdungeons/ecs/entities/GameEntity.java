@@ -17,8 +17,8 @@ public abstract class GameEntity extends Entity {
   /**
    * Transform.
    */
-  private final Matrix4f modelTransform;
-  private final Quaternionf rotationQuaternion;
+  private Matrix4f modelTransform;
+  private Quaternionf rotationQuaternion;
   private final String texturePath;
 
   /**
@@ -57,11 +57,10 @@ public abstract class GameEntity extends Entity {
    * @param scale the scale
    */
   public void updateModelMatrix(Vector3f position, Vector3f rotation, Vector3f scale) {
-    rotationQuaternion.identity();
     rotationQuaternion.rotateX(rotation.x);
     rotationQuaternion.rotateY(rotation.y);
     rotationQuaternion.rotateZ(rotation.z);
-    modelTransform.identity();
+    modelTransform = new Matrix4f().identity();
     modelTransform.translate(position).rotate(rotationQuaternion)
         .scale(scale);
   }

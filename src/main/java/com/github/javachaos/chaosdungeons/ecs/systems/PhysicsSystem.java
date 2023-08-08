@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import java.util.Deque;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,28 +35,29 @@ public class PhysicsSystem extends System {
 
   @Override
   public void update(float dt) {
+    getEntities().forEach(e -> e.update(dt));
     // update all entities with a PhysicsComponent and handle collisions
-    List<Entity> entities = getEntities();
-    if (entities != null) {
-      for (Entity e : entities) {
-        for (Entity f : entities) {
-          if (e.equals(f)) {
-            break;
-          }
-          if (e.hasComponent(PhysicsComponent.class) && f.hasComponent(PhysicsComponent.class)) {
-            PhysicsComponent pc1 = e.getComponent(PhysicsComponent.class);
-            PhysicsComponent pc2 = f.getComponent(PhysicsComponent.class);
-            if (pc1 != null) {
-              pc1.handleCollision(f);
-            }
-            if (pc2 != null) {
-              pc2.handleCollision(e);
-            }
-          }
-        }
-        e.update(dt);
-      }
-    }
+//    List<Entity> entities = getEntities();
+//    if (entities != null) {
+//      for (Entity e : entities) {
+//        e.update(dt);
+//        for (Entity f : entities) {
+//          if (e.equals(f)) {
+//            break;
+//          }
+//          if (e.hasComponent(PhysicsComponent.class) && f.hasComponent(PhysicsComponent.class)) {
+//            PhysicsComponent pc1 = e.getComponent(PhysicsComponent.class);
+//            PhysicsComponent pc2 = f.getComponent(PhysicsComponent.class);
+//            if (pc1 != null) {
+//              pc1.handleCollision(f);
+//            }
+//            if (pc2 != null) {
+//              pc2.handleCollision(e);
+//            }
+//          }
+//        }
+//      }
+//    }
   }
 
   @Override
@@ -64,6 +66,8 @@ public class PhysicsSystem extends System {
 
   @Override
   public void destroy() {
+    getEntities().forEach(Entity::destroy);
+    LOGGER.debug("Physics system shutdown.");
   }
 
 }

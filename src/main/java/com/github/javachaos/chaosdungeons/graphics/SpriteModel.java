@@ -79,22 +79,22 @@ public class SpriteModel {
    * Render this sprite model on the GPU.
    */
   public void render() {
+    GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
     GameWindow.getWorldShader().setSampleTexture(0);
     texture.bind(0);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
     glBindBuffer(GL_ARRAY_BUFFER, vertexId);
-    int dimensions = 3;
-    glVertexAttribPointer(0, dimensions, GL_FLOAT, false, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
     glBindBuffer(GL_ARRAY_BUFFER, textureId);
-    glVertexAttribPointer(1, dimensions - 1, GL_FLOAT, false, 0, 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
     glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+    texture.unbind();
   }
 
   /**

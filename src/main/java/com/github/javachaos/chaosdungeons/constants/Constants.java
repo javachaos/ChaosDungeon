@@ -14,9 +14,7 @@ public class Constants {
   public static final String FILENAME_REGEX = "^([a-z])+([_]){0,1}([a-z])+([.]){1}([a-z])+$";
   public static final String PNG_EXT = ".png";
   public static final double EPSILON = 1e-6;
-
-  //TODO figure this out
-  public static final String PROPERTY_FILE_NAME = "engine.properties";
+  public static final String PROPERTY_FILE_NAME = "/engine.properties";
 
   /**
    * Timeout in milliseconds.

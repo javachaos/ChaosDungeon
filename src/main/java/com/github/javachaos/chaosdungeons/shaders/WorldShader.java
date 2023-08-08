@@ -33,7 +33,7 @@ public class WorldShader extends ShaderProgram {
   /**
    * Set the projection matrix for this shader.
    */
-  public void loadProjection(float zoom) {
-    setUniform("projection", MatrixUtils.createProjectionMatrix(zoom));
+  public void loadProjection() {
+    setUniform("projection", MatrixUtils.createProjectionMatrix());
   }
 }

@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.joml.Vector3f;
 
 /**
@@ -13,7 +14,7 @@ public class Fireball extends GameEntity {
   private final Vector3f initialV;
   private final Vector3f initialAngularVelocity;
 
-  private static final float scale = 1.0f;
+  private static final float scale = 1f;
 
   /**
    * Create a new fireball.
@@ -68,7 +69,7 @@ public class Fireball extends GameEntity {
   public void init() {
     super.init();
     addComponent(new GravityComponent(100.0, 1.0, initialV,
-        initialAngularVelocity));
+        initialAngularVelocity, 0.1));
   }
 
   @Override

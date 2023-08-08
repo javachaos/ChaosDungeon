@@ -10,11 +10,13 @@ import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL11.glPixelStorei;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -109,7 +111,7 @@ public class Texture {
    * @param s the sampler index
    */
   public void bind(int s) {
-    if (s > 0 && s <= 31) {
+    if (s >= 0 && s < glGetInteger(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
       // Bind the texture
       glActiveTexture(GL_TEXTURE0 + s);
       glBindTexture(GL_TEXTURE_2D, this.id);
@@ -121,6 +123,7 @@ public class Texture {
   }
 
   public void delete() {
+    LOGGER.debug("Texture deleted: {}", id);
     glDeleteTextures(this.id);
   }
 

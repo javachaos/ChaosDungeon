@@ -21,10 +21,10 @@ public class GameLoop {
    * Initialize the game loop.
    */
   public void init(GameWindow window) {
-    renderSystem = new RenderSystem(window);
     systems = new ArrayList<>();
-    systems.add(new PhysicsSystem(window));
+    renderSystem = new RenderSystem(window);
     systems.add(renderSystem);
+    systems.add(new PhysicsSystem(window));
     systems.add(new LoadSystem(window));
     // add more later
     for (System system : systems) {
@@ -46,13 +46,12 @@ public class GameLoop {
    * @param dt the time between render and update calls.
    */
   public void update(double dt) {
-    systems.stream() // Loop over all system except the render system.
-        .filter(s -> !(s instanceof RenderSystem))
-        .forEach(t -> t.update((float) dt));
+    systems.stream().filter(s -> !(s instanceof RenderSystem))
+          .forEach(t -> t.update(dt));
   }
 
   public void shutdown() {
-    systems.forEach(System::shutdown);
+    System.shutdown();
   }
 
   public boolean isInitialized() {

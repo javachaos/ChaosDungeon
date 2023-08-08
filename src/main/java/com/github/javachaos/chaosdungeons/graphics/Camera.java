@@ -5,7 +5,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +25,7 @@ public class Camera implements GLFWKeyCallbackI {
   private float pitch;
   private float roll;
 
-  private float speed = .01f;
+  private float speed = 1.0f;
   private Vector3f pos = new Vector3f(0);
 
   private static final Logger LOGGER = LogManager.getLogger(Camera.class);
@@ -52,23 +54,29 @@ public class Camera implements GLFWKeyCallbackI {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
       glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
     }
-    if (key == GLFW_KEY_W) {
-      pos.y -= speed;
-      LOGGER.debug("W");
-    }
-    if (key == GLFW_KEY_A) {
-      pos.x -= speed;
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+      // Adjust camera position based on the key pressed
+      Vector3f movement = new Vector3f();
 
-      LOGGER.debug("A");
-    }
-    if (key == GLFW_KEY_S) {
-      pos.y += speed;
-      LOGGER.debug("S");
+      if (key == GLFW_KEY_W) {
+        movement.y += 1.0f;
+      }
+      if (key == GLFW_KEY_A) {
+        movement.x -= 1.0f;
+      }
+      if (key == GLFW_KEY_S) {
+        movement.y -= 1.0f;
+      }
+      if (key == GLFW_KEY_D) {
+        movement.x += 1.0f;
+      }
 
-    }
-    if (key == GLFW_KEY_D) {
-      pos.x += speed;
-      LOGGER.debug("D");
+      // Normalize movement vector and apply speed
+      movement.normalize();
+      movement.mul(speed);
+
+      // Update camera position
+      pos.add(movement);
     }
   }
 }

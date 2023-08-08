@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,15 +57,15 @@ public final class PropertyManager {
    * Load properties into memory from file.
    */
   private void loadProperties() {
-    try (FileInputStream fin = new FileInputStream(fileName)) {
-      if (!new File(fileName).createNewFile()) {
-        props.load(fin);
-        LOGGER.debug("Properties loaded into memory.");
-        LOGGER.debug(props.stringPropertyNames().toString());
-      }
-    } catch (final IOException e) {
-      LOGGER.error(e.getMessage());
+    InputStream inputStream = getClass().getResourceAsStream(fileName);
+    try {
+      props.load(inputStream);
+    } catch (IOException e) {
+      LOGGER.error(e);
+      throw new RuntimeException(e);
     }
+    LOGGER.debug("Properties loaded into memory.");
+    LOGGER.debug(props.stringPropertyNames().toString());
     isLoaded = true;
   }
 

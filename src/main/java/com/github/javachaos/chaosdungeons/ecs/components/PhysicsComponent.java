@@ -174,7 +174,6 @@ public class PhysicsComponent extends Component {
       prevPos.x = getPosition().x;
       prevPos.y = getPosition().y;
       prevPos.z = getPosition().z;
-      getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       if (angularVelocity.x < 0) {
         angularVelocity.x = 0;
       }
@@ -186,6 +185,7 @@ public class PhysicsComponent extends Component {
       }
       float angularMomentumDamping = 0.995f;
       angularVelocity.mul(angularMomentumDamping);
+      getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
       double newVz = velocity.z + (getPosition().z - prevPos.z);
@@ -206,6 +206,7 @@ public class PhysicsComponent extends Component {
   @Override
   public void destroy() {
     isStatic = true;
+    LOGGER.debug("PhysicsComponent destroyed [{}].", getEntity());
   }
 
   @Override
@@ -216,6 +217,7 @@ public class PhysicsComponent extends Component {
 
   @Override
   public void onRemoved(Entity e) {
+    LOGGER.debug("PhysicsComponent removed [{}].", e);
   }
 
   public void setAngularVelocity(Vector3f initialAngularVelocity) {

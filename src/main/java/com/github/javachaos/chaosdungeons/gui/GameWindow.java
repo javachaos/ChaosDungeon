@@ -141,7 +141,7 @@ public class GameWindow {
       
       gameLoop.update(dt);
       shaderProgram.bind();
-      shaderProgram.loadProjection(1000.0f);
+      shaderProgram.loadProjection();
       shaderProgram.setUniform("view", MatrixUtils.createViewMatrix(camera));
       gameLoop.render();
       shaderProgram.unbind();
@@ -173,16 +173,13 @@ public class GameWindow {
     int w = windowSize.getWidth();
     int h = windowSize.getHeight();
 
-    glEnable(GL20.GL_MULTISAMPLE);
+    //glEnable(GL20.GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
-    GL11.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
-    GL11.glMatrixMode(GL11.GL_PROJECTION);
-    GL11.glLoadIdentity();
-    GL11.glOrtho(0, w, 0, h, 1, 1);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
     GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_2D);
+    GL11.glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
   }
 
   private void setupLogging() {

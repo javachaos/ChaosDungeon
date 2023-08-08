@@ -2,7 +2,6 @@ package com.github.javachaos.chaosdungeons.utils;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.graphics.Camera;
-import com.github.javachaos.chaosdungeons.graphics.Transform;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -11,17 +10,6 @@ import org.joml.Vector3f;
  * Matrix utilities.
  */
 public class MatrixUtils {
-
-  /**
-   * Create a transformation matrix.
-   *
-   * @param t the transform
-   * @return the matrix
-   */
-  public static Matrix4f createTransformationMatrix(Transform t) {
-    return createTransformationMatrix(t.getPosition(), t.getRotation().x,
-        t.getRotation().y, t.getRotation().z, t.getScale());
-  }
 
   /**
    * Create a transformation matrix.
@@ -64,15 +52,17 @@ public class MatrixUtils {
   /**
    * Create a projection matrix with the desired zoom level.
    *
-   * @param zoom the zoom factor.
    * @return the projection matrix.
    */
-  public static Matrix4f createProjectionMatrix(float zoom) {
-    float tangent = (float) Math.toRadians(Math.tan(Constants.FOV / 2f));
-    float halfHeight = (float) (zoom * tangent);
+  public static Matrix4f createProjectionMatrix() {
+    float halfHeight = Constants.Z_FAR * (float) Math.tan(Math.toRadians(Constants.FOV / 2f));
     float halfWidth = halfHeight * GameWindow.getWindowSize().getAspectRatio();
-    Matrix4f projMatrix =
-        new Matrix4f().identity().ortho2D(halfWidth, -halfWidth, -halfHeight, halfHeight);
+    Matrix4f projMatrix = new Matrix4f().identity().ortho2D(
+        halfWidth,
+        -halfWidth,
+        -halfHeight,
+        halfHeight);
     return projMatrix;
   }
+
 }

@@ -1,6 +1,5 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
-import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import java.util.Collections;
 import java.util.Deque;
@@ -10,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,13 +24,6 @@ public abstract class Entity extends Component {
   private static final Logger LOGGER = LogManager.getLogger(Entity.class);
 
   private static final int REMOVAL_THRESHOLD = 256;
-
-  private int updateCount;
-
-  /**
-   * Executor for removing items from entities.
-   */
-  private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
   /**
    * Basic idea here, each entity has a list of components.
@@ -52,7 +41,7 @@ public abstract class Entity extends Component {
   public abstract void init();
 
   /**
-   * Add a component to this entity.
+   * Add a component to this entity. (same as addComponent(false, c))
    *
    * @param c the component to add.
    */
@@ -76,9 +65,15 @@ public abstract class Entity extends Component {
     if (!components.containsKey(getClass())) {
       components.put(getClass(), new ConcurrentLinkedDeque<>());
     }
-    c.setEntity(this);
-    c.onAdded(this);
-    components.get(getClass()).offerFirst(c);
+    if (front) {
+      c.setEntity(this);
+      c.onAdded(this);
+      components.get(getClass()).offerFirst(c);
+    } else {
+      c.setEntity(this);
+      c.onAdded(this);
+      components.get(getClass()).offerLast(c);
+    }
   }
 
   /**
@@ -141,59 +136,38 @@ public abstract class Entity extends Component {
   public void update(double dt) {
     for (Component c : getComponents()) {
       if (!c.isRemoved()) {
-        if (updateCount % 1000 == 0) {
-          LOGGER.debug("Updating component [{}]", c);
-        }
         c.update(dt);
       }
     }
     update((float) dt);
     checkRemoval();
-    updateCount++;
   }
-
-  private void checkRemoval() {
-    if (Component.getRemovalCount() > REMOVAL_THRESHOLD) {
-      executor.execute(() -> { // execute potentially long-running operation on a background thread.
-        Set<Component> remove = new HashSet<>();
-        components.values().forEach(c -> c.stream().filter(Component::isRemoved)
-            .forEach(remove::add));
-        if (Entity.this instanceof GameEntity) {
-          remove.forEach(c -> onRemoved(Entity.this));
-        }
-        remove.forEach(Component::destroy);
-        remove.forEach(c -> components.get(c.getClass()).remove(c));
-      });
-    }
-  }
-
-  public abstract void destroy();
 
   /**
-   * Release all components in the ECS framework.
+   * Check if there are enough removed components to warrant a
+   * large removal operation.
    */
-  public void shutdownComponentRegistry() {
-    executor.execute(
-        () -> components.values().forEach(v -> v.forEach(Component::destroy)));
-    try {
-      int i = 0;
-      // Wait for the executor to terminate, specifying a reasonable timeout
-      while (!executor.awaitTermination(Constants.DEFAULT_SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)
-             && i < 10) {
-        LOGGER.debug("Component registry shutdown attempt {}.", i);
-        i++;
+  private void checkRemoval() {
+    if (Component.getRemovalCount() > REMOVAL_THRESHOLD) {
+      Set<Component> remove = new HashSet<>();
+      components.values().forEach(c -> c.stream().filter(Component::isRemoved)
+          .forEach(remove::add));
+      if (Entity.this instanceof GameEntity) {
+        remove.forEach(c -> onRemoved(Entity.this));
       }
-      executor.shutdownNow();
-      if (executor.awaitTermination(Constants.DEFAULT_SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)) {
-        LOGGER.debug("Component registry shutdown forcibly.");
-      } else {
-        LOGGER.error("Component registry failed to shutdown.");
-        throw new RuntimeException("Component registry failed to shutdown.");
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(e);
+      remove.forEach(Component::destroy);
+      remove.forEach(c -> components.get(c.getClass()).remove(c));
     }
+  }
+
+  /**
+   * Destroy this entity.
+   */
+  public abstract void destroy();
+
+  public void shutdown() {
+    components.values().forEach(v -> v.forEach(Component::destroy));
+    destroy();
   }
 
   /**
@@ -213,8 +187,10 @@ public abstract class Entity extends Component {
    * @return true if this entity contains at least 1 of component
    */
   public <T extends Component> boolean hasComponent(Class<T> component) {
-    return components.get(getClass())
-        .stream()
-        .anyMatch(c -> component.isAssignableFrom(c.getClass()));
+    Deque<Component> comps = components.get(getClass());
+    if (comps == null) {
+      return false;
+    }
+    return comps.stream().anyMatch(c -> component.isAssignableFrom(c.getClass()));
   }
 }
