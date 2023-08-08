@@ -15,10 +15,8 @@ import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 
 /**
  * Sprite model.
@@ -48,7 +46,8 @@ public class SpriteModel {
   };
   float[] color = new float[] {1.0f, 1.0f, 1.0f};
   private int colorId;
-  private GameEntity ge;
+  private final GameEntity ge;
+  private boolean deleted;
 
   /**
    * Create a new sprite model for rendering on the GPU.
@@ -101,8 +100,10 @@ public class SpriteModel {
    * Delete the texture from the GPU.
    */
   public void delete() {
-    texture.unbind();
-    texture.delete();
+    if (!deleted) {
+      texture.delete();
+      deleted = true;
+    }
   }
 
 }

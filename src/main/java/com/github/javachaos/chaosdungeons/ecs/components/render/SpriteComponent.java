@@ -27,6 +27,8 @@ public class SpriteComponent extends RenderComponent {
   public void render(double dt) {
     if (isVisible) {
       img.render();
+    } else {
+      img.delete();
     }
   }
 
@@ -36,6 +38,8 @@ public class SpriteComponent extends RenderComponent {
 
   @Override
   public void onRemoved(Entity e) {
+    setVisible(false);
+    render(0);
   }
 
   @SuppressWarnings("unused")

@@ -18,7 +18,6 @@ public class LoadSystem extends System {
 
   @Override
   protected void update(float dt) {
-    getEntities().forEach(e -> e.update(dt));
   }
 
   /**
@@ -31,7 +30,6 @@ public class LoadSystem extends System {
 
   @Override
   public void destroy() {
-    getEntities().forEach(Entity::destroy);
     LOGGER.debug("Loading system shutdown.");
   }
 }

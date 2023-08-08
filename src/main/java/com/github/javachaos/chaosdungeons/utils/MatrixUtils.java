@@ -9,6 +9,7 @@ import org.joml.Vector3f;
 /**
  * Matrix utilities.
  */
+@SuppressWarnings("unused")
 public class MatrixUtils {
 
   /**
@@ -57,12 +58,11 @@ public class MatrixUtils {
   public static Matrix4f createProjectionMatrix() {
     float halfHeight = Constants.Z_FAR * (float) Math.tan(Math.toRadians(Constants.FOV / 2f));
     float halfWidth = halfHeight * GameWindow.getWindowSize().getAspectRatio();
-    Matrix4f projMatrix = new Matrix4f().identity().ortho2D(
-        halfWidth,
+    return new Matrix4f().identity().ortho2D(
         -halfWidth,
+        halfWidth,
         -halfHeight,
         halfHeight);
-    return projMatrix;
   }
 
 }

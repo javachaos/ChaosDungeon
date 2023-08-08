@@ -1,15 +1,15 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.utils.AutoDiscardingDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * System class for ECS.
@@ -17,7 +17,8 @@ import java.util.concurrent.Executors;
 @SuppressWarnings("unused")
 public abstract class System {
 
-  private static final List<Entity> entities = new CopyOnWriteArrayList<>();
+  private static final Map<Class<? extends GameEntity>, AutoDiscardingDeque<GameEntity>> entityMap =
+      new ConcurrentHashMap<>();
 
   public System(GameWindow window) {
   }
@@ -34,25 +35,52 @@ public abstract class System {
     update((float) dt);
   }
 
-  public static void addEntity(GameEntity e, boolean front) {
+  /**
+   * Add an entity to this System.
+   *
+   * @param e     the entity to be added.
+   * @param front true if the entity should be inserted at the front
+   *              of this list of entities
+   */
+  public static <T extends GameEntity> void addEntity(T e, boolean front) {
+    if (!entityMap.containsKey(e.getClass())) {
+      entityMap.put(e.getClass(), new AutoDiscardingDeque<>(Constants.MAX_ENTITIES));
+    }
     if (front) {
-      entities.add(0, e);
+      entityMap.get(e.getClass()).offerFirst(e);
     } else {
-      entities.add(e);
+      entityMap.get(e.getClass()).offerLast(e);
     }
   }
 
   /**
-   * Get the entities associated with this system.
+   * Get all entities associated with this system.
    *
    * @return the list of entities for this System.
    */
-  public List<Entity> getEntities() {
-    return entities;
+  public static Deque<GameEntity> getEntities() {
+    return coalesceDeques(new ArrayList<>(entityMap.values()));
+  }
+
+  /**
+   * Coalesce a list of deques into one list.
+   *
+   * @param dequeList input list
+   * @param <T> the type of elements in each deque
+   * @return a deque of each smaller deque merged together
+   */
+  public static <T> Deque<T> coalesceDeques(List<AutoDiscardingDeque<T>> dequeList) {
+    AutoDiscardingDeque<T> coalescedDeque = new AutoDiscardingDeque<>();
+
+    for (Deque<T> deque : dequeList) {
+      coalescedDeque.addAll(deque);
+    }
+
+    return coalescedDeque;
   }
 
   public static void shutdown() {
-    entities.forEach(Entity::shutdown);
+    getEntities().forEach(Entity::shutdown);
   }
 
   /**

@@ -34,10 +34,16 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.ecs.GameLoop;
+import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
+import com.github.javachaos.chaosdungeons.graphics.Camera;
+import com.github.javachaos.chaosdungeons.shaders.UiShader;
+import com.github.javachaos.chaosdungeons.shaders.WorldShader;
+import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,13 +57,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
-import com.github.javachaos.chaosdungeons.constants.Constants;
-import com.github.javachaos.chaosdungeons.ecs.GameLoop;
-import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
-import com.github.javachaos.chaosdungeons.graphics.Camera;
-import com.github.javachaos.chaosdungeons.shaders.UiShader;
-import com.github.javachaos.chaosdungeons.shaders.WorldShader;
-import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 
 /**
  * Game window.
@@ -138,7 +137,7 @@ public class GameWindow {
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
       lastUpdateTime = now;
-      
+
       gameLoop.update(dt);
       shaderProgram.bind();
       shaderProgram.loadProjection();
@@ -146,7 +145,7 @@ public class GameWindow {
       gameLoop.render();
       shaderProgram.unbind();
       frameCount++;
-      
+
       // Sleep to maintain desired FPS
       long renderTime = System.nanoTime() - lastRenderTime;
       long sleepTime = (OPTIMAL_TIME - renderTime) / 1000000; // Convert to milliseconds
@@ -173,7 +172,7 @@ public class GameWindow {
     int w = windowSize.getWidth();
     int h = windowSize.getHeight();
 
-    //glEnable(GL20.GL_MULTISAMPLE);
+    glEnable(GL20.GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
     GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

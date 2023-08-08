@@ -2,18 +2,21 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Component class for ECS.
  */
 public abstract class Component {
 
+  private static final Logger LOGGER = LogManager.getLogger(Component.class);
+
   private Entity entity;
 
   private static final AtomicInteger removalCount = new AtomicInteger(0);
 
   private boolean markedForRemoval;
-  private int id;
 
   /**
    * Create a new component with id.
@@ -28,14 +31,6 @@ public abstract class Component {
 
   public abstract void update(double dt);
 
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
   /**
    * Mark this component for removal. It will no longer be updated
    * but will remain in memory until a set number of components
@@ -43,9 +38,11 @@ public abstract class Component {
    * removal operation.
    */
   public void remove() {
+    LOGGER.debug("Removing component [{}]", this);
     markedForRemoval = true;
     removalCount.incrementAndGet();
     onRemoved(getEntity());
+    LOGGER.debug("Removed component [{}]", this);
   }
 
   public static int getRemovalCount() {

@@ -124,7 +124,7 @@ public abstract class Entity extends Component {
    * @param c the component to be removed.
    */
   public void removeComponent(Component c) {
-    getComponents().remove(c);
+    c.remove();
   }
 
   protected abstract void update(float dt);

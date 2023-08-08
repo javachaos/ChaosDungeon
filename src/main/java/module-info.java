@@ -16,4 +16,6 @@ module com.github.javachaos.chaosdungeons {
   exports com.github.javachaos.chaosdungeons.exceptions;
   exports com.github.javachaos.chaosdungeons.graphics;
   exports com.github.javachaos.chaosdungeons.shaders;
+  exports com.github.javachaos.chaosdungeons.ecs.components;
+  exports com.github.javachaos.chaosdungeons.ecs.entities;
 }

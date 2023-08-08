@@ -81,6 +81,7 @@ public class Texture {
       IntBuffer w = stack.mallocInt(1);
       IntBuffer h = stack.mallocInt(1);
       IntBuffer components = stack.mallocInt(1);
+
       ByteBuffer decodedImage = stbi_load_from_memory(buffer, w, h, components, 4);
       this.width = w.get();
       this.height = h.get();

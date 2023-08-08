@@ -3,6 +3,8 @@ package com.github.javachaos.chaosdungeons.ecs.entities;
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import com.github.javachaos.chaosdungeons.graphics.Texture;
+import java.util.HashMap;
+import java.util.Map;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -17,9 +19,10 @@ public abstract class GameEntity extends Entity {
   /**
    * Transform.
    */
-  private Matrix4f modelTransform;
-  private Quaternionf rotationQuaternion;
+  private final Matrix4f modelTransform;
+  private final Quaternionf rotationQuaternion;
   private final String texturePath;
+  private static final Map<String, Texture> textureMap = new HashMap<>();
 
   /**
    * Create a game entity.
@@ -46,7 +49,10 @@ public abstract class GameEntity extends Entity {
 
   @Override
   public void init() {
-    addComponent(new SpriteComponent(new SpriteModel(new Texture(texturePath), this)));
+    if (!textureMap.containsKey(texturePath)) {
+      textureMap.put(texturePath, new Texture(texturePath));
+    }
+    addComponent(new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this)));
   }
 
   /**
@@ -60,7 +66,7 @@ public abstract class GameEntity extends Entity {
     rotationQuaternion.rotateX(rotation.x);
     rotationQuaternion.rotateY(rotation.y);
     rotationQuaternion.rotateZ(rotation.z);
-    modelTransform = new Matrix4f().identity();
+    modelTransform.identity();
     modelTransform.translate(position).rotate(rotationQuaternion)
         .scale(scale);
   }
