@@ -146,6 +146,7 @@ public class GameWindow {
         gameLoop.init(this);
         GLUtil.setupDebugMessageCallback(log);
       }
+      camera.update();
       GL11.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds

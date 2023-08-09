@@ -57,6 +57,10 @@ import org.lwjgl.stb.STBTTPackedchar;
  * RenderedTextEntity class.
  * Heavily influenced by: <a href="https://github.com/LWJGL/lwjgl3/blob/master/modules/samples/src/test/java/org/lwjgl/demo/stb/TruetypeOversample.java">lwjgl 3 text demo</a>
  * Credit where credit is due.
+ *
+ * TODO change this into a RenderComponent
+ * Also remove render method from GameEntity
+ * only render components should handle rendering
  */
 public final class RenderedTextEntity extends GameEntity {
 

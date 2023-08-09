@@ -16,7 +16,7 @@ public class RandomFireballSpawnData {
    */
   public static SpawnData getData() {
     return new SpawnData.Builder()
-        .setSpawnRate(1.5f)
+        .setSpawnRate(150f)
         .setPosition(.5f, (float) (1f * Math.random()), 0f)
         .setRotation(new Vector3f(
             (rand.nextFloat()),
@@ -26,7 +26,7 @@ public class RandomFireballSpawnData {
             -(rand.nextFloat() * 16.0f),
             (rand.nextFloat() * 3.0f),
             0f))
-        .setMaxSpawns(100)
+        .setMaxSpawns(10000)
         .build();
   }
 }
