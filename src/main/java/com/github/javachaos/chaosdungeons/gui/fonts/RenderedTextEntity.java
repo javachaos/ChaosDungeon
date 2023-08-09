@@ -57,7 +57,6 @@ import org.lwjgl.stb.STBTTPackedchar;
  * RenderedTextEntity class.
  * Heavily influenced by: <a href="https://github.com/LWJGL/lwjgl3/blob/master/modules/samples/src/test/java/org/lwjgl/demo/stb/TruetypeOversample.java">lwjgl 3 text demo</a>
  * Credit where credit is due.
- *
  * TODO change this into a RenderComponent
  * Also remove render method from GameEntity
  * only render components should handle rendering
@@ -90,6 +89,11 @@ public final class RenderedTextEntity extends GameEntity {
 
   private String text = "";
 
+  /**
+   * Create a new RenderedTextEntity given the font path.
+   *
+   * @param fontPath the path to the ttf font file used to construct this text entity.
+   */
   public RenderedTextEntity(String fontPath) {
     super("assets/textures/fireball.png");
     this.fontPath = fontPath;
@@ -135,6 +139,7 @@ public final class RenderedTextEntity extends GameEntity {
         chardata.limit(p + 95);
         chardata.position(p);
         stbtt_PackSetOversampling(pc, 1, 1);
+        assert ttf != null;
         stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
 
         p = (i * 3 + 1) * 128 + 32;
@@ -153,7 +158,8 @@ public final class RenderedTextEntity extends GameEntity {
       stbtt_PackEnd(pc);
 
       glBindTexture(GL_TEXTURE_2D, fontText);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, BITMAP_W, BITMAP_H, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, BITMAP_W, BITMAP_H,
+          0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
@@ -221,7 +227,7 @@ public final class RenderedTextEntity extends GameEntity {
     print(getPosition().x + (ws.getWidth() / 2f),
           getPosition().y + (ws.getHeight() / 2f),
         sfont, text);
-    print(ws.getWidth() - 256, ws.getHeight() - 64, sfont, "FPS: " + GameWindow.getFPS());
+    print(ws.getWidth() - 256, ws.getHeight() - 64, sfont, "FPS: " + GameWindow.getFps());
   }
 
   private void render() {
