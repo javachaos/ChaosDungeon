@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
+import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -134,8 +135,8 @@ public abstract class Entity extends Component {
    */
   @Override
   public void update(double dt) {
-    for (Component c : getComponents()) {
-      if (!c.isRemoved()) {
+    for (Component c : getComponents()) { // differentiate render components from the rest.
+      if (!c.isRemoved() && !(c instanceof RenderComponent)) {
         c.update(dt);
       }
     }

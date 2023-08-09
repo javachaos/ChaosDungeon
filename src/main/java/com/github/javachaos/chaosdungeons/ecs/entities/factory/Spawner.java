@@ -70,6 +70,9 @@ public class Spawner<T extends GameEntity> extends GameEntity {
 
   @Override
   protected void update(float dt) {
+    if (!getSprite().isRemoved()) {
+      getSprite().remove();
+    }
     if (spawnData.getMaxSpawns() != 0) {
       timeSinceLastSpawn += dt;
 

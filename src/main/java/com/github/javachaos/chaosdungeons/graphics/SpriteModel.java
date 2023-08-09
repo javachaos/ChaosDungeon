@@ -78,8 +78,8 @@ public class SpriteModel {
    * Render this sprite model on the GPU.
    */
   public void render() {
-    GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
     GameWindow.getWorldShader().setSampleTexture(0);
+    GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
     texture.bind(0);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

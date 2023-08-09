@@ -23,6 +23,7 @@ public abstract class GameEntity extends Entity {
   private final Quaternionf rotationQuaternion;
   private final String texturePath;
   private static final Map<String, Texture> textureMap = new HashMap<>();
+  private SpriteComponent sprite;
 
   /**
    * Create a game entity.
@@ -32,6 +33,10 @@ public abstract class GameEntity extends Entity {
     this.rotationQuaternion = new Quaternionf();
     this.texturePath = texturePath;
     this.modelTransform = new Matrix4f();
+  }
+
+  public SpriteComponent getSprite() {
+    return sprite;
   }
 
   /**
@@ -52,7 +57,8 @@ public abstract class GameEntity extends Entity {
     if (!textureMap.containsKey(texturePath)) {
       textureMap.put(texturePath, new Texture(texturePath));
     }
-    addComponent(new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this)));
+    sprite = new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this));
+    addComponent(sprite);
   }
 
   /**
@@ -136,4 +142,10 @@ public abstract class GameEntity extends Entity {
     return modelTransform;
   }
 
+  public void render(float dt) {
+    //TODO restructure and clean this up better. A better implementation could be used here.
+    // or possibly refactor the whole project as the complexity is high.
+    // Would prefer a simpler project structure.
+    sprite.render(dt);
+  }
 }

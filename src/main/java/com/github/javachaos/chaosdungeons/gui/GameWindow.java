@@ -27,10 +27,13 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glGetError;
+import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -55,6 +58,8 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GLDebugMessageAMDCallback;
+import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
 
@@ -72,6 +77,8 @@ public class GameWindow {
   private static Camera camera;
   private static WindowSize windowSize;
   private long window;
+  private static double fps;
+  private PrintStream log;
 
   /**
    * Get the bounds of this Window as a Rectangle2D.
@@ -92,6 +99,10 @@ public class GameWindow {
 
   public static Camera getCamera() {
     return camera;
+  }
+
+  public static String getFPS() {
+    return fps + "";
   }
 
 
@@ -116,6 +127,7 @@ public class GameWindow {
     addWindowResizeCallback();
     windowSize = new WindowSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
     showWindow(window);
+
   }
 
   @SuppressWarnings("all")
@@ -132,12 +144,18 @@ public class GameWindow {
       if (!gameLoop.isInitialized()) {
         shaderProgram.init();
         gameLoop.init(this);
+        GLUtil.setupDebugMessageCallback(log);
       }
       GL11.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
       lastUpdateTime = now;
 
+      glEnable(GL_DEBUG_OUTPUT);
+      int errorCode = glGetError();
+      if (errorCode != GL_NO_ERROR) {
+        System.out.println("OpenGL error: " + errorCode);
+      }
       gameLoop.update(dt);
       shaderProgram.bind();
       shaderProgram.loadProjection();
@@ -153,13 +171,14 @@ public class GameWindow {
       if (sleepTime > 0) {
         Thread.sleep(sleepTime);
       }
+
       glfwSwapBuffers(window);
       glfwPollEvents();
       lastRenderTime = System.nanoTime();
 
       // Calculate FPS every second
       if (System.currentTimeMillis() - fpsTimer >= 1000) {
-        double fps = (double) frameCount / (System.currentTimeMillis() - fpsTimer) * 1000;
+        fps = (double) frameCount / (System.currentTimeMillis() - fpsTimer) * 1000;
         LOGGER.debug("FPS: {}", fps);
         frameCount = 0;
         fpsTimer = System.currentTimeMillis();
@@ -183,7 +202,7 @@ public class GameWindow {
 
   private void setupLogging() {
     // Setup an error callback.
-    PrintStream log = IoBuilder.forLogger(GameWindow.class)
+    log = IoBuilder.forLogger(GameWindow.class)
         .setLevel(Level.DEBUG).buildPrintStream();
     GLFWErrorCallback.createPrint(log).set();
   }
