@@ -16,17 +16,17 @@ public class RandomFireballSpawnData {
    */
   public static SpawnData getData() {
     return new SpawnData.Builder()
-        .setSpawnRate(5.0f)
+        .setSpawnRate(500.0f)
         .setPosition(.5f, (float) (1f * Math.random()), 0f)
         .setRotation(new Vector3f(
-            (rand.nextFloat() * 3.0f),
-            (rand.nextFloat() * 3.0f),
-            (rand.nextFloat() * 3.0f)))
+            (rand.nextFloat()),
+            (rand.nextFloat()),
+            (rand.nextFloat())))
         .setInitialVelocity(new Vector3f(
             -(rand.nextFloat() * 16.0f),
             (rand.nextFloat() * 3.0f),
             0f))
-        .setMaxSpawns(2500)
+        .setMaxSpawns(10000)
         .build();
   }
 }

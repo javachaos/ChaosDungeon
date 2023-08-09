@@ -16,6 +16,9 @@ public class Constants {
   public static final double EPSILON = 1e-6;
   public static final String PROPERTY_FILE_NAME = "/engine.properties";
 
+  /**
+   * The maximum number of entities of any given type.
+   */
   public static final int MAX_ENTITIES = Main.getPropertyManager()
       .getIntegerProperty("game.default.max_entities", 1000);
 

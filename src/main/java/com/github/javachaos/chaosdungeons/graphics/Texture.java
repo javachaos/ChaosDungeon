@@ -42,6 +42,7 @@ public class Texture {
   private final int width;
   private final int height;
   private final int id;
+  private boolean deleted;
 
   /**
    * Create a new texture.
@@ -124,8 +125,11 @@ public class Texture {
   }
 
   public void delete() {
-    LOGGER.debug("Texture deleted: {}", id);
-    glDeleteTextures(this.id);
+    if (!deleted) {
+      LOGGER.debug("Texture deleted: {}", id);
+      glDeleteTextures(this.id);
+      deleted = true;
+    }
   }
 
   public int getHeight() {
