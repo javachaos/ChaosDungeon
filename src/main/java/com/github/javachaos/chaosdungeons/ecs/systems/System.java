@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -10,6 +11,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * System class for ECS.
@@ -51,6 +53,15 @@ public abstract class System {
     } else {
       entityMap.get(e.getClass()).offerLast(e);
     }
+  }
+
+  public static <T extends GameEntity> T getEntity(Class<T> entityClass) {
+    Deque<GameEntity> entities = entityMap.get(entityClass);
+
+    if (entities != null && !entities.isEmpty()) {
+      return entityClass.cast(entities.getFirst());
+    }
+    return null; // No entity of the specified class found
   }
 
   public <T extends GameEntity> Deque<GameEntity> getEntities(T clazz) {

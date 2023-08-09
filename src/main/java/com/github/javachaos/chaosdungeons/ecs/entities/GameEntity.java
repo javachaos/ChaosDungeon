@@ -142,6 +142,11 @@ public abstract class GameEntity extends Entity {
     return modelTransform;
   }
 
+  /**
+   * Render this entity.
+   *
+   * @param dt the delta time.
+   */
   public void render(float dt) {
     //TODO restructure and clean this up better. A better implementation could be used here.
     // or possibly refactor the whole project as the complexity is high.

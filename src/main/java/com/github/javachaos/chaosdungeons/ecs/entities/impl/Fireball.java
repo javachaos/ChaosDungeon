@@ -4,6 +4,9 @@ import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
+import com.github.javachaos.chaosdungeons.ecs.systems.System;
+import com.github.javachaos.chaosdungeons.gui.fonts.RenderedTextEntity;
+import java.util.Objects;
 import org.joml.Vector3f;
 
 /**
@@ -79,6 +82,9 @@ public class Fireball extends GameEntity {
 
   @Override
   protected void update(float dt) {
+    RenderedTextEntity rte = Objects.requireNonNull(System.getEntity(RenderedTextEntity.class));
+    rte.getModelMatrix().rotation(45, new Vector3f(1,0,0));
+    rte.setText("Test");
   }
 
   @Override

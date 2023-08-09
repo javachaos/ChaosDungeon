@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.gui;
+package com.github.javachaos.chaosdungeons.geometry.gui;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

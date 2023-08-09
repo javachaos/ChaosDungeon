@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.gui;
+package com.github.javachaos.chaosdungeons.geometry.gui;
 
 import com.github.javachaos.chaosdungeons.geometry.DelaunayTriangulation;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;

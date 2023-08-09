@@ -18,4 +18,6 @@ module com.github.javachaos.chaosdungeons {
   exports com.github.javachaos.chaosdungeons.shaders;
   exports com.github.javachaos.chaosdungeons.ecs.components;
   exports com.github.javachaos.chaosdungeons.ecs.entities;
+  exports com.github.javachaos.chaosdungeons.geometry;
+  exports com.github.javachaos.chaosdungeons.geometry.gui;
 }

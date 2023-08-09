@@ -7,7 +7,7 @@ import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import com.github.javachaos.chaosdungeons.gui.ShapeDrawer;
+import com.github.javachaos.chaosdungeons.geometry.gui.ShapeDrawer;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;

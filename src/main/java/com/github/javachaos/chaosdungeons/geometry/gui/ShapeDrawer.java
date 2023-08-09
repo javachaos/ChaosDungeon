@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.gui;
+package com.github.javachaos.chaosdungeons.geometry.gui;
 
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 

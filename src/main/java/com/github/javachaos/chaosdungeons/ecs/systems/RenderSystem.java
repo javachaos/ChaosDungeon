@@ -33,7 +33,7 @@ public class RenderSystem extends System {
     FireballEntityFactory fireballEntityFactory = new FireballEntityFactory();
     Spawner<Fireball> s = new Spawner<>(fireballEntityFactory, RandomFireballSpawnData.getData());
     addEntity(s, false);
-    addEntity(new RenderedTextEntity(), false);
+    addEntity(new RenderedTextEntity("/assets/fonts/8bit.ttf"), false);
   }
 
   @Override

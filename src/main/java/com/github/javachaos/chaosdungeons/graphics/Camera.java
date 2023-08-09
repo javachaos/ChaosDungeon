@@ -58,24 +58,30 @@ public class Camera implements GLFWKeyCallbackI {
 
       if (key == GLFW_KEY_W) {
         movement.y += 1.0f;
+        move(movement);
       }
       if (key == GLFW_KEY_A) {
         movement.x -= 1.0f;
+        move(movement);
       }
       if (key == GLFW_KEY_S) {
         movement.y -= 1.0f;
+        move(movement);
       }
       if (key == GLFW_KEY_D) {
         movement.x += 1.0f;
+        move(movement);
       }
-
-      // Normalize movement vector and apply speed
-      movement.normalize();
-      float speed = 10.0f;
-      movement.mul(speed);
-
-      // Update camera position
-      pos.add(movement);
     }
+  }
+
+  private void move(Vector3f movement) {
+    // Normalize movement vector and apply speed
+    movement.normalize();
+    float speed = 10.0f;
+    movement.mul(speed);
+
+    // Update camera position
+    pos.add(movement);
   }
 }
