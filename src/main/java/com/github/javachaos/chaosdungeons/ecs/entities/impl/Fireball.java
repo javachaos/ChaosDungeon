@@ -76,15 +76,15 @@ public class Fireball extends GameEntity {
   @Override
   public void init() {
     super.init();
-    addComponent(new GravityComponent(100.0, 1.0, initialV,
+    addComponent(new GravityComponent(
+        100.0, 1.0, initialV,
         initialAngularVelocity, 0.1));
   }
 
   @Override
   protected void update(float dt) {
     RenderedTextEntity rte = Objects.requireNonNull(System.getEntity(RenderedTextEntity.class));
-    rte.getModelMatrix().rotation(45, new Vector3f(1,0,0));
-    rte.setText("Test");
+    rte.setText("Player");
   }
 
   @Override

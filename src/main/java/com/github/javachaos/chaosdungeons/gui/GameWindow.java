@@ -58,7 +58,6 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GLDebugMessageAMDCallback;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
@@ -101,7 +100,7 @@ public class GameWindow {
     return camera;
   }
 
-  public static String getFPS() {
+  public static String getFps() {
     return fps + "";
   }
 
@@ -155,7 +154,7 @@ public class GameWindow {
       glEnable(GL_DEBUG_OUTPUT);
       int errorCode = glGetError();
       if (errorCode != GL_NO_ERROR) {
-        System.out.println("OpenGL error: " + errorCode);
+        LOGGER.error("OpenGL error: " + errorCode);
       }
       gameLoop.update(dt);
       shaderProgram.bind();

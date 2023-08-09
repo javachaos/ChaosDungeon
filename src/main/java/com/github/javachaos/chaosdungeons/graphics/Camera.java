@@ -7,21 +7,16 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
-import static org.lwjgl.glfw.GLFW.glfwGetKey;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 /**
  * Camera 2D class.
  */
+@SuppressWarnings("unused")
 public class Camera implements GLFWKeyCallbackI {
-
-  private static final Logger LOGGER = LogManager.getLogger(Camera.class);
   private static final float SPEED = 5f;
   private final Vector3f pos = new Vector3f(0);
   private final Vector3f velocity = new Vector3f();
@@ -30,11 +25,16 @@ public class Camera implements GLFWKeyCallbackI {
   private float pitch;
   private float roll;
 
-  private boolean[] pressedKeys = new boolean[1024];
+  private final boolean[] pressedKeys = new boolean[512];
 
   public Camera() {
   }
 
+  /**
+   * Set the rotation of this camera.
+   *
+   * @param rot rotation (yaw, pitch, roll)
+   */
   public void setRotation(Vector3f rot) {
     this.yaw = rot.x;
     this.pitch = rot.y;
@@ -83,7 +83,7 @@ public class Camera implements GLFWKeyCallbackI {
       movement.x += SPEED;
     }
     movement.normalize(SPEED);
-    float acceleration = 0.48f;
+    float acceleration = 0.78f;
     velocity.add(movement.mul(acceleration));
 
     float friction = .9f;

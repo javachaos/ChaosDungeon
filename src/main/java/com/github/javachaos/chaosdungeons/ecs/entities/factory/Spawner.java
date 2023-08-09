@@ -21,6 +21,7 @@ public class Spawner<T extends GameEntity> extends GameEntity {
   private final EntityFactory<T> factory;
   private final SpawnData spawnData;
   private final Deque<T> spawnQueue;
+  private SpawnDataFactory spawnDataFactory;
   private float timeSinceLastSpawn;
 
   /**
@@ -58,6 +59,21 @@ public class Spawner<T extends GameEntity> extends GameEntity {
     this.spawnQueue = new ArrayDeque<>();
   }
 
+  /**
+   * Create a new spawner which creates new entities from the provided factory
+   * at a rate of (1.0 / spawnRate) and a maximum of max spawns. However, if
+   * maxSpawns is negative, this spawner will spawn entities indefinitely.
+   *
+   * @param factory the factory instance to create new entities from
+   * @param data the spawn data factory used to create each entity provided by the
+   *             factory along with information such as spawnRate and
+   *             maxSpawns.
+   */
+  public Spawner(EntityFactory<T> factory, SpawnDataFactory data) {
+    this(factory, data.create());
+    this.spawnDataFactory = data;
+  }
+
   @Override
   public void onAdded(Entity e) {
     LOGGER.debug("New spawner added.");
@@ -91,6 +107,9 @@ public class Spawner<T extends GameEntity> extends GameEntity {
   }
 
   private T newInstance() {
+    if (spawnDataFactory != null) {
+      return factory.create(spawnDataFactory.create());
+    }
     return factory.create(spawnData);
   }
 

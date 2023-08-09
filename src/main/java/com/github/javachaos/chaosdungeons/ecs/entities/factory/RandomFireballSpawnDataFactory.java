@@ -4,19 +4,16 @@ import java.util.Random;
 import org.joml.Vector3f;
 
 /**
- * Create a random fireball spawn data object.
+ * Fireball spawn data factory for creating random fireballs.
  */
-public class RandomFireballSpawnData {
+public class RandomFireballSpawnDataFactory implements SpawnDataFactory {
+
   private static final Random rand = new Random();
 
-  /**
-   * Get the spawn data for a random fireball.
-   *
-   * @return a random fireball spawn data object.
-   */
-  public static SpawnData getData() {
+  @Override
+  public SpawnData create() {
     return new SpawnData.Builder()
-        .setSpawnRate(150f)
+        .setSpawnRate(100f)
         .setPosition(.5f, (float) (1f * Math.random()), 0f)
         .setRotation(new Vector3f(
             (rand.nextFloat()),
