@@ -22,11 +22,11 @@ import com.github.javachaos.chaosdungeons.gui.GameWindow;
  * Sprite model.
  */
 @SuppressWarnings("unused")
-public class SpriteModel {
+public class SpriteModel implements Model {
   private final int drawCount;
-  private final int vertexId;
-  private final int textureId;
-  private final int indicesId;
+  private int vertexId;
+  private int textureId;
+  private int indicesId;
   private final Texture texture;
   float[] vertices = new float[] {
       -0.5f, 0.5f, 0,
@@ -58,25 +58,13 @@ public class SpriteModel {
     this.texture = texture;
     this.drawCount = indices.length;
     this.ge = ge;
-
-    this.vertexId = glGenBuffers();
-    glBindBuffer(GL_ARRAY_BUFFER, vertexId);
-    glBufferData(GL_ARRAY_BUFFER, createBuffer(vertices), GL_STATIC_DRAW);
-
-    this.textureId = glGenBuffers();
-    glBindBuffer(GL_ARRAY_BUFFER, textureId);
-    glBufferData(GL_ARRAY_BUFFER, createBuffer(texCoords), GL_STATIC_DRAW);
-
-    this.indicesId = glGenBuffers();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, createBuffer(indices), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    init();
   }
 
   /**
    * Render this sprite model on the GPU.
    */
+  @Override
   public void render() {
     GameWindow.getWorldShader().setSampleTexture(0);
     GameWindow.getWorldShader().setUniform("transformation", ge.getModelMatrix());
@@ -99,11 +87,29 @@ public class SpriteModel {
   /**
    * Delete the texture from the GPU.
    */
+  @Override
   public void delete() {
     if (!deleted) {
       texture.delete();
       deleted = true;
     }
+  }
+
+  @Override
+  public void init() {
+    this.vertexId = glGenBuffers();
+    glBindBuffer(GL_ARRAY_BUFFER, vertexId);
+    glBufferData(GL_ARRAY_BUFFER, createBuffer(vertices), GL_STATIC_DRAW);
+
+    this.textureId = glGenBuffers();
+    glBindBuffer(GL_ARRAY_BUFFER, textureId);
+    glBufferData(GL_ARRAY_BUFFER, createBuffer(texCoords), GL_STATIC_DRAW);
+
+    this.indicesId = glGenBuffers();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, createBuffer(indices), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
 }

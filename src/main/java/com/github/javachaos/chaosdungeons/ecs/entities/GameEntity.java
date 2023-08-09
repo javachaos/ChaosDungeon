@@ -1,6 +1,9 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import com.github.javachaos.chaosdungeons.graphics.Texture;
 import java.util.HashMap;
@@ -21,9 +24,10 @@ public abstract class GameEntity extends Entity {
    */
   private final Matrix4f modelTransform;
   private final Quaternionf rotationQuaternion;
-  private final String texturePath;
-  private static final Map<String, Texture> textureMap = new HashMap<>();
-  private SpriteComponent sprite;
+  protected final String texturePath;
+  protected static final Map<String, Texture> textureMap = new HashMap<>();
+  protected SpriteComponent sprite;
+  protected CollisionComponent collisionComponent;
 
   /**
    * Create a game entity.
@@ -37,6 +41,10 @@ public abstract class GameEntity extends Entity {
 
   public SpriteComponent getSprite() {
     return sprite;
+  }
+
+  public CollisionComponent getCollisionComponent() {
+    return collisionComponent;
   }
 
   /**
@@ -58,6 +66,9 @@ public abstract class GameEntity extends Entity {
       textureMap.put(texturePath, new Texture(texturePath));
     }
     sprite = new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this));
+    collisionComponent = new CollisionComponent(
+        new Quad(getPosition().x,
+        getPosition().y, 2, 2));
     addComponent(sprite);
   }
 

@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.collision.CollisionData;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.geometry.SatCollisionDetector;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
@@ -32,8 +33,8 @@ public class CollisionComponent extends Component {
    * @param other the other entity
    * @param otherPhys the other entities physics component
    */
-  public void onCollision(Entity other, PhysicsComponent otherPhys) {
-    CollisionComponent otherCollision = other.getComponent(CollisionComponent.class);
+  public void onCollision(GameEntity other, PhysicsComponent otherPhys) {
+    CollisionComponent otherCollision = other.getCollisionComponent();
     CollisionData cdata = SatCollisionDetector.checkCollisionDelaunay(shape,
         otherCollision.getShape());
     if (cdata.isColliding()) {
@@ -65,7 +66,7 @@ public class CollisionComponent extends Component {
    *
    * @return the shape of this collision component
    */
-  private Vertex getShape() {
+  public Vertex getShape() {
     return shape;
   }
 

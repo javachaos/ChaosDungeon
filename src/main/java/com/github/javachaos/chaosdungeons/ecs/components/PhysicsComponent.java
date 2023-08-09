@@ -152,7 +152,7 @@ public class PhysicsComponent extends Component {
   /**
    *  Collision handling method.
    */
-  public void handleCollision(Entity otherEntity) {
+  public void handleCollision(GameEntity otherEntity) {
     // Check if this entity has a CollisionComponent attached
     List<CollisionComponent> collisionComponents =
         getEntity().getComponents(CollisionComponent.class);
@@ -193,6 +193,10 @@ public class PhysicsComponent extends Component {
       double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       double newZ = getPosition().z + newVz * dt + 0.5 * newVz * dt * dt;
       GameEntity ge = ((GameEntity) getEntity());
+      //TODO come up with a method, to scan for entities in a box
+      // around the entity ge to simplify the number of collision checks
+      // or save entities with collision in a special data structure to
+      // make this more convenient. Quadtree or something maybe.
       ge.updateModelMatrix(
           new Vector3f(
               (float) newX,

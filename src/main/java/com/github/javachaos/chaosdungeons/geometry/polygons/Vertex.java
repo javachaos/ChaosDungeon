@@ -28,7 +28,6 @@ public class Vertex implements Iterable<Vertex> {
   private boolean isAcute;
   private double angle;
   private int index;
-  private HalfEdge outgoingEdge;
 
   public Vertex() {
   }

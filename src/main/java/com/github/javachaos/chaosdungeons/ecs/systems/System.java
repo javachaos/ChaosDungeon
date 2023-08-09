@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public abstract class System {
 
+  protected static QuadTree collisionQuadtree = new QuadTree();
   private static final Map<Class<? extends GameEntity>, AutoDiscardingDeque<GameEntity>> entityMap =
       new ConcurrentHashMap<>();
 
@@ -45,6 +47,7 @@ public abstract class System {
    *              of this list of entities
    */
   public static <T extends GameEntity> void addEntity(T e, boolean front) {
+    collisionQuadtree.insert(e.getPosition().x, e.getPosition().y, e.getCollisionComponent());
     if (!entityMap.containsKey(e.getClass())) {
       entityMap.put(e.getClass(), new AutoDiscardingDeque<>(Constants.MAX_ENTITIES));
     }

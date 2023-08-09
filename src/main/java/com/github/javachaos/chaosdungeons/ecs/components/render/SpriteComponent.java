@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.components.render;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.graphics.Model;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,12 +14,12 @@ public class SpriteComponent extends RenderComponent {
 
   private static final Logger LOGGER = LogManager.getLogger(SpriteComponent.class);
 
-  private final SpriteModel img;
+  private final Model img;
 
   /**
    * Create a new component.
    */
-  public SpriteComponent(SpriteModel img) {
+  public SpriteComponent(Model img) {
     super();
     this.img = img;
   }

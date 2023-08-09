@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.gui.fonts;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import static org.lwjgl.opengl.GL11.GL_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
@@ -38,7 +38,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAllocFloat;
 import static org.lwjgl.system.MemoryUtil.memFree;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.WindowSize;
@@ -61,9 +60,9 @@ import org.lwjgl.stb.STBTTPackedchar;
  * Also remove render method from GameEntity
  * only render components should handle rendering
  */
-public final class RenderedTextEntity extends GameEntity {
+public final class TextModel implements Model {
 
-  private static final Logger LOGGER = LogManager.getLogger(RenderedTextEntity.class);
+  private static final Logger LOGGER = LogManager.getLogger(TextModel.class);
 
   private static final int BITMAP_W = 512;
   private static final int BITMAP_H = 512;
@@ -82,6 +81,7 @@ public final class RenderedTextEntity extends GameEntity {
   private final FloatBuffer xb = memAllocFloat(1);
   private final FloatBuffer yb = memAllocFloat(1);
   private final String fontPath;
+  private final GameEntity pos;
 
   private int fontText;
 
@@ -94,10 +94,10 @@ public final class RenderedTextEntity extends GameEntity {
    *
    * @param fontPath the path to the ttf font file used to construct this text entity.
    */
-  public RenderedTextEntity(String fontPath) {
-    super("assets/textures/fireball.png");
+  public TextModel(String fontPath, GameEntity ge) {
     this.fontPath = fontPath;
-    loadFonts();
+    this.pos = ge;
+    init();
   }
 
   public void setText(String text) {
@@ -121,61 +121,6 @@ public final class RenderedTextEntity extends GameEntity {
       LOGGER.error(e.getMessage());
       return null;
     }
-  }
-
-
-  private void loadFonts() {
-    fontText = glGenTextures();
-    chardata = STBTTPackedchar.malloc(6 * 128);
-
-    try (STBTTPackContext pc = STBTTPackContext.malloc()) {
-      ByteBuffer ttf = loadFontFile(fontPath);
-
-      ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
-
-      stbtt_PackBegin(pc, bitmap, BITMAP_W, BITMAP_H, 0, 1, NULL);
-      for (int i = 0; i < 2; i++) {
-        int p = (i * 3) * 128 + 32;
-        chardata.limit(p + 95);
-        chardata.position(p);
-        stbtt_PackSetOversampling(pc, 1, 1);
-        assert ttf != null;
-        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
-
-        p = (i * 3 + 1) * 128 + 32;
-        chardata.limit(p + 95);
-        chardata.position(p);
-        stbtt_PackSetOversampling(pc, 2, 2);
-        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
-
-        p = (i * 3 + 2) * 128 + 32;
-        chardata.limit(p + 95);
-        chardata.position(p);
-        stbtt_PackSetOversampling(pc, 3, 1);
-        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
-      }
-      chardata.clear();
-      stbtt_PackEnd(pc);
-
-      glBindTexture(GL_TEXTURE_2D, fontText);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, BITMAP_W, BITMAP_H,
-          0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    }
-  }
-
-  private void drawInit(WindowSize ws) {
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.0, ws.getWidth(), ws.getHeight(), 0.0, -1.0, 1.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
   }
 
   private static void drawSquareTexCoords(float x0, float y0, float x1, float y1,
@@ -206,7 +151,6 @@ public final class RenderedTextEntity extends GameEntity {
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, fontText);
-
     glBegin(GL_QUADS);
     for (int i = 0; i < text.length(); i++) {
       stbtt_GetPackedQuad(chardata, BITMAP_W, BITMAP_H,
@@ -219,33 +163,33 @@ public final class RenderedTextEntity extends GameEntity {
     glEnd();
   }
 
-  private void drawString(WindowSize ws) {
+  @Override
+  public void render() {
+    GameWindow.getUiShader().bind();
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    WindowSize ws = GameWindow.getWindowSize();
+    glOrtho(0.0, ws.getWidth(), ws.getHeight(), 0.0, -1.0, 1.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     int font = 3;
     int sfont = sf[font];
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    print(getPosition().x + (ws.getWidth() / 2f),
-          getPosition().y + (ws.getHeight() / 2f),
+    print(pos.getPosition().x + (ws.getWidth() / 2f),
+          pos.getPosition().y + (ws.getHeight() / 2f),
         sfont, text);
     print(ws.getWidth() - 256, ws.getHeight() - 64, sfont, "FPS: " + GameWindow.getFps());
-  }
-
-  private void render() {
-    if (!getSprite().isRemoved()) {
-      getSprite().remove();
-    }
-    WindowSize ws = GameWindow.getWindowSize();
-    drawInit(ws);
-    drawString(ws);
+    GameWindow.getUiShader().unbind();
+    GameWindow.getWorldShader().bind();
   }
 
   @Override
-  protected void update(float dt) {
-    render();
-  }
-
-  @Override
-  public void destroy() {
+  public void delete() {
     chardata.free();
     memFree(yb);
     memFree(xb);
@@ -253,10 +197,39 @@ public final class RenderedTextEntity extends GameEntity {
   }
 
   @Override
-  public void onAdded(Entity e) {
+  public void init() {
+    fontText = glGenTextures();
+    chardata = STBTTPackedchar.malloc(6 * 128);
+    try (STBTTPackContext pc = STBTTPackContext.malloc()) {
+      ByteBuffer ttf = loadFontFile(fontPath);
+      ByteBuffer bitmap = BufferUtils.createByteBuffer(BITMAP_W * BITMAP_H);
+      stbtt_PackBegin(pc, bitmap, BITMAP_W, BITMAP_H, 0, 1, NULL);
+      for (int i = 0; i < 2; i++) {
+        int p = (i * 3) * 128 + 32;
+        chardata.limit(p + 95);
+        chardata.position(p);
+        stbtt_PackSetOversampling(pc, 1, 1);
+        assert ttf != null;
+        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
+        p = (i * 3 + 1) * 128 + 32;
+        chardata.limit(p + 95);
+        chardata.position(p);
+        stbtt_PackSetOversampling(pc, 2, 2);
+        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
+        p = (i * 3 + 2) * 128 + 32;
+        chardata.limit(p + 95);
+        chardata.position(p);
+        stbtt_PackSetOversampling(pc, 3, 1);
+        stbtt_PackFontRange(pc, ttf, 0, scale[i], 32, chardata);
+      }
+      chardata.clear();
+      stbtt_PackEnd(pc);
+      glBindTexture(GL_TEXTURE_2D, fontText);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, BITMAP_W, BITMAP_H,
+          0, GL_ALPHA, GL_UNSIGNED_BYTE, bitmap);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    }
   }
 
-  @Override
-  public void onRemoved(Entity e) {
-  }
 }

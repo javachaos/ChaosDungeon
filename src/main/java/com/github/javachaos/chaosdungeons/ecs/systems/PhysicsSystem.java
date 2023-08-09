@@ -1,8 +1,12 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import java.util.Deque;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,30 +37,31 @@ public class PhysicsSystem extends System {
 
   @Override
   public void update(float dt) {
-    getEntities().forEach(e -> e.update(dt));
+    getEntities().forEach(e -> {
+      e.update(dt);
+      collisionQuadtree.updateNode(e.getCollisionComponent(), e.getPosition().x, e.getPosition().y);
+    });
+    collisionQuadtree.render(GameWindow.getWindowSize().getWidth(),
+        GameWindow.getWindowSize().getHeight());
     // update all entities with a PhysicsComponent and handle collisions
-    //    List<Entity> entities = getEntities();
-    //    if (entities != null) {
-    //      for (Entity e : entities) {
-    //        e.update(dt);
-    //        for (Entity f : entities) {
-    //          if (e.equals(f)) {
-    //            break;
-    //          }
-    //          if (e.hasComponent(PhysicsComponent.class)
-    //          && f.hasComponent(PhysicsComponent.class)) {
-    //            PhysicsComponent pc1 = e.getComponent(PhysicsComponent.class);
-    //            PhysicsComponent pc2 = f.getComponent(PhysicsComponent.class);
-    //            if (pc1 != null) {
-    //              pc1.handleCollision(f);
-    //            }
-    //            if (pc2 != null) {
-    //              pc2.handleCollision(e);
-    //            }
-    //          }
-    //        }
-    //      }
-    //    }
+    //Deque<GameEntity> entities = getEntities();
+//    for (GameEntity e : entities) {
+//      e.update(dt);
+//      for (GameEntity f : entities) {
+//        if (e.equals(f)) {
+//          break;
+//        }
+//          CollisionComponent pc1 = e.getCollisionComponent();
+//          CollisionComponent pc2 = f.getCollisionComponent();
+//          if (pc1 != null) {
+//            pc1.handleCollision(f);
+//          }
+//          if (pc2 != null) {
+//            pc2.handleCollision(e);
+//          }
+//        }
+//      }
+//    }
   }
 
   @Override

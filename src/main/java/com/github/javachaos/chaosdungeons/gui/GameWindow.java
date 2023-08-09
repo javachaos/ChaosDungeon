@@ -132,7 +132,7 @@ public class GameWindow {
   @SuppressWarnings("all")
   private void loop(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     GL.createCapabilities();
-    //uiShader = new UiShader();
+    uiShader = new UiShader();
     shaderProgram = new WorldShader();
     initView();
     long lastUpdateTime = System.nanoTime();
