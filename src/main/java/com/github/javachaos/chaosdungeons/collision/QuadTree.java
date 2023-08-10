@@ -2,13 +2,15 @@ package com.github.javachaos.chaosdungeons.collision;
 
 import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glColor3f;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,32 +22,49 @@ public class QuadTree {
 
   private static final Logger LOGGER = LogManager.getLogger(QuadTree.class);
 
-  private static Map<CollisionComponent, Node> collisionMap = new HashMap<>();
+  private static Map<GameEntity, Node> collisionMap = new HashMap<>();
 
   private Node root;
 
-  private class Node {
+  public static class Node {
     float x;
     float y;
     Node NW, NE, SE, SW;
     boolean isLeaf = true;
-    CollisionComponent value;
-    Node(float x, float y, CollisionComponent ge) {
+    GameEntity value;
+    public GameEntity getValue() {
+      return value;
+    }
+    Node(float x, float y, GameEntity ge) {
       this.value = ge;
       this.x = x;
       this.y = y;
     }
   }
 
-  public void insert(float x, float y, CollisionComponent value) {
+  public void insert(float x, float y, GameEntity value) {
     root = insert(root, x, y, value);
   }
 
-  public void updateNode(float ox, float oy, float x, float y, CollisionComponent cc) {
-    List<Node> c = getChildren(new LinkedList<>(), find(new Quad(x, y, ox, oy)));
-    remove(ox, oy);
-    c.forEach(child -> insert(child.x, child.y, child.value));
-    insert(x, y, cc);
+  public void updateNode(float ox, float oy, float x, float y, GameEntity ge) {
+    Vertex s = null;
+    CollisionComponent cc = null;
+    if (ge != null)
+      cc = ge.getCollisionComponent();
+    if (cc != null) {
+      s = cc.getShape();
+    }
+    Rectangle r = null;
+    if(s != null) {
+      r = s.getBounds();
+    }
+    if (r != null) {
+      List<Node> c =
+          getChildren(new LinkedList<>(), find(new Quad(x, y, ox, oy)));
+        remove(ox, oy);
+        c.forEach(child -> insert(child.x, child.y, child.value));
+        insert(x, y, ge);
+    }
   }
 
   public void render(float w, float h) {
@@ -57,13 +76,7 @@ public class QuadTree {
       return;
     }
 
-    if (n.isLeaf) {
-      glColor3f(1f, 0f, 0f);
-    } else {
-      glColor3f(0f, 0f, 1f);
-    }
-
-    // Draw horizontal lines
+    // Draw rectangle representing the quad
     glBegin(GL_LINES);
     glVertex2f(x, y);
     glVertex2f(x + w, y);
@@ -87,7 +100,6 @@ public class QuadTree {
     render(n.SW, x, y + halfHeight, halfWidth, halfHeight);
     render(n.SE, x + halfWidth, y + halfHeight, halfWidth, halfHeight);
   }
-
 
   public void remove(float x, float y) {
     root = remove(root, x, y);
@@ -147,7 +159,7 @@ public class QuadTree {
     return children;
   }
 
-  private Node insert(Node n, float x, float y, CollisionComponent cc) {
+  private Node insert(Node n, float x, float y, GameEntity cc) {
     if (n == null) {
       Node node = new Node(x, y, cc);
       collisionMap.put(cc, node);

@@ -20,7 +20,7 @@ public class RandomFireballSpawnDataFactory implements SpawnDataFactory {
             (rand.nextFloat()),
             (rand.nextFloat())))
         .setInitialVelocity(new Vector3f(
-            (rand.nextFloat() * 16.0f),
+            -(rand.nextFloat() * 16.0f),
             (rand.nextFloat() * 3.0f),
             0f))
         .setMaxSpawns(1000)

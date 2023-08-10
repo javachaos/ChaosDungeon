@@ -7,6 +7,7 @@ import com.github.javachaos.chaosdungeons.geometry.SatCollisionDetector;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.geom.Point2D;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,13 +19,25 @@ public class CollisionComponent extends Component {
   private static final Logger LOGGER = LogManager.getLogger(CollisionComponent.class);
 
   private Vertex shape;
+  private PhysicsComponent physicsComponent;
 
   /**
    * Create a new component.
    */
-  public CollisionComponent(Vertex shape) {
+  public CollisionComponent(Vertex shape, PhysicsComponent physicsComponent) {
     super();
     this.shape = shape;
+    this.physicsComponent = physicsComponent;
+  }
+
+  /**
+   *  Collision handling method.
+   */
+  public void handleCollision(GameEntity otherEntity, CollisionComponent other) {
+    if (other != null) {
+      // Signal the collision to the CollisionComponent
+      other.onCollision(otherEntity, physicsComponent);
+    }
   }
 
   /**

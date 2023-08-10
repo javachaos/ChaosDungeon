@@ -252,45 +252,53 @@ public class SatCollisionDetector {
 
   private static Point2D calculateCollisionNormal(Triangle t1, Triangle t2) {
     // Find the edge of t1 that is intersecting with t2
-    Edge intersectionEdge = Objects.requireNonNull(findIntersectionEdge(t1, t2));
+    Edge intersectionEdge = findIntersectionEdge(t1, t2);
+    if (intersectionEdge != null) {
+      // Calculate the collision normal as the perpendicular vector to the edge
+      double nx = -(intersectionEdge.getB().getY() - intersectionEdge.getA().getY());
+      double ny = intersectionEdge.getB().getX() - intersectionEdge.getA().getX();
 
-    // Calculate the collision normal as the perpendicular vector to the edge
-    double nx = -(intersectionEdge.getB().getY() - intersectionEdge.getA().getY());
-    double ny = intersectionEdge.getB().getX() - intersectionEdge.getA().getX();
+      // Normalize the collision normal
+      double length = Math.sqrt(nx * nx + ny * ny);
+      if (length > 0) {
+        nx /= length;
+        ny /= length;
+      }
 
-    // Normalize the collision normal
-    double length = Math.sqrt(nx * nx + ny * ny);
-    if (length > 0) {
-      nx /= length;
-      ny /= length;
+      return new Point2D.Double(nx, ny);
+    } else {
+      return null;
     }
-
-    return new Point2D.Double(nx, ny);
   }
 
   private static double calculatePenetrationDepth(Triangle t1, Triangle t2,
                                                   Point2D collisionNormal) {
     // Find the edge of t1 that is intersecting with t2
-    Edge intersectionEdge = Objects.requireNonNull(findIntersectionEdge(t1, t2));
+    Edge intersectionEdge = findIntersectionEdge(t1, t2);
 
-    // Project the vertices of t1 onto the collision normal to find the minimum overlap
-    double minOverlap = Double.POSITIVE_INFINITY;
-    for (Point2D point : t1.getPoints()) {
-      double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
-          * point.getY();
-      double overlap = projection - intersectionEdge.projectPoint(point);
-      minOverlap = Math.min(minOverlap, overlap);
+    if (intersectionEdge != null) {
+
+      // Project the vertices of t1 onto the collision normal to find the minimum overlap
+      double minOverlap = Double.POSITIVE_INFINITY;
+      for (Point2D point : t1.getPoints()) {
+        double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+            * point.getY();
+        double overlap = projection - intersectionEdge.projectPoint(point);
+        minOverlap = Math.min(minOverlap, overlap);
+      }
+
+      // Project the vertices of t2 onto the collision normal to find the minimum overlap
+      for (Point2D point : t2.getPoints()) {
+        double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+            * point.getY();
+        double overlap = intersectionEdge.projectPoint(point) - projection;
+        minOverlap = Math.min(minOverlap, overlap);
+      }
+
+      return minOverlap;
+    } else {
+      return 0.0;
     }
-
-    // Project the vertices of t2 onto the collision normal to find the minimum overlap
-    for (Point2D point : t2.getPoints()) {
-      double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
-          * point.getY();
-      double overlap = intersectionEdge.projectPoint(point) - projection;
-      minOverlap = Math.min(minOverlap, overlap);
-    }
-
-    return minOverlap;
   }
 
   private static Edge findIntersectionEdge(Triangle t1, Triangle t2) {

@@ -47,7 +47,7 @@ public abstract class System {
    *              of this list of entities
    */
   public static <T extends GameEntity> void addEntity(T e, boolean front) {
-    collisionQuadtree.insert(e.getPosition().x, e.getPosition().y, e.getCollisionComponent());
+    collisionQuadtree.insert(e.getPosition().x, e.getPosition().y, e);
     if (!entityMap.containsKey(e.getClass())) {
       entityMap.put(e.getClass(), new AutoDiscardingDeque<>(Constants.MAX_ENTITIES));
     }

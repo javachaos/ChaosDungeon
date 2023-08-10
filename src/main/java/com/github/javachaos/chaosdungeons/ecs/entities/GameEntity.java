@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
+import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
@@ -68,7 +69,7 @@ public abstract class GameEntity extends Entity {
     sprite = new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this));
     collisionComponent = new CollisionComponent(
         new Quad(getPosition().x,
-        getPosition().y, 2, 2));
+        getPosition().y, 2, 2), new GravityComponent(1.0, 1.0, new Vector3f()));
     addComponent(sprite);
   }
 

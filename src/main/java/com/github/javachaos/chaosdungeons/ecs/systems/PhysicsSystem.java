@@ -5,6 +5,8 @@ import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import java.util.Deque;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +20,11 @@ public class PhysicsSystem extends System {
 
   float prevX;
   float prevY;
+
+  float maxX = Float.MIN_VALUE;
+  float maxY = Float.MIN_VALUE;
+
+  long dtacc;
 
   private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
 
@@ -48,10 +55,18 @@ public class PhysicsSystem extends System {
           prevX,
           prevY,
           e.getPosition().x,
-          e.getPosition().y, e.getCollisionComponent());
+          e.getPosition().y, e);
+      QuadTree.Node n = collisionQuadtree.find(new Quad(prevX, prevY, e.getScale().x,
+          e.getScale().y));
+      if (e.getCollisionComponent() != null && n != null && n.getValue() != null) {
+        e.getCollisionComponent().handleCollision(n.getValue(),
+            n.getValue().getCollisionComponent());
+      }
+      //TODO get something working...
     });
-
-    collisionQuadtree.render(1024, 1024);
+    collisionQuadtree.render(
+        GameWindow.getWindowSize().getWidth(),
+        GameWindow.getWindowSize().getHeight());
     // update all entities with a PhysicsComponent and handle collisions
     //Deque<GameEntity> entities = getEntities();
 //    for (GameEntity e : entities) {
