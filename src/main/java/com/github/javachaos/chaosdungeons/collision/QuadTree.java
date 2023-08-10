@@ -1,10 +1,7 @@
 package com.github.javachaos.chaosdungeons.collision;
 
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_LINES;
-import static org.lwjgl.opengl.GL11.GL_QUADS;
 import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glColor3f;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex2f;
@@ -44,18 +41,15 @@ public class QuadTree {
     root = insert(root, x, y, value);
   }
 
-  public void updateNode(CollisionComponent cc, float x, float y) {
-    Node node = collisionMap.get(cc);
-    if (node != null) {
-      List<Node> children = getChildren(new LinkedList<>(), node);
-      remove(node.x, node.y);
-      children.forEach(c -> insert(c.x, c.y, c.value));
-      insert(x, y, cc);
-    }
+  public void updateNode(float ox, float oy, float x, float y, CollisionComponent cc) {
+    List<Node> c = getChildren(new LinkedList<>(), find(new Quad(x, y, ox, oy)));
+    remove(ox, oy);
+    c.forEach(child -> insert(child.x, child.y, child.value));
+    insert(x, y, cc);
   }
 
   public void render(float w, float h) {
-    render(root, root.x, root.y, w, h);
+    render(root, 0, 0, w, h);
   }
 
   private void render(Node n, float x, float y, float w, float h) {
@@ -106,6 +100,7 @@ public class QuadTree {
 
     // Check if the current node's coordinates match the target coordinates
     if (eq(n.x, x) && eq(n.y, y)) {
+      collisionMap.keySet().remove(n.value);
       return null;  // Node found, return null to remove it
     }
 
@@ -152,30 +147,30 @@ public class QuadTree {
     return children;
   }
 
-  private Node insert(Node n, float x, float y, CollisionComponent ge) {
+  private Node insert(Node n, float x, float y, CollisionComponent cc) {
     if (n == null) {
-      Node node = new Node(x, y, ge);
-      collisionMap.put(ge, node);
+      Node node = new Node(x, y, cc);
+      collisionMap.put(cc, node);
       return node;
     }
     n.isLeaf = false;
     if (x < n.x && y < n.y) {
-      n.SW = insert(n.SW, x, y, ge);
+      n.SW = insert(n.SW, x, y, cc);
     } else if (x < n.x && !(y < n.y)) {
-      n.NW = insert(n.NW, x, y, ge);
+      n.NW = insert(n.NW, x, y, cc);
     } else if (!(x < n.x) && y < n.y) {
-      n.SE = insert(n.SE, x, y, ge);
+      n.SE = insert(n.SE, x, y, cc);
     } else if (!(x < n.x) && !(y < n.y)) {
-      n.NE = insert(n.NE, x, y, ge);
+      n.NE = insert(n.NE, x, y, cc);
     }
     return n;
   }
 
-  public CollisionComponent find(Quad q) {
+  public Node find(Quad q) {
     return find(root, q);
   }
 
-  private CollisionComponent find(Node n, Quad q) {
+  private Node find(Node n, Quad q) {
     if (n == null) {
       return null;
     }
@@ -188,8 +183,8 @@ public class QuadTree {
     float ymax = r.height + r.y;
 
     if (r.contains(n.x, n.y) && n.isLeaf) {
-      LOGGER.debug("Found: ({},{})", n.x, n.y);
-      return n.value;
+      //LOGGER.debug("Found: ({},{})", n.x, n.y);
+      return n;
     }
 
     if (xmin < n.x && ymin < n.y) {

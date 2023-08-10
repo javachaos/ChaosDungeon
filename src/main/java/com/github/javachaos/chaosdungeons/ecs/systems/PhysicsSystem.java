@@ -16,6 +16,9 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("unused")
 public class PhysicsSystem extends System {
 
+  float prevX;
+  float prevY;
+
   private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
 
   public PhysicsSystem(GameWindow window) {
@@ -38,11 +41,17 @@ public class PhysicsSystem extends System {
   @Override
   public void update(float dt) {
     getEntities().forEach(e -> {
+      prevX = e.getPosition().x;
+      prevY = e.getPosition().y;
       e.update(dt);
-      collisionQuadtree.updateNode(e.getCollisionComponent(), e.getPosition().x, e.getPosition().y);
+      collisionQuadtree.updateNode(
+          prevX,
+          prevY,
+          e.getPosition().x,
+          e.getPosition().y, e.getCollisionComponent());
     });
-    collisionQuadtree.render(GameWindow.getWindowSize().getWidth(),
-        GameWindow.getWindowSize().getHeight());
+
+    collisionQuadtree.render(1024, 1024);
     // update all entities with a PhysicsComponent and handle collisions
     //Deque<GameEntity> entities = getEntities();
 //    for (GameEntity e : entities) {
