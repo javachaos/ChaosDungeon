@@ -207,4 +207,10 @@ public abstract class GameEntity extends Entity {
       dcr.render(dt);
     }
   }
+
+  public void setPosition(Vector3f pos) {
+	  modelTransform.m30(pos.x);
+	  modelTransform.m31(pos.y);
+	  modelTransform.m32(pos.z);
+  }
 }

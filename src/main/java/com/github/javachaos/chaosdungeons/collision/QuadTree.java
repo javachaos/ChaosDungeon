@@ -47,13 +47,14 @@ public class QuadTree {
 
 
     public boolean contains(float x, float y) {
-      float x1 = this.x;
-      float x2 = this.x + w;
-      float y1 = this.y;
-      float y2 = this.y + h;
-      return x > x1 && x < x2
-          && y > y1 && y < y2;
+        float x1 = this.x;
+        float x2 = this.x + w;
+        float y1 = this.y;
+        float y2 = this.y + h;
+        return x >= x1 && x <= x2
+            && y >= y1 && y <= y2;
     }
+
 
     public void setPosition(Vector3f pos) {
       this.x = pos.x;

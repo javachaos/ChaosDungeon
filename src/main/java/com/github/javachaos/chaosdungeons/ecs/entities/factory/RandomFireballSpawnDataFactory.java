@@ -14,7 +14,7 @@ public class RandomFireballSpawnDataFactory implements SpawnDataFactory {
   @Override
   public SpawnData create() {
     return new SpawnData.Builder()
-        .setSpawnRate(100f)
+        .setSpawnRate(10f)
         .setPosition(.5f, (float) (1f * Math.random()), 0f)
         .setRotation(new Vector3f(
             (rand.nextFloat()),
@@ -25,9 +25,9 @@ public class RandomFireballSpawnDataFactory implements SpawnDataFactory {
             (rand.nextFloat()),
             0f))
         .setShape(new QuadTree.Quad(-0.25f, -0.25f, .5f, .5f))
-        .setMaxSpawns(100)
-        .setMass(1.0f)
-        .setGravitationFactor(0.00001f)
+        .setMaxSpawns(1000)
+        .setMass(10.0f)
+        .setGravitationFactor(0.001f)
         .setRestitution(1.0f)
         .build();
   }

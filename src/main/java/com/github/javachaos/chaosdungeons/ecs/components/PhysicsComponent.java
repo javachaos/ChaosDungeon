@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 /**
@@ -98,6 +99,10 @@ public class PhysicsComponent extends Component {
   public Vector3f getPosition() {
     return gameEntity.getPosition();
   }
+  
+  public void setPosition(Vector3f pos) {
+	  gameEntity.setPosition(pos);
+  }
 
   public Vector3f getScale() {
     return gameEntity.getScale();
@@ -124,6 +129,10 @@ public class PhysicsComponent extends Component {
       velocity.z += (float) az;
     }
   }
+  
+  public void applyForce(Vector3f f) {
+	  applyForce(f.x, f.y, f.z);
+  }
 
   /**
    * Method to apply forces to the entity.
@@ -133,6 +142,18 @@ public class PhysicsComponent extends Component {
    */
   public void applyForce(double forceX, double forceY) {
     applyForce(forceX, forceY, 0);
+  }
+  
+  public void applyImpulse(Vector3f impulse) {
+	  velocity.add(impulse);
+  }
+  
+  public float getInvMass() {
+      if (mass == 0) {
+          return 0;  // Infinite mass or immovable object
+      } else {
+          return (float) (1.0f / mass);
+      }
   }
 
   /**
@@ -148,7 +169,7 @@ public class PhysicsComponent extends Component {
     double az = forceZ / mass;
     angularVelocity.set(new Vector3f((float) ax, (float) ay, (float) az));
   }
-
+  
   /**
    * Verlet integration method to update position and velocity.
    *
@@ -170,9 +191,13 @@ public class PhysicsComponent extends Component {
         angularVelocity.z = 0;
       }
       float angularMomentum = 0.995f;
-      float momentum = 0.9998f;
+      float drag = 0.998f;
+      float momentumX = (float) mass * velocity.x;
+      float momentumY = (float) mass * velocity.y;
+      float momentumZ = (float) mass * velocity.z;
       angularVelocity.mul(angularMomentum);
-      velocity.mul(momentum);
+      velocity.mul(drag);
+      
       getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
@@ -207,5 +232,13 @@ public class PhysicsComponent extends Component {
 
   public void setAngularVelocity(Vector3f initialAngularVelocity) {
     angularVelocity.set(initialAngularVelocity);
+  }
+
+  public Vector3f getVelocity() {
+	return velocity;
+  }
+	
+  public void setVelocity(Vector3f v1Prime) {
+	  this.velocity.set(v1Prime);
   }
 }

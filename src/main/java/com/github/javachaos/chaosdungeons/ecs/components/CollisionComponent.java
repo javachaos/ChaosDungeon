@@ -5,6 +5,7 @@ import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Vector3f;
 
 /**
  * Basic collision component class.
@@ -32,13 +33,41 @@ public class CollisionComponent extends Component {
    * @param otherCc the other entities collision component
    */
   public void onCollision(GameEntity other, CollisionComponent otherCc) {
-    PhysicsComponent otherPhys = otherCc.physicsComponent;
-    GameEntity thisGe = (GameEntity) getEntity();
-    if (thisGe != other && shape.intersects(otherCc.getShape())) {
-      LOGGER.debug("Collision detected between {} and {}", getEntity(), other);
-      physicsComponent.applyForce(otherPhys.getVx(), otherPhys.getVy());
-    }
-  }
+	    PhysicsComponent thisPhys = physicsComponent;
+	    PhysicsComponent otherPhys = otherCc.physicsComponent;
+	    GameEntity thisGe = (GameEntity) getEntity();
+
+	    if (thisGe != other && shape.intersects(otherCc.getShape())) {
+	        //LOGGER.debug("Collision detected between {} and {}", getEntity(), other);
+	        Vector3f thisCenter = new Vector3f(thisPhys.getPosition().x + shape.w / 2f,
+                    thisPhys.getPosition().y + shape.h / 2f,
+                    0);
+			Vector3f otherCenter = new Vector3f(otherPhys.getPosition().x + otherCc.getShape().w / 2f,
+			                     otherPhys.getPosition().y + otherCc.getShape().h / 2f,
+			                     0);
+	        Vector3f v1minusv2 = thisPhys.getVelocity().sub(otherPhys.getVelocity());
+	        Vector3f v2minusv1 = otherPhys.getVelocity().sub(thisPhys.getVelocity());
+	        
+	        
+	        Vector3f x1minusx2 = thisCenter.sub(otherCenter);
+	        float numerator = v1minusv2.dot(x1minusx2);
+	        float len = Vector3f.lengthSquared(x1minusx2.x, x1minusx2.y, x1minusx2.z);
+	        float scalarMul = (numerator / len) * (float) (2 * otherPhys.getMass() / (thisPhys.getMass() + otherPhys.getMass()));
+	        x1minusx2.mul(scalarMul);	        
+	        Vector3f v1 = thisPhys.getVelocity();
+	        Vector3f v1Prime = v1.sub(x1minusx2);
+	        otherPhys.applyImpulse(v1Prime);
+	        
+	        Vector3f x2minusx1 = otherCenter.sub(thisCenter);
+	        numerator = v2minusv1.dot(x2minusx1);
+	        len = Vector3f.lengthSquared(x2minusx1.x, x2minusx1.y, x2minusx1.z);
+	        scalarMul = (numerator / len) * (float) (2 * thisPhys.getMass() / (thisPhys.getMass() + otherPhys.getMass()));
+	        x2minusx1.mul(scalarMul); 
+	        Vector3f v2 = otherPhys.getVelocity();
+	        Vector3f v2Prime = v2.sub(x2minusx1);
+	        otherPhys.applyImpulse(v1Prime);
+	    }
+	}
 
   /**
    * Return the shape for this collision component.
@@ -67,6 +96,5 @@ public class CollisionComponent extends Component {
 
   @Override
   public void onRemoved(Entity e) {
-
   }
 }

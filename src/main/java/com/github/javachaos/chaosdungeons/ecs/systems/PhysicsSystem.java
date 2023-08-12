@@ -54,13 +54,9 @@ public class PhysicsSystem extends System {
         v = cc.getShape();
         if (v != null) {
           for (QuadTree.Node n : collisionQuadtree.find(v)) {
-            if (n == null) {
-              return;
-            }
             GameEntity ge = n.getValue();
-            if (ge.getCollisionComponent() != null) {
-              ge.getCollisionComponent().onCollision(e, e.getCollisionComponent());
-            }
+            CollisionComponent occ = ge.getCollisionComponent();
+            occ.onCollision(e, e.getCollisionComponent());
           }
         }
       }
