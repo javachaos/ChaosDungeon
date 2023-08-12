@@ -5,24 +5,61 @@ import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 
-import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.joml.Vector3f;
 
+/**
+ * A simple PR quad tree for collision detection.
+ */
 public class QuadTree {
+  
+  public static class Quad {
+    public float x;
+    public float y;
+    public float w;
+    public float h;
+    
+    public Quad(float x, float y, float w, float h) {
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+    }
 
-  private static final Logger LOGGER = LogManager.getLogger(QuadTree.class);
+    public boolean intersects(Quad other) {
+      // Calculate the boundaries of the current Quad
+      float x1 = this.x;
+      float y1 = this.y;
+      float x2 = this.x + w;
+      float y2 = this.y + h;
 
-  private static Map<GameEntity, Node> collisionMap = new HashMap<>();
+      // Calculate the boundaries of the other Quad
+      float x3 = other.x;
+      float y3 = other.y;
+      float x4 = other.x + other.w;
+      float y4 = other.y + other.h;
+
+      // Check for intersection using the separating axis theorem
+      return !(x2 < x3 || x1 > x4 || y2 < y3 || y1 > y4);
+    }
+
+
+    public boolean contains(float x, float y) {
+      float x1 = this.x;
+      float x2 = this.x + w;
+      float y1 = this.y;
+      float y2 = this.y + h;
+      return x > x1 && x < x2
+          && y > y1 && y < y2;
+    }
+
+    public void setPosition(Vector3f pos) {
+      this.x = pos.x;
+      this.y = pos.y;
+    }
+  }
 
   private Node root;
 
@@ -30,7 +67,6 @@ public class QuadTree {
     float x;
     float y;
     Node NW, NE, SE, SW;
-    boolean isLeaf = true;
     GameEntity value;
     public GameEntity getValue() {
       return value;
@@ -46,25 +82,8 @@ public class QuadTree {
     root = insert(root, x, y, value);
   }
 
-  public void updateNode(float ox, float oy, float x, float y, GameEntity ge) {
-    Vertex s = null;
-    CollisionComponent cc = null;
-    if (ge != null)
-      cc = ge.getCollisionComponent();
-    if (cc != null) {
-      s = cc.getShape();
-    }
-    Rectangle r = null;
-    if(s != null) {
-      r = s.getBounds();
-    }
-    if (r != null) {
-      List<Node> c =
-          getChildren(new LinkedList<>(), find(new Quad(x, y, ox, oy)));
-        remove(ox, oy);
-        c.forEach(child -> insert(child.x, child.y, child.value));
-        insert(x, y, ge);
-    }
+  public void insert(GameEntity ge) {
+    insert(ge.getPosition().x, ge.getPosition().y, ge);
   }
 
   public void render(float w, float h) {
@@ -101,71 +120,16 @@ public class QuadTree {
     render(n.SE, x + halfWidth, y + halfHeight, halfWidth, halfHeight);
   }
 
-  public void remove(float x, float y) {
-    root = remove(root, x, y);
-  }
-
-  private Node remove(Node n, float x, float y) {
-    if (n == null) {
-      return null;
-    }
-
-    // Check if the current node's coordinates match the target coordinates
-    if (eq(n.x, x) && eq(n.y, y)) {
-      collisionMap.keySet().remove(n.value);
-      return null;  // Node found, return null to remove it
-    }
-
-    // Recurse into appropriate sub-quadrant based on coordinates
-    if (x < n.x && y < n.y) {
-      n.SW = remove(n.SW, x, y);
-    } else if (x < n.x && !(y < n.y)) {
-      n.NW = remove(n.NW, x, y);
-    } else if (!(x < n.x) && y < n.y) {
-      n.SE = remove(n.SE, x, y);
-    } else if (!(x < n.x) && !(y < n.y)) {
-      n.NE = remove(n.NE, x, y);
-    }
-
-    return n;  // Return the updated node after removing or not
-  }
-
   private static final float EPSILON = 1e-6f;
 
   private boolean eq(float a, float b) {
     return Math.abs(a - b) < EPSILON;
   }
 
-  private List<Node> getChildren(List<Node> children, Node n) {
-    if (n == null) {
-      return children;
-    }
-    if (n.isLeaf) {
-      children.add(n);
-    } else {
-      if (n.SE != null) {
-        getChildren(children, n.SE);
-      }
-      if (n.SW != null) {
-        getChildren(children, n.SW);
-      }
-      if (n.NE != null) {
-        getChildren(children, n.NE);
-      }
-      if (n.NW != null) {
-        getChildren(children, n.NW);
-      }
-    }
-    return children;
-  }
-
   private Node insert(Node n, float x, float y, GameEntity cc) {
     if (n == null) {
-      Node node = new Node(x, y, cc);
-      collisionMap.put(cc, node);
-      return node;
+      return new Node(x, y, cc);
     }
-    n.isLeaf = false;
     if (x < n.x && y < n.y) {
       n.SW = insert(n.SW, x, y, cc);
     } else if (x < n.x && !(y < n.y)) {
@@ -178,41 +142,39 @@ public class QuadTree {
     return n;
   }
 
-  public Node find(Quad q) {
-    return find(root, q);
+  public List<Node> find(Quad q) {
+    return find(new LinkedList<>(), root, q);
   }
 
-  private Node find(Node n, Quad q) {
+  private List<Node> find(List<Node> nodes, Node n, Quad q) {
     if (n == null) {
-      return null;
+      return nodes;
     }
 
-    Rectangle r = q.getBounds();
+    float xmin = q.x;
+    float ymin = q.y;
+    float xmax = q.w + q.x;
+    float ymax = q.h + q.y;
 
-    float xmin = r.x;
-    float ymin = r.y;
-    float xmax = r.width + r.x;
-    float ymax = r.height + r.y;
-
-    if (r.contains(n.x, n.y) && n.isLeaf) {
-      //LOGGER.debug("Found: ({},{})", n.x, n.y);
-      return n;
+    if (q.contains(n.x, n.y)) {
+      nodes.add(n);
+      return nodes;
     }
 
     if (xmin < n.x && ymin < n.y) {
-      return find(n.SW, q);
+      return find(nodes, n.SW, q);
     }
     if (xmin < n.x && !(ymax <= n.y)) {
-      return find(n.NW, q);
+      return find(nodes, n.NW, q);
     }
     if (!(xmax <= n.x) && ymax < n.y) {
-      return find(n.SE, q);
+      return find(nodes, n.SE, q);
     }
     if (!(xmax <= n.x) && !(ymax <= n.y)) {
-      return find(n.NE, q);
+      return find(nodes, n.NE, q);
     }
 
-    return null; // Handle case when no conditions match
+    return nodes; // Handle case when no conditions match
   }
 
 }

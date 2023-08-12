@@ -15,6 +15,7 @@ public class Constants {
   public static final String PNG_EXT = ".png";
   public static final double EPSILON = 1e-6;
   public static final String PROPERTY_FILE_NAME = "/engine.properties";
+  public static final String EIGHT_BIT_FONT = "/assets/fonts/8bit.ttf";
 
   /**
    * The maximum number of entities of any given type.
@@ -40,7 +41,8 @@ public class Constants {
       .getFloatProperty("game.z_near", 0.1f);
   public static final float FOV = (float) Math.toRadians(
       Main.getPropertyManager().getFloatProperty("game.fov", 70f));
-
+  public static boolean DEBUG = Main.getPropertyManager().getBooleanProperty("game.debug",
+      false);
   /**
    * Unused constructor.
    */

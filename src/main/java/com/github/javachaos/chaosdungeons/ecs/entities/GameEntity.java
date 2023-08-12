@@ -1,10 +1,11 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
+import com.github.javachaos.chaosdungeons.ecs.components.render.DebugCollisionRenderer;
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import com.github.javachaos.chaosdungeons.graphics.Texture;
 import java.util.HashMap;
@@ -29,23 +30,45 @@ public abstract class GameEntity extends Entity {
   protected static final Map<String, Texture> textureMap = new HashMap<>();
   protected SpriteComponent sprite;
   protected CollisionComponent collisionComponent;
+  private DebugCollisionRenderer dcr;
+  private final SpawnData spawnData;
+
+  public GameEntity(String texturePath) {
+    this(texturePath, new SpawnData.Builder().build());
+  }
 
   /**
    * Create a game entity.
    */
-  public GameEntity(String texturePath) {
+  public GameEntity(String texturePath, SpawnData data) {
     super();
-    this.rotationQuaternion = new Quaternionf();
+    this.spawnData = data;
+    this.rotationQuaternion = new Quaternionf().rotationXYZ(
+        data.getRotation().x,
+        data.getRotation().y,
+        data.getRotation().z);
     this.texturePath = texturePath;
     this.modelTransform = new Matrix4f();
   }
 
-  public SpriteComponent getSprite() {
-    return sprite;
-  }
-
-  public CollisionComponent getCollisionComponent() {
-    return collisionComponent;
+  /**
+   * Create a new game entity with initial pos, rotation, and scale.
+   *
+   * @param texturePath texture for this game entity
+   * @param pos initial position of this game entity
+   * @param rot initial rotation of this game entity
+   * @param scale initial scale of this game entity
+   */
+  public GameEntity(String texturePath,
+                    Vector3f pos, Vector3f rot, Vector3f scale,
+                    Vector3f initialV, Vector3f initialAngularVelocity) {
+    this(texturePath, new SpawnData.Builder()
+        .setPosition(pos)
+        .setRotation(rot)
+        .setScale(scale)
+        .setInitialVelocity(initialV)
+        .setAngularVelocity(initialAngularVelocity)
+        .build());
   }
 
   /**
@@ -57,8 +80,11 @@ public abstract class GameEntity extends Entity {
    * @param scale initial scale of this game entity
    */
   public GameEntity(String texturePath, Vector3f pos, Vector3f rot, Vector3f scale) {
-    this(texturePath);
-    updateModelMatrix(pos, rot, scale);
+    this(texturePath, new SpawnData.Builder()
+        .setPosition(pos)
+        .setRotation(rot)
+        .setScale(scale)
+        .build());
   }
 
   @Override
@@ -67,10 +93,18 @@ public abstract class GameEntity extends Entity {
       textureMap.put(texturePath, new Texture(texturePath));
     }
     sprite = new SpriteComponent(new SpriteModel(textureMap.get(texturePath), this));
-    collisionComponent = new CollisionComponent(
-        new Quad(getPosition().x,
-        getPosition().y, 2, 2), new GravityComponent(1.0, 1.0, new Vector3f()));
+    dcr = new DebugCollisionRenderer(spawnData.getShape());
+    GravityComponent grav = new GravityComponent(
+        spawnData.getMass(),
+        spawnData.getRestitution(),
+        spawnData.getInitialVelocity(),
+        spawnData.getAngularVelocity(),
+        spawnData.getGravitationFactor());
+    collisionComponent = new CollisionComponent(spawnData.getShape(), grav);
+    addComponent(dcr);
     addComponent(sprite);
+    addComponent(grav);
+    addComponent(collisionComponent);
   }
 
   /**
@@ -100,6 +134,14 @@ public abstract class GameEntity extends Entity {
     modelTransform.identity();
     modelTransform.translate(position).rotate(rotation)
         .scale(scale);
+  }
+
+  public SpriteComponent getSprite() {
+    return sprite;
+  }
+
+  public CollisionComponent getCollisionComponent() {
+    return collisionComponent;
   }
 
   /**
@@ -160,9 +202,9 @@ public abstract class GameEntity extends Entity {
    * @param dt the delta time.
    */
   public void render(float dt) {
-    //TODO restructure and clean this up better. A better implementation could be used here.
-    // or possibly refactor the whole project as the complexity is high.
-    // Would prefer a simpler project structure.
     sprite.render(dt);
+    if (dcr != null && Constants.DEBUG) {
+      dcr.render(dt);
+    }
   }
 }

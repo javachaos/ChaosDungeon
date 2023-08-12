@@ -1,6 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.PlayerEntity;
 import com.github.javachaos.chaosdungeons.ecs.entities.TextEntity;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.FireballEntityFactory;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.RandomFireballSpawnDataFactory;
@@ -25,7 +27,8 @@ public class RenderSystem extends System {
 
   @Override
   public void update(float dt) { // update all entities with a render component.
-    getEntities().stream().filter(c -> c.hasComponent(RenderComponent.class))
+    gameEntityList.stream().filter(
+        c -> c.hasComponent(RenderComponent.class))
         .forEach(e -> e.render(dt));
   }
 
@@ -35,9 +38,9 @@ public class RenderSystem extends System {
     Spawner<Fireball> s = new Spawner<>(
         fireballEntityFactory,
         new RandomFireballSpawnDataFactory());
-
     addEntity(s, false);
-    addEntity(new TextEntity("/assets/fonts/8bit.ttf"), false);
+    addEntity(new PlayerEntity(), false);
+    addEntity(new TextEntity(Constants.EIGHT_BIT_FONT), false);
   }
 
   @Override

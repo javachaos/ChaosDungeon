@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import java.util.Random;
 import org.joml.Vector3f;
 
@@ -20,10 +21,14 @@ public class RandomFireballSpawnDataFactory implements SpawnDataFactory {
             (rand.nextFloat()),
             (rand.nextFloat())))
         .setInitialVelocity(new Vector3f(
-            -(rand.nextFloat() * 16.0f),
-            (rand.nextFloat() * 3.0f),
+            -(rand.nextFloat()),
+            (rand.nextFloat()),
             0f))
-        .setMaxSpawns(1000)
+        .setShape(new QuadTree.Quad(-0.25f, -0.25f, .5f, .5f))
+        .setMaxSpawns(100)
+        .setMass(1.0f)
+        .setGravitationFactor(0.00001f)
+        .setRestitution(1.0f)
         .build();
   }
 }

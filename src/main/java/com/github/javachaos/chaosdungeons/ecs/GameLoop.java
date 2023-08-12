@@ -23,8 +23,8 @@ public class GameLoop {
   public void init(GameWindow window) {
     systems = new ArrayList<>();
     renderSystem = new RenderSystem(window);
-    systems.add(renderSystem);
     systems.add(new PhysicsSystem(window));
+    systems.add(renderSystem);
     systems.add(new LoadSystem(window));
     // add more later
     for (System system : systems) {
@@ -36,8 +36,8 @@ public class GameLoop {
   /**
    * Update render system.
    */
-  public void render() {
-    renderSystem.update((float) 0.0);
+  public void render(float dt) {
+    renderSystem.update(dt);
   }
 
   /**
@@ -46,6 +46,7 @@ public class GameLoop {
    * @param dt the time between render and update calls.
    */
   public void update(double dt) {
+    GameWindow.getCamera().update();
     systems.stream().filter(s -> !(s instanceof RenderSystem))
           .forEach(t -> t.update(dt));
   }

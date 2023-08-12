@@ -1,5 +1,9 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
+
 /**
  * Player entity class.
  */
@@ -10,16 +14,25 @@ public class PlayerEntity extends GameEntity {
    * Create a new player entity.
    */
   public PlayerEntity() {
-    super("assets/textures/player.png");
+    super("assets/textures/player.png",
+        new SpawnData.Builder()
+            .setRestitution(10f)
+            .setMass(4f)
+            .setGravitationFactor(0f)
+            .setMaxSpawns(1)
+            .setSpawnRate(1)
+            .setShape(new QuadTree.Quad(0, 0, 1, 1))
+            .build());
   }
 
   @Override
   public void init() {
+    super.init();
   }
 
   @Override
   public void update(float dt) {
-
+    updateModelMatrix(GameWindow.getCamera().getPosition(), getRotation(), getScale());
   }
 
   @Override
@@ -28,11 +41,9 @@ public class PlayerEntity extends GameEntity {
 
   @Override
   public void onAdded(Entity e) {
-
   }
 
   @Override
   public void onRemoved(Entity e) {
-
   }
 }

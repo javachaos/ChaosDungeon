@@ -1,5 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.util.Objects;
 import org.joml.Vector3f;
 
@@ -13,6 +15,10 @@ public class SpawnData {
   private final Vector3f scale;
   private final Vector3f angularVelocity;
   private final Vector3f initialVelocity;
+  private float gravitationFactor;
+  private QuadTree.Quad shape;
+  private float mass;
+  private float restitution;
   private float spawnRate = 1.0f;
   private int maxSpawns;
 
@@ -33,6 +39,10 @@ public class SpawnData {
                     Vector3f scale,
                     Vector3f angularVelocity,
                     Vector3f initialVelocity,
+                    QuadTree.Quad shape,
+                    float mass,
+                    float gravitationFactor,
+                    float restitution,
                     float spawnRate,
                     int maxSpawns) {
     this.angularVelocity = Objects.requireNonNullElseGet(angularVelocity, () -> new Vector3f(0));
@@ -40,6 +50,16 @@ public class SpawnData {
     this.rotation = Objects.requireNonNullElseGet(rotation, () -> new Vector3f(0));
     this.position = Objects.requireNonNullElseGet(position, () -> new Vector3f(0));
     this.scale = Objects.requireNonNullElseGet(scale, () -> new Vector3f(1));
+    this.shape = Objects.requireNonNullElseGet(shape, () -> new QuadTree.Quad(0, 0, 1, 1));
+    if (mass > 0) {
+      this.mass = mass;
+    }
+    if (restitution > 0) {
+      this.restitution = restitution;
+    }
+    if (gravitationFactor > 0) {
+      this.gravitationFactor = gravitationFactor;
+    }
     if (spawnRate > 0) {
       this.spawnRate = spawnRate;
     }
@@ -67,6 +87,10 @@ public class SpawnData {
     return new Vector3f(position);
   }
 
+  public QuadTree.Quad getShape() {
+    return shape;
+  }
+
   public float getSpawnRate() {
     return spawnRate;
   }
@@ -79,6 +103,18 @@ public class SpawnData {
     maxSpawns--;
   }
 
+  public float getMass() {
+    return mass;
+  }
+
+  public float getGravitationFactor() {
+    return gravitationFactor;
+  }
+
+  public float getRestitution() {
+    return restitution;
+  }
+
   /**
    * Builder class.
    */
@@ -88,6 +124,10 @@ public class SpawnData {
     private Vector3f scale;
     private Vector3f angularVelocity;
     private Vector3f initialVelocity;
+    private QuadTree.Quad shape;
+    private float gravitationFactor;
+    private float mass;
+    private float restitution;
     private float spawnRate = 1.0f;
     private int maxSpawns = 1;
 
@@ -101,6 +141,10 @@ public class SpawnData {
       position = new Vector3f();
       angularVelocity = new Vector3f();
       initialVelocity = new Vector3f();
+      shape = new QuadTree.Quad(0, 0, 1, 1);
+      gravitationFactor = 1.0f;
+      mass = 1.0f;
+      restitution = 1.0f;
     }
 
     public Builder setAngularVelocity(Vector3f angularVelocity) {
@@ -143,6 +187,26 @@ public class SpawnData {
       return this;
     }
 
+    public Builder setMass(float mass) {
+      this.mass = mass;
+      return this;
+    }
+
+    public Builder setRestitution(float restitution) {
+      this.restitution = restitution;
+      return this;
+    }
+
+    public Builder setGravitationFactor(float gravitationFactor) {
+      this.gravitationFactor = gravitationFactor;
+      return this;
+    }
+
+    public Builder setShape(QuadTree.Quad shape) {
+      this.shape = shape;
+      return this;
+    }
+
     /**
      * Build this builder.
      *
@@ -150,8 +214,9 @@ public class SpawnData {
      */
     public SpawnData build() {
       // Create and return the SpawnData object
-      return new SpawnData(position, rotation, scale,
-          angularVelocity, initialVelocity,
+      return new SpawnData(rotation, position, scale,
+          angularVelocity, initialVelocity, shape,
+          mass, gravitationFactor, restitution,
           spawnRate, maxSpawns);
     }
   }

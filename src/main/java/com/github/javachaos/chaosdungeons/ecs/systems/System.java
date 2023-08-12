@@ -2,7 +2,6 @@ package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.constants.Constants;
-import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -12,19 +11,18 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * System class for ECS.
  */
 @SuppressWarnings("unused")
 public abstract class System {
-
-  protected static QuadTree collisionQuadtree = new QuadTree();
   private static final Map<Class<? extends GameEntity>, AutoDiscardingDeque<GameEntity>> entityMap =
       new ConcurrentHashMap<>();
+  protected static Deque<GameEntity> gameEntityList;
 
   public System(GameWindow window) {
+    gameEntityList = new AutoDiscardingDeque<>();
   }
 
   /**
@@ -35,7 +33,8 @@ public abstract class System {
   protected abstract void update(float dt);
 
   public void update(double dt) { // update all systems.
-    getEntities().forEach(e -> e.update(dt));
+    gameEntityList = getEntities();
+    gameEntityList.forEach(e -> e.update(dt));
     update((float) dt);
   }
 
@@ -47,7 +46,6 @@ public abstract class System {
    *              of this list of entities
    */
   public static <T extends GameEntity> void addEntity(T e, boolean front) {
-    collisionQuadtree.insert(e.getPosition().x, e.getPosition().y, e);
     if (!entityMap.containsKey(e.getClass())) {
       entityMap.put(e.getClass(), new AutoDiscardingDeque<>(Constants.MAX_ENTITIES));
     }

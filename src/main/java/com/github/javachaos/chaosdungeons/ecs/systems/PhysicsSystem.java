@@ -1,14 +1,16 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Quad;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.gui.WindowSize;
 import java.util.Deque;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,15 +20,12 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("unused")
 public class PhysicsSystem extends System {
 
+  private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
   float prevX;
   float prevY;
-
   float maxX = Float.MIN_VALUE;
   float maxY = Float.MIN_VALUE;
-
-  long dtacc;
-
-  private static final Logger LOGGER = LogManager.getLogger(PhysicsSystem.class);
+  private QuadTree collisionQuadtree;
 
   public PhysicsSystem(GameWindow window) {
     super(window);
@@ -47,45 +46,38 @@ public class PhysicsSystem extends System {
 
   @Override
   public void update(float dt) {
-    getEntities().forEach(e -> {
-      prevX = e.getPosition().x;
-      prevY = e.getPosition().y;
-      e.update(dt);
-      collisionQuadtree.updateNode(
-          prevX,
-          prevY,
-          e.getPosition().x,
-          e.getPosition().y, e);
-      QuadTree.Node n = collisionQuadtree.find(new Quad(prevX, prevY, e.getScale().x,
-          e.getScale().y));
-      if (e.getCollisionComponent() != null && n != null && n.getValue() != null) {
-        e.getCollisionComponent().handleCollision(n.getValue(),
-            n.getValue().getCollisionComponent());
+    buildQuadTree();
+    for (GameEntity e : gameEntityList) {
+      CollisionComponent cc = e.getCollisionComponent();
+      QuadTree.Quad v;
+      if (cc != null) {
+        v = cc.getShape();
+        if (v != null) {
+          for (QuadTree.Node n : collisionQuadtree.find(v)) {
+            if (n == null) {
+              return;
+            }
+            GameEntity ge = n.getValue();
+            if (ge.getCollisionComponent() != null) {
+              ge.getCollisionComponent().onCollision(e, e.getCollisionComponent());
+            }
+          }
+        }
       }
-      //TODO get something working...
-    });
-    collisionQuadtree.render(
-        GameWindow.getWindowSize().getWidth(),
-        GameWindow.getWindowSize().getHeight());
-    // update all entities with a PhysicsComponent and handle collisions
-    //Deque<GameEntity> entities = getEntities();
-//    for (GameEntity e : entities) {
-//      e.update(dt);
-//      for (GameEntity f : entities) {
-//        if (e.equals(f)) {
-//          break;
-//        }
-//          CollisionComponent pc1 = e.getCollisionComponent();
-//          CollisionComponent pc2 = f.getCollisionComponent();
-//          if (pc1 != null) {
-//            pc1.handleCollision(f);
-//          }
-//          if (pc2 != null) {
-//            pc2.handleCollision(e);
-//          }
-//        }
-//      }
-//    }
+    }
+    if (Constants.DEBUG) {
+      WindowSize ws = GameWindow.getWindowSize();
+      collisionQuadtree.render(512, 512);
+    }
+  }
+
+  private void buildQuadTree() {
+    collisionQuadtree = new QuadTree();
+    for (GameEntity e : gameEntityList) {
+      if (e.hasComponent(CollisionComponent.class)) {
+        collisionQuadtree.insert(e);
+      }
+    }
   }
 
   @Override

@@ -61,7 +61,7 @@ public class GravityComponent extends PhysicsComponent {
   @Override
   public void update(double dt) {
     super.update(dt);
-    super.applyForce(0.0, fg * GRAVITATIONAL_FACTOR);
+    applyForce(0.0, fg * GRAVITATIONAL_FACTOR);
   }
 
   @Override

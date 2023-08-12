@@ -1,13 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
-import com.github.javachaos.chaosdungeons.collision.CollisionData;
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.geometry.SatCollisionDetector;
-import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import java.awt.geom.Point2D;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,59 +13,30 @@ public class CollisionComponent extends Component {
 
   private static final Logger LOGGER = LogManager.getLogger(CollisionComponent.class);
 
-  private Vertex shape;
-  private PhysicsComponent physicsComponent;
+  private QuadTree.Quad shape;
+  private final PhysicsComponent physicsComponent;
 
   /**
    * Create a new component.
    */
-  public CollisionComponent(Vertex shape, PhysicsComponent physicsComponent) {
+  public CollisionComponent(QuadTree.Quad shape, PhysicsComponent physicsComponent) {
     super();
     this.shape = shape;
     this.physicsComponent = physicsComponent;
   }
 
   /**
-   *  Collision handling method.
-   */
-  public void handleCollision(GameEntity otherEntity, CollisionComponent other) {
-    if (other != null) {
-      // Signal the collision to the CollisionComponent
-      other.onCollision(otherEntity, physicsComponent);
-    }
-  }
-
-  /**
    * Check if this collision component is colliding with another collision component.
    *
    * @param other the other entity
-   * @param otherPhys the other entities physics component
+   * @param otherCc the other entities collision component
    */
-  public void onCollision(GameEntity other, PhysicsComponent otherPhys) {
-    CollisionComponent otherCollision = other.getCollisionComponent();
-    CollisionData cdata = SatCollisionDetector.checkCollisionDelaunay(shape,
-        otherCollision.getShape());
-    if (cdata.isColliding()) {
+  public void onCollision(GameEntity other, CollisionComponent otherCc) {
+    PhysicsComponent otherPhys = otherCc.physicsComponent;
+    GameEntity thisGe = (GameEntity) getEntity();
+    if (thisGe != other && shape.intersects(otherCc.getShape())) {
       LOGGER.debug("Collision detected between {} and {}", getEntity(), other);
-      PhysicsComponent pyThis = getEntity().getComponent(PhysicsComponent.class);
-      if (!otherPhys.isStatic()) {
-        otherPhys.applyForce(pyThis.getVx(), pyThis.getVy());
-        pyThis.applyForce(otherPhys.getVx(), otherPhys.getVy());
-      } else {
-        double normalX = cdata.getCollisionNormal().getX();
-        double normalY = cdata.getCollisionNormal().getY();
-        double relativeVelocityX = pyThis.getVx() - otherPhys.getVx();
-        double relativeVelocityY = pyThis.getVy() - otherPhys.getVy();
-        double dotProduct = LinearMath.dotProduct(cdata.getCollisionNormal(),
-            new Point2D.Double(relativeVelocityX, relativeVelocityY));
-        double dotProductSum = pyThis.getMass() + otherPhys.getMass();
-        // Calculate impulse
-        double impulse = -(1 + pyThis.getRestitution()) * dotProduct / dotProductSum;
-        // Update velocity based on collision response (bounce off stationary entity)
-        double impulseX = impulse * normalX;
-        double impulseY = impulse * normalY;
-        pyThis.applyForce(impulseX, impulseY);
-      }
+      physicsComponent.applyForce(otherPhys.getVx(), otherPhys.getVy());
     }
   }
 
@@ -79,12 +45,15 @@ public class CollisionComponent extends Component {
    *
    * @return the shape of this collision component
    */
-  public Vertex getShape() {
+  public QuadTree.Quad getShape() {
     return shape;
   }
 
   @Override
-  public void update(double dt) { //Unused
+  public void update(double dt) {
+    shape.x = ((GameEntity) getEntity()).getPosition().x;
+    shape.y = ((GameEntity) getEntity()).getPosition().y;
+    physicsComponent.update(dt);
   }
 
   @Override
@@ -94,7 +63,6 @@ public class CollisionComponent extends Component {
 
   @Override
   public void onAdded(Entity e) {
-
   }
 
   @Override

@@ -169,8 +169,10 @@ public class PhysicsComponent extends Component {
       if (angularVelocity.z < 0) {
         angularVelocity.z = 0;
       }
-      float angularMomentumDamping = 0.995f;
-      angularVelocity.mul(angularMomentumDamping);
+      float angularMomentum = 0.995f;
+      float momentum = 0.9998f;
+      angularVelocity.mul(angularMomentum);
+      velocity.mul(momentum);
       getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
@@ -179,10 +181,6 @@ public class PhysicsComponent extends Component {
       double newY = getPosition().y + newVy * dt + 0.5 * newVy * dt * dt;
       double newZ = getPosition().z + newVz * dt + 0.5 * newVz * dt * dt;
       GameEntity ge = ((GameEntity) getEntity());
-      //TODO come up with a method, to scan for entities in a box
-      // around the entity ge to simplify the number of collision checks
-      // or save entities with collision in a special data structure to
-      // make this more convenient. Quadtree or something maybe.
       ge.updateModelMatrix(
           new Vector3f(
               (float) newX,

@@ -89,38 +89,6 @@ public class Vertex implements Iterable<Vertex> {
     } while (current != vertices);
   }
 
-
-  /**
-    * Get the bounding box of this polygon.
-    *
-    * @return the Rectangle2D which defines the bounding box of this polygon.
-    */
-  public Rectangle getBounds() {
-    double maxY = Double.MIN_VALUE;
-    double minY = Double.MAX_VALUE;
-    double maxX = Double.MIN_VALUE;
-    double minX = Double.MAX_VALUE;
-    Vertex current = this;
-
-    do {
-      Point2D curr = current.getPoint();
-      double x = curr.getX();
-      double y = curr.getY();
-      maxY = Math.max(maxY, y);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x);
-      minX = Math.min(minX, x);
-      current = current.next;
-    } while (current != this);
-
-    double x = minX;
-    double y = minY;
-    double w = maxX - x;
-    double h = maxY - y;
-
-    return new Rectangle((int) x, (int) y, (int) w, (int) h);
-  }
-
   private static boolean epsEquals(double d1, double d2) {
     return Math.abs(d1 - d2) < EPSILON;
   }
@@ -161,6 +129,37 @@ public class Vertex implements Iterable<Vertex> {
     } else {
       return (num1 > 0 && num2 > 0) || (num1 < 0 && num2 < 0);
     }
+  }
+
+  /**
+   * Get the bounding box of this polygon.
+   *
+   * @return the Rectangle2D which defines the bounding box of this polygon.
+   */
+  public Rectangle getBounds() {
+    double maxY = Double.MIN_VALUE;
+    double minY = Double.MAX_VALUE;
+    double maxX = Double.MIN_VALUE;
+    double minX = Double.MAX_VALUE;
+    Vertex current = this;
+
+    do {
+      Point2D curr = current.getPoint();
+      double x = curr.getX();
+      double y = curr.getY();
+      maxY = Math.max(maxY, y);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      minX = Math.min(minX, x);
+      current = current.next;
+    } while (current != this);
+
+    double x = minX;
+    double y = minY;
+    double w = maxX - x;
+    double h = maxY - y;
+
+    return new Rectangle((int) x, (int) y, (int) w, (int) h);
   }
 
   /**
@@ -242,8 +241,8 @@ public class Vertex implements Iterable<Vertex> {
    * Get the concavity of the vertex b.
    *
    * @return 0 if the point is co-linear with its neighbours
-   *         1 if the point is concave
-   *        -1 if the point is convex
+   * 1 if the point is concave
+   * -1 if the point is convex
    */
   public int concavity() {
     Vertex b = this;
@@ -301,6 +300,21 @@ public class Vertex implements Iterable<Vertex> {
 
   public Point2D get(int i) {
     return getVertex(i).getPoint();
+  }
+
+  /**
+   * Translate this shape by x and y.
+   *
+   * @param x the x pos
+   * @param y the y pos
+   */
+  public void translate(double x, double y) {
+    Vertex current = this;
+    do {
+      current.px += x;
+      current.py += y;
+      current = current.next;
+    } while (current != this);
   }
 
   /**
@@ -517,6 +531,7 @@ public class Vertex implements Iterable<Vertex> {
   public Iterator<Vertex> iterator() { //Test this
     return new Iterator<>() {
       final Vertex curr = Vertex.this;
+
       @Override
       public boolean hasNext() {
         return Vertex.this.next != curr;
