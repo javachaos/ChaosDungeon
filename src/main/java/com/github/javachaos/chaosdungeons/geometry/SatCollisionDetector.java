@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.geometry;
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
 import com.github.javachaos.chaosdungeons.collision.CollisionData;
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import javax.swing.SwingUtilities;
+import org.joml.Vector2f;
 
 /**
  * Separating Axis Theorem collision detector.
@@ -137,19 +139,39 @@ public class SatCollisionDetector {
    * @return collision data
    */
   public static CollisionData checkCollisionDelaunay(Vertex polygon1, Vertex polygon2) {
-    List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1.getPoints());
-    List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2.getPoints());
-
+    List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(
+        polygon1.getPoints());
+    List<Edge> edges1 = DelaunayTriangulation.constrainDelaunayTriangulation(
+        triangles1, polygon1);
+    List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(
+        polygon2.getPoints());
+    List<Edge> edges2 = DelaunayTriangulation.constrainDelaunayTriangulation(
+        triangles1, polygon2);
+   // QuadTree<Edge> qt = new QuadTree<>(new QuadTree.Quad());
+//    for (Edge e1 : edges1) {
+//      qt.insert(
+//          (float) e1.getA().getX(),
+//          (float) e1.getA().getY(),
+//          e1);
+//    }
+//    for (Edge e2 : edges2) {
+//      List<QuadTree<Edge>.Node> edgeList = qt.find(new QuadTree.Quad(
+//          (float) e2.getA().getX(),
+//          (float) e2.getA().getY(),
+//          (float) e2.getB().getX(),
+//          (float) e2.getB().getY()));
+//    }
+    //TODO refine and test, then implement.
     for (Triangle t : triangles1) {
       for (Triangle t2 : triangles2) {
         if (checkCollision(t, t2)) {
-          Point2D norm = calculateCollisionNormal(t, t2);
+          Vector2f norm = calculateCollisionNormal(t, t2);
           double depth = calculatePenetrationDepth(t, t2, norm);
           return new CollisionData(norm, depth);
         }
       }
     }
-    return new CollisionData(new Point2D.Double(0, 0), 0.0);
+    return new CollisionData(new Vector2f(), 0.0);
   }
 
   private static List<Point2D> getAxes(Set<Point2D> polygon1, Set<Point2D> polygon2) {
@@ -250,7 +272,7 @@ public class SatCollisionDetector {
     return points;
   }
 
-  private static Point2D calculateCollisionNormal(Triangle t1, Triangle t2) {
+  private static Vector2f calculateCollisionNormal(Triangle t1, Triangle t2) {
     // Find the edge of t1 that is intersecting with t2
     Edge intersectionEdge = findIntersectionEdge(t1, t2);
     if (intersectionEdge != null) {
@@ -265,14 +287,14 @@ public class SatCollisionDetector {
         ny /= length;
       }
 
-      return new Point2D.Double(nx, ny);
+      return new Vector2f((float) nx, (float) ny);
     } else {
       return null;
     }
   }
 
   private static double calculatePenetrationDepth(Triangle t1, Triangle t2,
-                                                  Point2D collisionNormal) {
+                                                  Vector2f collisionNormal) {
     // Find the edge of t1 that is intersecting with t2
     Edge intersectionEdge = findIntersectionEdge(t1, t2);
 
@@ -281,7 +303,7 @@ public class SatCollisionDetector {
       // Project the vertices of t1 onto the collision normal to find the minimum overlap
       double minOverlap = Double.POSITIVE_INFINITY;
       for (Point2D point : t1.getPoints()) {
-        double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+        double projection = collisionNormal.x * point.getX() + collisionNormal.y
             * point.getY();
         double overlap = projection - intersectionEdge.projectPoint(point);
         minOverlap = Math.min(minOverlap, overlap);
@@ -289,7 +311,7 @@ public class SatCollisionDetector {
 
       // Project the vertices of t2 onto the collision normal to find the minimum overlap
       for (Point2D point : t2.getPoints()) {
-        double projection = collisionNormal.getX() * point.getX() + collisionNormal.getY()
+        double projection = collisionNormal.x * point.getX() + collisionNormal.y
             * point.getY();
         double overlap = intersectionEdge.projectPoint(point) - projection;
         minOverlap = Math.min(minOverlap, overlap);

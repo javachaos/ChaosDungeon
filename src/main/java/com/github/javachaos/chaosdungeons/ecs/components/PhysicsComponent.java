@@ -2,11 +2,9 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Quaternionf;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 /**
@@ -15,24 +13,23 @@ import org.joml.Vector3f;
 @SuppressWarnings("unused")
 public class PhysicsComponent extends Component {
 
+  private static final Logger LOGGER = LogManager.getLogger(PhysicsComponent.class);
   private final Vector3f velocity;
   private final Vector3f angularVelocity;
-  private Vector3f angularAcceleration;
   private final Vector3f prevPos;
   private final double mass;
   private final double restitution; // Coefficient of restitution for bounciness
+  private final Quaternionf prevRotation;
+  private Vector3f angularAcceleration;
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
   private GameEntity gameEntity;
-
-  private static final Logger LOGGER = LogManager.getLogger(PhysicsComponent.class);
-  private final Quaternionf prevRotation;
 
   /**
    * Create a new physics component.
    *
-   * @param mass the mass of this object
+   * @param mass        the mass of this object
    * @param restitution the restitution
-   * @param isStatic true if this is a static object
+   * @param isStatic    true if this is a static object
    */
   public PhysicsComponent(double mass, double restitution, Vector3f initialVelocity,
                           boolean isStatic) {
@@ -49,9 +46,9 @@ public class PhysicsComponent extends Component {
   /**
    * Create a new physics component.
    *
-   * @param mass the mass of this object
+   * @param mass        the mass of this object
    * @param restitution the restitution
-   * @param isStatic true if this is a static object
+   * @param isStatic    true if this is a static object
    */
   public PhysicsComponent(double mass, double restitution,
                           Vector3f initialVelocity, Vector3f initialAngularVelocity,
@@ -99,9 +96,9 @@ public class PhysicsComponent extends Component {
   public Vector3f getPosition() {
     return gameEntity.getPosition();
   }
-  
+
   public void setPosition(Vector3f pos) {
-	  gameEntity.setPosition(pos);
+    gameEntity.setPosition(pos);
   }
 
   public Vector3f getScale() {
@@ -129,9 +126,9 @@ public class PhysicsComponent extends Component {
       velocity.z += (float) az;
     }
   }
-  
+
   public void applyForce(Vector3f f) {
-	  applyForce(f.x, f.y, f.z);
+    applyForce(f.x, f.y, f.z);
   }
 
   /**
@@ -143,17 +140,17 @@ public class PhysicsComponent extends Component {
   public void applyForce(double forceX, double forceY) {
     applyForce(forceX, forceY, 0);
   }
-  
+
   public void applyImpulse(Vector3f impulse) {
-	  velocity.add(impulse);
+    velocity.add(impulse);
   }
-  
+
   public float getInvMass() {
-      if (mass == 0) {
-          return 0;  // Infinite mass or immovable object
-      } else {
-          return (float) (1.0f / mass);
-      }
+    if (mass == 0) {
+      return 0;  // Infinite mass or immovable object
+    } else {
+      return (float) (1.0f / mass);
+    }
   }
 
   /**
@@ -169,7 +166,7 @@ public class PhysicsComponent extends Component {
     double az = forceZ / mass;
     angularVelocity.set(new Vector3f((float) ax, (float) ay, (float) az));
   }
-  
+
   /**
    * Verlet integration method to update position and velocity.
    *
@@ -197,7 +194,7 @@ public class PhysicsComponent extends Component {
       float momentumZ = (float) mass * velocity.z;
       angularVelocity.mul(angularMomentum);
       velocity.mul(drag);
-      
+
       getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
@@ -235,10 +232,10 @@ public class PhysicsComponent extends Component {
   }
 
   public Vector3f getVelocity() {
-	return velocity;
+    return velocity;
   }
-	
+
   public void setVelocity(Vector3f v1Prime) {
-	  this.velocity.set(v1Prime);
+    this.velocity.set(v1Prime);
   }
 }

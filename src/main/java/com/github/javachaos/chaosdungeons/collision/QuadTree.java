@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import java.util.LinkedList;
 import java.util.List;
 import org.joml.Vector3f;
@@ -13,8 +13,8 @@ import org.joml.Vector3f;
 /**
  * A simple PR quad tree for collision detection.
  */
-public class QuadTree {
-  
+public class QuadTree<T> {
+
   public static class Quad {
     public float x;
     public float y;
@@ -62,29 +62,38 @@ public class QuadTree {
     }
   }
 
-  private Node root;
-
-  public static class Node {
+  public class Node {
     float x;
     float y;
     Node NW, NE, SE, SW;
-    GameEntity value;
-    public GameEntity getValue() {
+    T value;
+    public T getValue() {
       return value;
     }
-    Node(float x, float y, GameEntity ge) {
+    Node(float x, float y, T ge) {
       this.value = ge;
       this.x = x;
       this.y = y;
     }
   }
 
-  public void insert(float x, float y, GameEntity value) {
-    root = insert(root, x, y, value);
+  private Quad boundary;
+
+  private Node root;
+
+  public QuadTree(Quad boundary) {
+    this.boundary = boundary;
   }
 
-  public void insert(GameEntity ge) {
-    insert(ge.getPosition().x, ge.getPosition().y, ge);
+  public QuadTree(float w, float h) {
+    Vector3f pos = GameWindow.getCamera().getPosition();
+    this.boundary = new Quad(pos.x, pos.y, w, h);
+  }
+
+  public void insert(float x, float y, T value) {
+    if (boundary.contains(x, y)) {
+      root = insert(root, x, y, value);
+    }
   }
 
   public void render(float w, float h) {
@@ -121,13 +130,7 @@ public class QuadTree {
     render(n.SE, x + halfWidth, y + halfHeight, halfWidth, halfHeight);
   }
 
-  private static final float EPSILON = 1e-6f;
-
-  private boolean eq(float a, float b) {
-    return Math.abs(a - b) < EPSILON;
-  }
-
-  private Node insert(Node n, float x, float y, GameEntity cc) {
+  private Node insert(Node n, float x, float y, T cc) {
     if (n == null) {
       return new Node(x, y, cc);
     }
@@ -144,11 +147,11 @@ public class QuadTree {
   }
 
   public List<Node> find(Quad q) {
-    return find(new LinkedList<>(), root, q);
+      return find(new LinkedList<>(), root, q);
   }
 
   private List<Node> find(List<Node> nodes, Node n, Quad q) {
-    if (n == null) {
+    if (n == null || !boundary.intersects(q)) {
       return nodes;
     }
 
@@ -159,20 +162,19 @@ public class QuadTree {
 
     if (q.contains(n.x, n.y)) {
       nodes.add(n);
-      return nodes;
     }
 
     if (xmin < n.x && ymin < n.y) {
-      return find(nodes, n.SW, q);
+      find(nodes, n.SW, q);
     }
     if (xmin < n.x && !(ymax <= n.y)) {
-      return find(nodes, n.NW, q);
+      find(nodes, n.NW, q);
     }
     if (!(xmax <= n.x) && ymax < n.y) {
-      return find(nodes, n.SE, q);
+      find(nodes, n.SE, q);
     }
     if (!(xmax <= n.x) && !(ymax <= n.y)) {
-      return find(nodes, n.NE, q);
+      find(nodes, n.NE, q);
     }
 
     return nodes; // Handle case when no conditions match

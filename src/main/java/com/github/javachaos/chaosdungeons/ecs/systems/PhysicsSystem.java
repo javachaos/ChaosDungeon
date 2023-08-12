@@ -25,7 +25,7 @@ public class PhysicsSystem extends System {
   float prevY;
   float maxX = Float.MIN_VALUE;
   float maxY = Float.MIN_VALUE;
-  private QuadTree collisionQuadtree;
+  private QuadTree<GameEntity> collisionQuadtree;
 
   public PhysicsSystem(GameWindow window) {
     super(window);
@@ -54,7 +54,7 @@ public class PhysicsSystem extends System {
         v = cc.getShape();
         if (v != null) {
           for (QuadTree.Node n : collisionQuadtree.find(v)) {
-            GameEntity ge = n.getValue();
+            GameEntity ge = (GameEntity) n.getValue();
             CollisionComponent occ = ge.getCollisionComponent();
             occ.onCollision(e, e.getCollisionComponent());
           }
@@ -68,10 +68,14 @@ public class PhysicsSystem extends System {
   }
 
   private void buildQuadTree() {
-    collisionQuadtree = new QuadTree();
+    WindowSize ws = GameWindow.getWindowSize();
+    collisionQuadtree = new QuadTree<>(ws.getWidth(), ws.getHeight());
     for (GameEntity e : gameEntityList) {
       if (e.hasComponent(CollisionComponent.class)) {
-        collisionQuadtree.insert(e);
+        collisionQuadtree.insert(
+            e.getPosition().x,
+            e.getPosition().y,
+            e);
       }
     }
   }

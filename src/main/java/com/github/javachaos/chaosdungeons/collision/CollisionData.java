@@ -3,15 +3,16 @@ package com.github.javachaos.chaosdungeons.collision;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import org.joml.Vector2f;
 
 /**
  * CollisionData pojo.
  */
 @SuppressWarnings("unused")
 public class CollisionData {
-  private final Point2D collisionNormal; // The collision normal vector
+  private final Vector2f collisionNormal; // The collision normal vector
   private final double penetrationDepth; // The penetration depth of the collision
-  private final List<Point2D> contactPoints; // List of contact points (optional)
+  private final List<Vector2f> contactPoints; // List of contact points (optional)
   private final boolean isColliding;
 
   /**
@@ -20,7 +21,7 @@ public class CollisionData {
    * @param collisionNormal the collision normal vector
    * @param penetrationDepth the penetration depth
    */
-  public CollisionData(Point2D collisionNormal, double penetrationDepth) {
+  public CollisionData(Vector2f collisionNormal, double penetrationDepth) {
     this.collisionNormal = collisionNormal;
     this.penetrationDepth = penetrationDepth;
     this.contactPoints = new ArrayList<>();
@@ -35,11 +36,11 @@ public class CollisionData {
     return penetrationDepth;
   }
 
-  public List<Point2D> getContactPoints() {
+  public List<Vector2f> getContactPoints() {
     return contactPoints;
   }
 
-  public Point2D getCollisionNormal() {
+  public Vector2f getCollisionNormal() {
     return collisionNormal;
   }
 
