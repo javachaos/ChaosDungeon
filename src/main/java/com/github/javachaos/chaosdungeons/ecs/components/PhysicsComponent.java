@@ -24,8 +24,6 @@ public class PhysicsComponent extends Component {
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
   private GameEntity gameEntity;
 
-  private float MAX_SPEED = 1.5F;
-
   /**
    * Create a new physics component.
    *
@@ -147,14 +145,6 @@ public class PhysicsComponent extends Component {
     velocity.add(impulse);
   }
 
-  public float getInvMass() {
-    if (mass == 0) {
-      return 0;  // Infinite mass or immovable object
-    } else {
-      return (float) (1.0f / mass);
-    }
-  }
-
   /**
    * Apply an angular force to this physics object.
    *
@@ -169,6 +159,11 @@ public class PhysicsComponent extends Component {
     angularVelocity.set(new Vector3f((float) ax, (float) ay, (float) az));
   }
 
+  /**
+   * Clamp the velocity vector the maxSpeed.
+   *
+   * @param maxSpeed the max speed.
+   */
   public void clampVelocity(float maxSpeed) {
     // Clamp each component of the velocity vector separately
     velocity.x = Math.min(maxSpeed, Math.max(-maxSpeed, velocity.x));
@@ -197,11 +192,12 @@ public class PhysicsComponent extends Component {
       if (angularVelocity.z < 0) {
         angularVelocity.z = 0;
       }
-      float angularMomentum = 0.995f;
+      float angularDrag = 0.995f;
       float drag = 0.998f;
-      angularVelocity.mul(angularMomentum);
+      float maxSpeed = 1.5F;
+      angularVelocity.mul(angularDrag);
       velocity.mul(drag);
-      clampVelocity(MAX_SPEED);
+      clampVelocity(maxSpeed);
       getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
