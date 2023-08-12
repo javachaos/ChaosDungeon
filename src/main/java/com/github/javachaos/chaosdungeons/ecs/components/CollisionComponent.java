@@ -32,8 +32,17 @@ public class CollisionComponent extends Component {
    * @param otherCc the other entities collision component
    */
   public void onCollision(GameEntity other, CollisionComponent otherCc) {
+
+    float momentumX = (float) physicsComponent.getMass() * physicsComponent.getVelocity().x;
+    float momentumY = (float) physicsComponent.getMass() * physicsComponent.getVelocity().y;
+    float oMomentumX = (float) otherCc.physicsComponent.getMass()
+        * otherCc.physicsComponent.getVelocity().x;
+    float oMomentumY = (float) otherCc.physicsComponent.getMass()
+        * otherCc.physicsComponent.getVelocity().y;
+
     PhysicsComponent thisPhys = physicsComponent;
     PhysicsComponent otherPhys = otherCc.physicsComponent;
+    Vector3f origVel = thisPhys.getVelocity().add(otherPhys.getVelocity());
     GameEntity thisGe = (GameEntity) getEntity();
 
     if (thisGe != other && shape.intersects(otherCc.getShape())) {
@@ -66,6 +75,39 @@ public class CollisionComponent extends Component {
       Vector3f v2 = otherPhys.getVelocity();
       Vector3f v2Prime = v2.sub(x2minusx1);
       otherPhys.applyImpulse(v2Prime);
+      int i = 0;
+      float EPSILON = 1e-6f;
+      while (!thisPhys.getVelocity().add(otherPhys.getVelocity()).equals(origVel, EPSILON)) {
+        i++;
+        switch (i) {
+          case 1:
+            thisPhys.applyForce(EPSILON, EPSILON);
+            break;
+          case 2:
+            thisPhys.applyForce(EPSILON, -EPSILON);
+            break;
+          case 3:
+            thisPhys.applyForce(-EPSILON, EPSILON);
+            break;
+          case 4:
+            thisPhys.applyForce(-EPSILON, -EPSILON);
+            break;
+          case 5:
+            otherPhys.applyForce(EPSILON, EPSILON);
+            break;
+          case 6:
+            otherPhys.applyForce(EPSILON, -EPSILON);
+            break;
+          case 7:
+            otherPhys.applyForce(-EPSILON, EPSILON);
+            break;
+          case 8:
+            otherPhys.applyForce(-EPSILON, -EPSILON);
+            break;
+          default:
+            i = 0;
+        }
+      }
     }
   }
 

@@ -21,7 +21,7 @@ public class PlayerEntity extends GameEntity {
             .setGravitationFactor(0f)
             .setMaxSpawns(1)
             .setSpawnRate(1)
-            .setShape(new QuadTree.Quad(0, 0, 100, 2))
+            .setShape(new QuadTree.Quad(0, 0, 2, 2))
             .build());
   }
 

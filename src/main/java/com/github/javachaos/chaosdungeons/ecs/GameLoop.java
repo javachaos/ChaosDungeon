@@ -23,7 +23,6 @@ public class GameLoop {
 
   private double accumulatedTime = 0.0;
   private PhysicsSystem physicsSystem;
-  private long prevTime;
 
   /**
    * Initialize the game loop.

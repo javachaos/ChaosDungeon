@@ -24,6 +24,8 @@ public class PhysicsComponent extends Component {
   private boolean isStatic;   // Flag to indicate if the entity is static (immovable)
   private GameEntity gameEntity;
 
+  private float MAX_SPEED = 1.5F;
+
   /**
    * Create a new physics component.
    *
@@ -167,6 +169,14 @@ public class PhysicsComponent extends Component {
     angularVelocity.set(new Vector3f((float) ax, (float) ay, (float) az));
   }
 
+  public void clampVelocity(float maxSpeed) {
+    // Clamp each component of the velocity vector separately
+    velocity.x = Math.min(maxSpeed, Math.max(-maxSpeed, velocity.x));
+    velocity.y = Math.min(maxSpeed, Math.max(-maxSpeed, velocity.y));
+    velocity.z = Math.min(maxSpeed, Math.max(-maxSpeed, velocity.z));
+  }
+
+
   /**
    * Verlet integration method to update position and velocity.
    *
@@ -189,12 +199,9 @@ public class PhysicsComponent extends Component {
       }
       float angularMomentum = 0.995f;
       float drag = 0.998f;
-      float momentumX = (float) mass * velocity.x;
-      float momentumY = (float) mass * velocity.y;
-      float momentumZ = (float) mass * velocity.z;
       angularVelocity.mul(angularMomentum);
       velocity.mul(drag);
-
+      clampVelocity(MAX_SPEED);
       getRotation().integrate((float) dt, angularVelocity.x, angularVelocity.y, angularVelocity.z);
       double newVx = velocity.x + (getPosition().x - prevPos.x);
       double newVy = velocity.y + (getPosition().y - prevPos.y);
