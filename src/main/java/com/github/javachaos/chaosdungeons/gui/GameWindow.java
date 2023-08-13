@@ -41,8 +41,7 @@ import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.graphics.Camera;
-import com.github.javachaos.chaosdungeons.shaders.UiShader;
-import com.github.javachaos.chaosdungeons.shaders.WorldShader;
+import com.github.javachaos.chaosdungeons.shaders.Shaders;
 import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 import java.io.PrintStream;
 import java.nio.IntBuffer;
@@ -71,8 +70,7 @@ public class GameWindow {
   private static final int TARGET_FPS = 60;
   private static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS; // Time per frame in nanoseconds
   private static final Logger LOGGER = LogManager.getLogger(GameWindow.class);
-  private static WorldShader shaderProgram;
-  private static UiShader uiShader;
+
   private static Camera camera;
   private static WindowSize windowSize;
   private long window;
@@ -86,14 +84,6 @@ public class GameWindow {
    */
   public static WindowSize getWindowSize() {
     return windowSize;
-  }
-
-  public static WorldShader getWorldShader() {
-    return shaderProgram;
-  }
-
-  public static UiShader getUiShader() {
-    return uiShader;
   }
 
   public static Camera getCamera() {
@@ -132,8 +122,7 @@ public class GameWindow {
   @SuppressWarnings("all")
   private void loop(GameLoop gameLoop) throws ShaderLoadException, InterruptedException {
     GL.createCapabilities();
-    uiShader = new UiShader();
-    shaderProgram = new WorldShader();
+
     initView();
     long lastUpdateTime = System.nanoTime();
     long lastRenderTime = System.nanoTime();
@@ -141,10 +130,10 @@ public class GameWindow {
     long fpsTimer = System.currentTimeMillis();
     while (!glfwWindowShouldClose(window)) {
       if (!gameLoop.isInitialized()) {
-        shaderProgram.init();
         gameLoop.init(this);
         GLUtil.setupDebugMessageCallback(log);
       }
+      Shaders.init();
       GL11.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
@@ -156,11 +145,7 @@ public class GameWindow {
         LOGGER.error("OpenGL error: " + errorCode);
       }
       gameLoop.update(dt);
-      shaderProgram.bind();
-      shaderProgram.loadProjection();
-      shaderProgram.setUniform("view", MatrixUtils.createViewMatrix(camera));
       gameLoop.render((float) dt);
-      shaderProgram.unbind();
       frameCount++;
 
       // Sleep to maintain desired FPS

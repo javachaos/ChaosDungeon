@@ -7,7 +7,7 @@ import com.github.javachaos.chaosdungeons.ecs.components.render.DebugCollisionRe
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
-import com.github.javachaos.chaosdungeons.graphics.Texture;
+import com.github.javachaos.chaosdungeons.graphics.text.Texture;
 import java.util.HashMap;
 import java.util.Map;
 import org.joml.Matrix4f;

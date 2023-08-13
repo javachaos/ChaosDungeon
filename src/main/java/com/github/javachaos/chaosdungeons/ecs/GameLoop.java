@@ -7,6 +7,9 @@ import com.github.javachaos.chaosdungeons.ecs.systems.System;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.github.javachaos.chaosdungeons.shaders.Shaders;
+import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +48,12 @@ public class GameLoop {
    * Update render system.
    */
   public void render(float dt) {
+    Shaders.getCurrentShader().bind();
+    Shaders.getCurrentShader().loadProjection();
+    Shaders.getCurrentShader().setUniform("view",
+            MatrixUtils.createViewMatrix(GameWindow.getCamera()));
     renderSystem.update(dt);
+    Shaders.getCurrentShader().unbind();
   }
 
   /**

@@ -1,34 +1,9 @@
-package com.github.javachaos.chaosdungeons.graphics;
+package com.github.javachaos.chaosdungeons.graphics.text;
 
-import static org.lwjgl.opengl.GL11.GL_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_LIGHTING;
-import static org.lwjgl.opengl.GL11.GL_LINEAR;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glOrtho;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
-import static org.lwjgl.opengl.GL11.glVertex2f;
+import static com.github.javachaos.chaosdungeons.utils.FileUtils.loadFontFile;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.stb.STBTruetype.stbtt_GetPackedQuad;
 import static org.lwjgl.stb.STBTruetype.stbtt_PackBegin;
 import static org.lwjgl.stb.STBTruetype.stbtt_PackEnd;
@@ -39,12 +14,15 @@ import static org.lwjgl.system.MemoryUtil.memAllocFloat;
 import static org.lwjgl.system.MemoryUtil.memFree;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.graphics.Model;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.WindowSize;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+
+import com.github.javachaos.chaosdungeons.shaders.ShaderProgram;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
@@ -57,9 +35,7 @@ import org.lwjgl.stb.STBTTPackedchar;
  * Heavily influenced by: <a href="https://github.com/LWJGL/lwjgl3/blob/master/modules/samples/src/test/java/org/lwjgl/demo/stb/TruetypeOversample.java">lwjgl 3 text demo</a>
  * Credit where credit is due.
  */
-public final class TextModel implements Model {
-
-  private static final Logger LOGGER = LogManager.getLogger(TextModel.class);
+public class TextModel implements Model {
 
   private static final int BITMAP_W = 512;
   private static final int BITMAP_H = 512;
@@ -86,14 +62,17 @@ public final class TextModel implements Model {
 
   private String text = "";
 
+  private ShaderProgram program;
+
   /**
    * Create a new RenderedTextEntity given the font path.
    *
    * @param fontPath the path to the ttf font file used to construct this text entity.
    */
-  public TextModel(String fontPath, GameEntity ge) {
+  protected TextModel(ShaderProgram program, String fontPath, GameEntity ge) {
     this.fontPath = fontPath;
     this.pos = ge;
+    this.program = program;
     init();
   }
 
@@ -101,24 +80,7 @@ public final class TextModel implements Model {
     this.text = text;
   }
 
-  private ByteBuffer loadFontFile(String filePath) {
-    try (InputStream inputStream = getClass().getResourceAsStream(filePath)) {
-      if (inputStream == null) {
-        throw new IOException("Font file not found: " + filePath);
-      }
 
-      byte[] fontData = inputStream.readAllBytes();
-
-      ByteBuffer buffer = BufferUtils.createByteBuffer(fontData.length);
-      buffer.put(fontData);
-      buffer.flip();
-
-      return buffer;
-    } catch (IOException e) {
-      LOGGER.error(e.getMessage());
-      return null;
-    }
-  }
 
   private static void drawSquareTexCoords(float x0, float y0, float x1, float y1,
                                           float s0, float t0, float s1, float t1) {
@@ -162,7 +124,8 @@ public final class TextModel implements Model {
 
   @Override
   public void render() {
-    GameWindow.getUiShader().bind();
+    int currentProgramBak = glGetInteger(GL_CURRENT_PROGRAM);
+    program.bind();
     glDisable(GL_CULL_FACE);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -181,8 +144,8 @@ public final class TextModel implements Model {
           pos.getPosition().y + (ws.getHeight() / 2f),
         sfont, text);
     print(ws.getWidth() - 256, ws.getHeight() - 64, sfont, "FPS: " + GameWindow.getFps());
-    GameWindow.getUiShader().unbind();
-    GameWindow.getWorldShader().bind();
+    program.unbind();
+    glUseProgram(currentProgramBak);
   }
 
   @Override

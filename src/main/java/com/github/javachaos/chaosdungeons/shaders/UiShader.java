@@ -18,4 +18,9 @@ public class UiShader extends ShaderProgram {
   public void addUniforms() {
     //no uniforms for UI shader. (yet)
   }
+
+  @Override
+  public void loadProjection() {
+    //no projection uniform (yet)
+  }
 }

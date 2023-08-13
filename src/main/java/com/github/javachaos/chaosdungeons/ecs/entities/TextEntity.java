@@ -1,7 +1,8 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
-import com.github.javachaos.chaosdungeons.graphics.TextModel;
+import com.github.javachaos.chaosdungeons.graphics.text.TextModel;
+import com.github.javachaos.chaosdungeons.graphics.text.UiTextModel;
 
 /**
  * Text entity.
@@ -18,7 +19,7 @@ public class TextEntity extends GameEntity {
 
   @Override
   public void init() {
-    tm = new TextModel(fontPath, this);
+    tm = new UiTextModel(fontPath, this);
     sprite = new SpriteComponent(tm);
     addComponent(sprite);
   }

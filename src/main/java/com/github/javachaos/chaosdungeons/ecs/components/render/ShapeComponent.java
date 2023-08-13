@@ -3,8 +3,9 @@ package com.github.javachaos.chaosdungeons.ecs.components.render;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Mesh;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import java.awt.Color;
+
+import com.github.javachaos.chaosdungeons.shaders.Shaders;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
@@ -47,7 +48,8 @@ public class ShapeComponent extends RenderComponent {
 
   @Override
   public void render(double dt) {
-    GameWindow.getWorldShader().setSampleTexture(0);
+    Shaders.getCurrentShader().setSampleTexture(0);
+
     GL30.glBindVertexArray(mesh.getVaoID());
     GL20.glEnableVertexAttribArray(0);
     GL11.glDrawElements(GL11.GL_POLYGON, mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);

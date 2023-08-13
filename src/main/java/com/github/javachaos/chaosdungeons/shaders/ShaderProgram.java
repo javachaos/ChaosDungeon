@@ -1,26 +1,5 @@
 package com.github.javachaos.chaosdungeons.shaders;
 
-import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
-import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
-import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
-import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
-import static org.lwjgl.opengl.GL20.glAttachShader;
-import static org.lwjgl.opengl.GL20.glCompileShader;
-import static org.lwjgl.opengl.GL20.glCreateProgram;
-import static org.lwjgl.opengl.GL20.glCreateShader;
-import static org.lwjgl.opengl.GL20.glDeleteShader;
-import static org.lwjgl.opengl.GL20.glDetachShader;
-import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
-import static org.lwjgl.opengl.GL20.glGetProgrami;
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glLinkProgram;
-import static org.lwjgl.opengl.GL20.glShaderSource;
-import static org.lwjgl.opengl.GL20.glUniform1i;
-import static org.lwjgl.opengl.GL20.glUniform4fv;
-import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
-import static org.lwjgl.opengl.GL20.glUseProgram;
-import static org.lwjgl.opengl.GL20.glValidateProgram;
-
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformException;
@@ -31,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +18,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
+
+import static org.lwjgl.opengl.GL20.*;
 
 /**
  * Class which represents a shader program.
@@ -50,6 +33,7 @@ public abstract class ShaderProgram {
   private final String vertexSrc;
   private final String fragSrc;
   private int programId;
+  private boolean isInitialized;
 
   /**
    * Create a new shader program.
@@ -67,11 +51,13 @@ public abstract class ShaderProgram {
           + " invalid file path string. Must be "
           + Constants.FILENAME_REGEX);
     }
-    this.vertexSrc = readShaderSource(File.separator + vertexShaderPath);
-    this.fragSrc = readShaderSource(File.separator + fragmentShaderPath);
+    this.vertexSrc = readShaderSource(Constants.JAVA_PATH_SEPARATOR + vertexShaderPath);
+    this.fragSrc = readShaderSource(Constants.JAVA_PATH_SEPARATOR + fragmentShaderPath);
   }
 
   public abstract void addUniforms();
+
+  public abstract void loadProjection();
 
   /**
    * Create a uniform named uniformName.
@@ -203,6 +189,7 @@ public abstract class ShaderProgram {
     // Delete the individual shaders (they are already linked to the program)
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    isInitialized = true;
   }
 
   public String getVertexSrc() {
@@ -248,5 +235,9 @@ public abstract class ShaderProgram {
 
   public void unbind() {
     glUseProgram(0);
+  }
+
+  public boolean isInitialized() {
+    return isInitialized;
   }
 }

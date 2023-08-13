@@ -115,6 +115,5 @@ public class Camera implements GLFWKeyCallbackI {
 
   public void update() {
     pos.add(velocity);
-    //pos.add(velocity); // Update the camera position based on velocity
   }
 }

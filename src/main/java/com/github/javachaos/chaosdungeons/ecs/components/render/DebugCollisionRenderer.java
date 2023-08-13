@@ -9,6 +9,7 @@ import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.shaders.Shaders;
 import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 import org.joml.Vector3f;
 
@@ -35,7 +36,7 @@ public class DebugCollisionRenderer extends RenderComponent {
     GameEntity ge = ((GameEntity) getEntity());
     Vector3f p = ge.getPosition();
     //Get matrix transform without rotation.
-    GameWindow.getWorldShader().setUniform("transformation",
+    Shaders.getCurrentShader().setUniform("transformation",
         MatrixUtils.createTransformationMatrix(p, 0, 0, 0, ge.getScale()));
 
     glBegin(GL_LINES);
@@ -55,7 +56,7 @@ public class DebugCollisionRenderer extends RenderComponent {
 
     glEnd();
 
-    GameWindow.getWorldShader()
+    Shaders.getCurrentShader()
         .setUniform("transformation", ((GameEntity) getEntity()).getModelMatrix());
   }
 }

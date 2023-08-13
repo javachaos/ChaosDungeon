@@ -24,4 +24,5 @@ module com.github.javachaos.chaosdungeons {
   exports com.github.javachaos.chaosdungeons.collision;
   exports com.github.javachaos.chaosdungeons.ecs.entities.factory;
   exports com.github.javachaos.chaosdungeons.ecs.components.render;
+    exports com.github.javachaos.chaosdungeons.graphics.text;
 }

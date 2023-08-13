@@ -9,7 +9,6 @@ import com.github.javachaos.chaosdungeons.ecs.entities.factory.RandomFireballSpa
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.Spawner;
 import com.github.javachaos.chaosdungeons.ecs.entities.impl.Fireball;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import com.github.javachaos.chaosdungeons.graphics.TextModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

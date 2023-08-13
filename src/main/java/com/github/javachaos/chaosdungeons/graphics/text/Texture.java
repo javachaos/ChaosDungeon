@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.graphics;
+package com.github.javachaos.chaosdungeons.graphics.text;
 
 import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;
@@ -21,7 +21,6 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -56,7 +55,7 @@ public class Texture {
     int initialSize = 1024;
     LOGGER.debug("Loading texture: {}", imagePath);
     String path;
-    InputStream resource = Texture.class.getResourceAsStream(File.separator + imagePath);
+    InputStream resource = Texture.class.getResourceAsStream("/" + imagePath);
     ByteBuffer buffer = BufferUtils.createByteBuffer(initialSize);
     if (resource == null) {
       throw new RuntimeException("Texture not found: " + imagePath);

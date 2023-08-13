@@ -14,10 +14,45 @@
         <junit.version>5.10.0</junit.version>
         <log4j.version>2.20.0</log4j.version>
         <lwjgl.version>3.3.2</lwjgl.version>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
         <shade.version>3.5.0</shade.version>
         <main.class>com.github.javachaos.chaosdungeons.Main</main.class>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>lwjgl-natives-linux></id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-linux</lwjgl.natives>
+            </properties>
+        </profile>
+        <profile>
+            <id>lwjgl-natives-macos</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-osx</lwjgl.natives>
+            </properties>
+        </profile>
+        <profile>
+            <id>lwjgl-natives-windows></id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-windows</lwjgl.natives>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>

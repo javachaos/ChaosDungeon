@@ -36,6 +36,8 @@ public class CollisionComponent extends Component {
   }
 
   private void resolveCollision(PhysicsComponent otherPhys, PhysicsComponent thisPhys) {
+    //TODO solve for static-static and static-dynamic body collisions
+    // currently resolves dynamic-dynamic collisions
     Vector3f thisCenter = physicsComponent.getCenter();
     Vector3f otherCenter = otherPhys.getCenter();
     Vector3f v1minusv2 = thisPhys.getVelocity().sub(otherPhys.getVelocity());
