@@ -20,15 +20,16 @@ public class LinearMath {
    * @return true if the two lines intersect
    */
   public static boolean checkIntersection(Point2D p1, Point2D p2, Point2D p3, Point2D p4) {
-    double orientation1 = (p2.getY() - p1.getY()) * (p3.getX() - p2.getX())
-        - (p2.getX() - p1.getX()) * (p3.getY() - p2.getY());
-    double orientation2 = (p2.getY() - p1.getY()) * (p4.getX() - p2.getX())
-        - (p2.getX() - p1.getX()) * (p4.getY() - p2.getY());
-    double orientation3 = (p4.getY() - p3.getY()) * (p1.getX() - p4.getX())
-        - (p4.getX() - p3.getX()) * (p1.getY() - p4.getY());
-    double orientation4 = (p4.getY() - p3.getY()) * (p2.getX() - p4.getX())
-        - (p4.getX() - p3.getX()) * (p2.getY() - p4.getY());
-    return (orientation1 * orientation2 < 0) && (orientation3 * orientation4 < 0);
+    double orientation1 = (p2.getX() - p1.getX()) * (p3.getY() - p2.getY())
+        - (p2.getY() - p1.getY()) * (p3.getX() - p2.getX());
+    double orientation2 = (p2.getX() - p1.getX()) * (p4.getY() - p2.getY())
+        - (p2.getY() - p1.getY()) * (p4.getX() - p2.getX());
+    double orientation3 = (p4.getX() - p3.getX()) * (p1.getY() - p4.getY())
+        - (p4.getY() - p3.getY()) * (p1.getX() - p4.getX());
+    double orientation4 = (p4.getX() - p3.getX()) * (p2.getY() - p4.getY())
+        - (p4.getY() - p3.getY()) * (p2.getX() - p4.getX());
+
+    return (orientation1 * orientation2 <= 0) && (orientation3 * orientation4 <= 0);
   }
 
   public static boolean checkIntersection(Edge a, Edge b) {

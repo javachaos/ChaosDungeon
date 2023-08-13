@@ -564,10 +564,11 @@ public class Vertex implements Iterable<Vertex> {
       horizontalPoint = new Point2D.Double(r.x, r.height - (r.height - p.getY()) + 0.01);
     } //Scan down the side of the bounding box until we are
     // separated from the point p by at least 0.001 to avoid errors.
-    Edge e = new Edge(p, horizontalPoint);
+    Edge e = new Edge(horizontalPoint, p);
     double minDist = Double.MAX_VALUE;
     int intersectionCount = 0;
-    for (Edge f : getEdges()) {
+    List<Edge> edges = getEdges();
+    for (Edge f : edges) {
       if (f.intersects(e)) {
         intersectionCount++;
       }

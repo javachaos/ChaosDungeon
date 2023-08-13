@@ -118,7 +118,7 @@ public class Edge {
    */
   public double distanceToPoint(Point2D p0) {
     double num = Math.abs((pointB.getX() - pointA.getX())
-        * (pointB.getY() - pointA.getY()) - ((pointA.getX() - p0.getX())
+        * (pointB.getY() - p0.getY()) - ((pointA.getX() - p0.getX())
         * (pointB.getY() - pointA.getY())));
     double x1 = (pointB.getX() - pointA.getX());
     double y1 = (pointB.getY() - pointA.getY());

@@ -13,6 +13,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -100,6 +101,7 @@ public class SatCollisionDetector {
     for (Point2D p : polygon1.getPoints()) {
       double d = polygon2.contains(p);
       if (d > 0) {
+        System.out.println("Colliding: " + d);
         contactPoints1.add(new Vector2f((float) p.getX(), (float) p.getY()));
         totalDepth += d;
       }
@@ -110,6 +112,7 @@ public class SatCollisionDetector {
     for (Point2D p : polygon2.getPoints()) {
       double d = polygon1.contains(p);
       if (d > 0) {
+        System.out.println("Colliding: " + d);
         contactPoints2.add(new Vector2f((float) p.getX(), (float) p.getY()));
         totalDepth += d;
       }
@@ -134,12 +137,17 @@ public class SatCollisionDetector {
       }
       k++;
     }
-    Vector2f collisionNormal = new Vector2f(contactPoints2.get(maxDistV2Idx)
-        .sub(contactPoints1.get(maxDistV1Idx)));
-    List<Vector2f> allPts = new ArrayList<>(contactPoints1);
-    allPts.addAll(contactPoints2);
-    return new CollisionData.Builder().setPenetrationDepth(totalDistance / j)
-        .setContactPoints(allPts).setCollisionNormal(collisionNormal).build();
+    //TODO finish debugging this in ECLIPSE
+    if (!contactPoints1.isEmpty() && !contactPoints2.isEmpty()) {
+      Vector2f collisionNormal = new Vector2f(contactPoints2.get(maxDistV2Idx)
+          .sub(contactPoints1.get(maxDistV1Idx)));
+      List<Vector2f> allPts = new ArrayList<>(contactPoints1);
+      allPts.addAll(contactPoints2);
+      return new CollisionData.Builder().setPenetrationDepth(totalDistance / j)
+          .setContactPoints(allPts).setCollisionNormal(collisionNormal).build();
+    }
+    return new CollisionData.Builder().setPenetrationDepth(0)
+        .setContactPoints(Collections.emptyList()).setCollisionNormal(new Vector2f()).build();
   }
 
   /**

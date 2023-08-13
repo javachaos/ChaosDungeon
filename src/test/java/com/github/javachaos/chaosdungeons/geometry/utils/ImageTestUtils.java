@@ -21,7 +21,7 @@ public class ImageTestUtils {
   /**
    * Draw a polygon to a png file at filename.
    *
-   * @param poly the polygon as a vertex
+   * @param poly     the polygon as a vertex
    * @param filename the file to save the PNG to
    */
   public static void drawPolygon(Vertex poly, String filename) {
@@ -60,10 +60,11 @@ public class ImageTestUtils {
       i++;
     }
     g2d.drawPolygon(x, y, points.size());
-    for (i = 0; i < points.size(); i++) {
-      Point2D point = points.get(i);
-      String coordinatesText = "P[ " + i + ": x = " + point.getX() + ", y = " + point.getY() + " ]";
-      g2d.drawString(coordinatesText, (int) point.getX(), (int) point.getY());
-    }
+    //    for (i = 0; i < points.size(); i++) {
+    //      Point2D point = points.get(i);
+    //      //String coordinatesText = "P[ " + i + ": x = " + point.getX() + ", y = " + point.getY() + " ]";
+    //      //g2d.drawString(coordinatesText, (int) point.getX(), (int) point.getY());
+    //    }
+
   }
 }
