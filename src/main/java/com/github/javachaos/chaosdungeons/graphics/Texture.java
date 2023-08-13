@@ -124,6 +124,9 @@ public class Texture {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
+  /**
+   * Delete this texture.
+   */
   public void delete() {
     if (!deleted) {
       LOGGER.debug("Texture deleted: {}", id);

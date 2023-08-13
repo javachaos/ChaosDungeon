@@ -110,6 +110,21 @@ public class Edge {
     return new Point2D.Double(-dirY, dirX);
   }
 
+  /**
+   * Compute the distance between this edge and the point p0.
+   *
+   * @param p0 the point
+   * @return the distance to the point p0 from this line.
+   */
+  public double distanceToPoint(Point2D p0) {
+    double num = Math.abs((pointB.getX() - pointA.getX())
+        * (pointB.getY() - pointA.getY()) - ((pointA.getX() - p0.getX())
+        * (pointB.getY() - pointA.getY())));
+    double x1 = (pointB.getX() - pointA.getX());
+    double y1 = (pointB.getY() - pointA.getY());
+    double denom = Math.sqrt(x1 * x1 + y1 * y1);
+    return num / denom;
+  }
 
   public double projectPoint(Point2D point) {
     Point2D normalizedAxis = normalize(getDirectionVector());

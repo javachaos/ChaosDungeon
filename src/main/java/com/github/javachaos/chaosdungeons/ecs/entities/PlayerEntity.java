@@ -16,12 +16,12 @@ public class PlayerEntity extends GameEntity {
   public PlayerEntity() {
     super("assets/textures/player.png",
         new SpawnData.Builder()
-            .setRestitution(1000f)
-            .setMass(40f)
+            .setRestitution(100f)
+            .setMass(10f)
             .setGravitationFactor(0f)
             .setMaxSpawns(1)
             .setSpawnRate(1)
-            .setShape(new QuadTree.Quad(0, 0, 2, 2))
+            .setShape(new QuadTree.Quad(0, 0, 1, 1))
             .build());
   }
 

@@ -21,17 +21,17 @@ import org.joml.Vector4f;
 @SuppressWarnings("unused")
 public abstract class GameEntity extends Entity {
 
+  protected static final Map<String, Texture> textureMap = new HashMap<>();
+  protected final String texturePath;
   /**
    * Transform.
    */
   private final Matrix4f modelTransform;
   private final Quaternionf rotationQuaternion;
-  protected final String texturePath;
-  protected static final Map<String, Texture> textureMap = new HashMap<>();
+  private final SpawnData spawnData;
   protected SpriteComponent sprite;
   protected CollisionComponent collisionComponent;
   private DebugCollisionRenderer dcr;
-  private final SpawnData spawnData;
 
   public GameEntity(String texturePath) {
     this(texturePath, new SpawnData.Builder().build());
@@ -55,9 +55,9 @@ public abstract class GameEntity extends Entity {
    * Create a new game entity with initial pos, rotation, and scale.
    *
    * @param texturePath texture for this game entity
-   * @param pos initial position of this game entity
-   * @param rot initial rotation of this game entity
-   * @param scale initial scale of this game entity
+   * @param pos         initial position of this game entity
+   * @param rot         initial rotation of this game entity
+   * @param scale       initial scale of this game entity
    */
   public GameEntity(String texturePath,
                     Vector3f pos, Vector3f rot, Vector3f scale,
@@ -75,9 +75,9 @@ public abstract class GameEntity extends Entity {
    * Create a new game entity with initial pos, rotation, and scale.
    *
    * @param texturePath texture for this game entity
-   * @param pos initial position of this game entity
-   * @param rot initial rotation of this game entity
-   * @param scale initial scale of this game entity
+   * @param pos         initial position of this game entity
+   * @param rot         initial rotation of this game entity
+   * @param scale       initial scale of this game entity
    */
   public GameEntity(String texturePath, Vector3f pos, Vector3f rot, Vector3f scale) {
     this(texturePath, new SpawnData.Builder()
@@ -112,7 +112,7 @@ public abstract class GameEntity extends Entity {
    *
    * @param position the position
    * @param rotation the rotation
-   * @param scale the scale
+   * @param scale    the scale
    */
   public void updateModelMatrix(Vector3f position, Vector3f rotation, Vector3f scale) {
     rotationQuaternion.rotateX(rotation.x);
@@ -128,7 +128,7 @@ public abstract class GameEntity extends Entity {
    *
    * @param position the position
    * @param rotation the rotation
-   * @param scale the scale
+   * @param scale    the scale
    */
   public void updateModelMatrix(Vector3f position, Quaternionf rotation, Vector3f scale) {
     modelTransform.identity();
@@ -151,6 +151,17 @@ public abstract class GameEntity extends Entity {
    */
   public Vector3f getPosition() {
     return new Vector3f(modelTransform.m30(), modelTransform.m31(), modelTransform.m32());
+  }
+
+  /**
+   * Set the position of this game entity.
+   *
+   * @param pos the new position
+   */
+  public void setPosition(Vector3f pos) {
+    modelTransform.m30(pos.x);
+    modelTransform.m31(pos.y);
+    modelTransform.m32(pos.z);
   }
 
   /**
@@ -179,8 +190,8 @@ public abstract class GameEntity extends Entity {
    * Set rotation.
    *
    * @param pitch The pitch angle in radians.
-   * @param yaw The yaw angle in radians.
-   * @param roll The roll angle in radians.
+   * @param yaw   The yaw angle in radians.
+   * @param roll  The roll angle in radians.
    */
   public void setRotation(float pitch, float yaw, float roll) {
     Matrix4f newRotation = new Matrix4f(); // Create a new rotation matrix
@@ -206,11 +217,5 @@ public abstract class GameEntity extends Entity {
     if (dcr != null && Constants.DEBUG) {
       dcr.render(dt);
     }
-  }
-
-  public void setPosition(Vector3f pos) {
-	  modelTransform.m30(pos.x);
-	  modelTransform.m31(pos.y);
-	  modelTransform.m32(pos.z);
   }
 }

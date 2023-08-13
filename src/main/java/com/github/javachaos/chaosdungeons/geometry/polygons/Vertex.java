@@ -241,8 +241,8 @@ public class Vertex implements Iterable<Vertex> {
    * Get the concavity of the vertex b.
    *
    * @return 0 if the point is co-linear with its neighbours
-   * 1 if the point is concave
-   * -1 if the point is convex
+   *         1 if the point is concave
+   *         -1 if the point is convex
    */
   public int concavity() {
     Vertex b = this;
@@ -542,5 +542,45 @@ public class Vertex implements Iterable<Vertex> {
         return Vertex.this.next;
       }
     };
+  }
+
+  /**
+   * Return true if this vertex contains the point p within its bounds.
+   * Does not work with shapes that have holes nor shapes with twists (overlapping edges)
+   * (degenerate shapes).
+   *
+   * @param p the point to check
+   * @return the distance to the nearest edge
+   *         if p is inside the bounds of the polygon represented by this vertex
+   *         0 if the point is not contained in this vertex.
+   */
+  public double contains(Point2D p) {
+    Rectangle r = getBounds();
+    if (!r.contains(p)) {
+      return 0;
+    }
+    Point2D horizontalPoint = new Point2D.Double(r.x, r.height - (r.height - p.getY()));
+    while (p.distance(horizontalPoint) < 0.001 && horizontalPoint.getY() <= r.height) {
+      horizontalPoint = new Point2D.Double(r.x, r.height - (r.height - p.getY()) + 0.01);
+    } //Scan down the side of the bounding box until we are
+    // separated from the point p by at least 0.001 to avoid errors.
+    Edge e = new Edge(p, horizontalPoint);
+    double minDist = Double.MAX_VALUE;
+    int intersectionCount = 0;
+    for (Edge f : getEdges()) {
+      if (f.intersects(e)) {
+        intersectionCount++;
+      }
+      double dist = f.distanceToPoint(p);
+      if (dist < minDist) {
+        minDist = dist;
+      }
+    }
+    // odd number of intersecting points, means this vertex
+    // contains the point p
+    if (intersectionCount % 2 != 0) {
+      return minDist;
+    }
+    return 0;
   }
 }

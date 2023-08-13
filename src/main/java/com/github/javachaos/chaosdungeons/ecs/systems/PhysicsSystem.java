@@ -4,13 +4,9 @@ import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
-import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.WindowSize;
-import java.util.Deque;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,8 +49,8 @@ public class PhysicsSystem extends System {
       if (cc != null) {
         v = cc.getShape();
         if (v != null) {
-          for (QuadTree.Node n : collisionQuadtree.find(v)) {
-            GameEntity ge = (GameEntity) n.getValue();
+          for (QuadTree<GameEntity>.Node n : collisionQuadtree.find(v)) {
+            GameEntity ge = n.getValue();
             CollisionComponent occ = ge.getCollisionComponent();
             occ.onCollision(e, e.getCollisionComponent());
           }
@@ -63,7 +59,7 @@ public class PhysicsSystem extends System {
     }
     if (Constants.DEBUG) {
       WindowSize ws = GameWindow.getWindowSize();
-      collisionQuadtree.render(512, 512);
+      collisionQuadtree.render(256, 256);
     }
   }
 

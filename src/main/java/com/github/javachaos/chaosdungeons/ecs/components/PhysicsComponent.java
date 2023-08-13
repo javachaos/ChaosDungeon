@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
+import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import org.apache.logging.log4j.LogManager;
@@ -193,8 +194,8 @@ public class PhysicsComponent extends Component {
         angularVelocity.z = 0;
       }
       float angularDrag = 0.995f;
-      float drag = 0.998f;
-      float maxSpeed = 1.5F;
+      float drag = 0.9998f;
+      float maxSpeed = 0.89F;
       angularVelocity.mul(angularDrag);
       velocity.mul(drag);
       clampVelocity(maxSpeed);
@@ -214,6 +215,18 @@ public class PhysicsComponent extends Component {
           getRotation(), //rotation
           getScale()); //scale
     }
+  }
+
+  /**
+   * Get the center of the entity this PhysicsComponents is attached to.
+   *
+   * @return the center point as a Vector 3.
+   */
+  public Vector3f getCenter() {
+    QuadTree.Quad shape = gameEntity.getCollisionComponent().getShape();
+    return new Vector3f((float) (getPosition().x + shape.wp / 2f),
+        (float) (getPosition().y + shape.hp / 2f),
+        0);
   }
 
   @Override
@@ -241,4 +254,5 @@ public class PhysicsComponent extends Component {
   public void setVelocity(Vector3f v1Prime) {
     this.velocity.set(v1Prime);
   }
+
 }

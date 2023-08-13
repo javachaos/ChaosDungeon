@@ -1,8 +1,6 @@
 package com.github.javachaos.chaosdungeons.utils;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +14,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author javachaos
  */
+@SuppressWarnings("unused")
 public final class PropertyManager {
 
   /**
@@ -122,7 +121,7 @@ public final class PropertyManager {
     if (!isLoaded) {
       loadProperties();
     }
-    if ((key == null) || (key.length() <= 0)) {
+    if ((key == null) || (key.isEmpty())) {
       throw new IllegalArgumentException("Key was null or zero length.");
     }
     return props.getProperty(key);
@@ -142,11 +141,11 @@ public final class PropertyManager {
     if (!isLoaded) {
       loadProperties();
     }
-    if ((key == null) || (key.length() <= 0)) {
+    if ((key == null) || (key.isEmpty())) {
       return defaultValue;
     }
     temp = props.getProperty(key);
-    if (temp == null || (temp.length() <= 0)) {
+    if (temp == null || (temp.isEmpty())) {
       return defaultValue;
     }
 
