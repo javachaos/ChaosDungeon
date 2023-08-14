@@ -32,6 +32,9 @@ public class Vertex implements Iterable<Vertex> {
   private boolean isAcute;
   private double angle;
   private int index;
+  private List<Edge> edges;
+
+  private Rectangle bounds;
 
   public Vertex() {
   }
@@ -82,6 +85,8 @@ public class Vertex implements Iterable<Vertex> {
     this.setPrevious(prevVertex);
     prevVertex.setNext(this);
     calculateAngles(this);
+    this.edges = getEdges();
+    this.bounds = getBounds();
   }
 
   private static void calculateAngles(Vertex vertices) {
@@ -179,6 +184,10 @@ public class Vertex implements Iterable<Vertex> {
       current = current.next;
     } while (current != this);
     return e;
+  }
+
+  public List<Edge> getEdgesFast() {
+    return edges;
   }
 
   public boolean isAcute() {
@@ -558,35 +567,25 @@ public class Vertex implements Iterable<Vertex> {
    *         if p is inside the bounds of the polygon represented by this vertex
    *         0 if the point is not contained in this vertex.
    */
-  public double contains(Point2D p) {
-    Rectangle r = getBounds();
-    if (!r.contains(p)) {
-      return 0;
+  public boolean contains(Point2D p) {
+    if (!bounds.contains(p)) {
+      return false;
     }
-    Point2D horizontalPoint = new Point2D.Double(r.x, r.height - (r.height - p.getY()));
-    while (p.distance(horizontalPoint) < 0.001 && horizontalPoint.getY() <= r.height) {
-      horizontalPoint = new Point2D.Double(r.x, r.height - (r.height - p.getY()) + 0.01);
-    } //Scan down the side of the bounding box until we are
-    // separated from the point p by at least 0.001 to avoid errors.
+    Point2D horizontalPoint = new Point2D.Double(bounds.x,
+            bounds.height - (bounds.height - p.getY()));
     Edge e = new Edge(horizontalPoint, p);
-    double minDist = Double.MAX_VALUE;
     int intersectionCount = 0;
-    List<Edge> edges = getEdges();
     for (Edge f : edges) {
       if (f.intersects(e)) {
         intersectionCount++;
-      }
-      double dist = f.distanceToPoint(p);
-      if (dist < minDist) {
-        minDist = dist;
+        if (intersectionCount >= 2) {
+          break;
+        }
       }
     }
     // odd number of intersecting points, means this vertex
     // contains the point p
-    if (intersectionCount % 2 != 0) {
-      return minDist;
-    }
-    return 0;
+    return intersectionCount % 2 != 0;
   }
 
   /**
@@ -598,53 +597,55 @@ public class Vertex implements Iterable<Vertex> {
    */
   public CollisionData checkCollision(Vertex otherPolygon) {
     boolean isColliding = false;
-    List<Vector2f> contactPoints1 = new ArrayList<>();
     List<Point2D> otherPts = otherPolygon.getPoints();
-    int i = 0;
-    double totalDepth = 0;
-    for (Point2D p : otherPts) {
-      double d = contains(p);
-      if (d > 0) {
-        isColliding = true;
-        contactPoints1.add(new Vector2f((float) p.getX(), (float) p.getY()));
-        totalDepth += d;
-      }
-      i++;
-    }
-
+    List<Vector2f> contactPoints1 = new ArrayList<>();
     List<Vector2f> contactPoints2 = new ArrayList<>();
-    for (Point2D p : getPoints()) {
-      double d = otherPolygon.contains(p);
-      if (d > 0) {
+
+    Vertex current = otherPolygon;
+    do {
+      if (contains(current.getPoint())) {
         isColliding = true;
-        contactPoints2.add(new Vector2f((float) p.getX(), (float) p.getY()));
-        totalDepth += d;
+        contactPoints1.add(new Vector2f((float) current.px, (float) current.py));
       }
-      i++;
-    }
+      current = current.next;
+    } while (current != otherPolygon);
+
+    current = this;
+    do {
+      if (otherPolygon.contains(current.getPoint())) {
+        isColliding = true;
+        contactPoints2.add(new Vector2f((float) current.px, (float) current.py));
+      }
+      current = current.next;
+    } while (current != this);
+
     double totalDistance = 0;
     double maxDist = 0;
     int maxDistV1Idx = 0;
     int maxDistV2Idx = 0;
-    for (Vector2f v1 : contactPoints1) {
-      for (Vector2f v2 : contactPoints2) {
-        double currentDist = v1.distance(v2);
-        if (currentDist > maxDist) {
-          maxDist = currentDist;
-          maxDistV1Idx = contactPoints1.indexOf(v1);
-          maxDistV2Idx = contactPoints2.indexOf(v2);
-        }
-        totalDistance += currentDist;
-      }
-    }
 
     if (!contactPoints1.isEmpty() && !contactPoints2.isEmpty()) {
+
+      for (int i = 0; i < contactPoints1.size(); i++) {
+        Vector2f v1 = contactPoints1.get(i);
+        for (int j = 0; j < contactPoints2.size(); j++) {
+          Vector2f v2 = contactPoints2.get(j);
+          double currentDist = v1.distance(v2);
+          if (currentDist > maxDist) {
+            maxDist = currentDist;
+            maxDistV1Idx = i;
+            maxDistV2Idx = j;
+          }
+          totalDistance += currentDist;
+        }
+      }
+
       Vector2f collisionNormal = new Vector2f(contactPoints2.get(maxDistV2Idx)
               .sub(contactPoints1.get(maxDistV1Idx)));
       List<Vector2f> allPts = new ArrayList<>(contactPoints1);
       allPts.addAll(contactPoints2);
       return new CollisionData.Builder()
-              .setPenetrationDepth(totalDistance / (contactPoints1.size() + contactPoints2.size()))
+              .setPenetrationDepth(collisionNormal.length())
               .setContactPoints(allPts)
               .setIsColliding(true)
               .setCollisionNormal(collisionNormal).build();
@@ -653,8 +654,22 @@ public class Vertex implements Iterable<Vertex> {
     // collision information must be filled in by collision component.
     return new CollisionData.Builder().setPenetrationDepth(totalDistance)
             .setContactPoints(Collections.emptyList())
+            .setIncomplete(true)
             .setIsColliding(isColliding)
             .setCollisionNormal(new Vector2f()).build();
+  }
+
+  private boolean findCollidingContactPoints(Vertex polygon, List<Vector2f> contactPoints) {
+    boolean isColliding = false;
+    Vertex current = polygon;
+    do {
+      if (contains(current.getPoint())) {
+        isColliding = true;
+        contactPoints.add(new Vector2f((float) current.px, (float) current.py));
+      }
+      current = current.next;
+    } while (current != polygon);
+    return isColliding;
   }
 
 }

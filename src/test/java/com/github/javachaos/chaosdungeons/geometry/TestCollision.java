@@ -22,24 +22,35 @@ public class TestCollision {
 
   @Test
   public void testCollisionPartialOverlap() {
-    Vertex circle = new ShapeBuilder.Circle().setNumPoints(100).setRadius(55).build();
+    Vertex circle = new ShapeBuilder.Circle().setNumPoints(50).setRadius(160).build();
     Vertex square =
         new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
             .build();
-    ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square);
+    Vertex rand = new Vertex(GenerationUtils.generateNonRegularPolygon(160, 160, 6, 128, 128));
+    ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square, rand);
     circle.print();
     square.print();
     CollisionData d = circle.checkCollision(square);
     CollisionData e = square.checkCollision(circle);
+    long start = System.nanoTime();
+    CollisionData a = rand.checkCollision(circle);
+    long end = System.nanoTime();
+    CollisionData p = rand.checkCollision(square);
+    LOGGER.debug("Runtime: {}", end - start);
     assertTrue(d.isColliding());
     assertTrue(e.isColliding());
+    assertTrue(a.isColliding());
+    assertTrue(p.isColliding());
     LOGGER.debug("Collision: {}", d);
     LOGGER.debug("Collision: {}", e);
+    LOGGER.debug("Collision: {}", a);
+    LOGGER.debug("Collision: {}", p);
+
   }
 
   @Test
   public void testCollisionFullOverlap() {
-    Vertex circle = new ShapeBuilder.Circle().setPosition(new Vector2f(65, 150)).setNumPoints(100).setRadius(55).build();
+    Vertex circle = new ShapeBuilder.Circle().setPosition(new Vector2f(65, 150)).setNumPoints(20).setRadius(55).build();
     Vertex square =
             new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
                     .build();
@@ -47,7 +58,10 @@ public class TestCollision {
     circle.print();
     square.print();
     LOGGER.debug("Square");
+    long start = System.nanoTime();
     CollisionData d = circle.checkCollision(square);
+    long end = System.nanoTime();
+    LOGGER.debug("Runtime: {}", end - start);
     LOGGER.debug("Circle");
     CollisionData e = square.checkCollision(circle);
     assertTrue(d.isColliding());

@@ -20,7 +20,7 @@
 
     <profiles>
         <profile>
-            <id>lwjgl-natives-linux></id>
+            <id>lwjgl-natives-linux</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -42,7 +42,7 @@
             </properties>
         </profile>
         <profile>
-            <id>lwjgl-natives-windows></id>
+            <id>lwjgl-natives-windows</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -183,29 +183,6 @@
 	                </dependency>
 	            </dependencies>
 	        </plugin>
-                <plugin>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
-                    <executions>
-                        <execution>
-                            <id>copy-resources</id>
-                            <!-- here the phase you need -->
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${basedir}/target/</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>src/main/resources/</directory>
-                                        <filtering>true</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
 	              <groupId>org.apache.maven.plugins</groupId>
 	              <artifactId>maven-shade-plugin</artifactId>

@@ -10,8 +10,6 @@ import java.util.List;
 
 import com.github.javachaos.chaosdungeons.shaders.Shaders;
 import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Main game loop class.

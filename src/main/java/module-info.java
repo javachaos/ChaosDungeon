@@ -11,18 +11,4 @@ module com.github.javachaos.chaosdungeons {
     requires org.joml;
     requires org.lwjgl.stb;
   exports com.github.javachaos.chaosdungeons;
-  exports com.github.javachaos.chaosdungeons.gui;
-  exports com.github.javachaos.chaosdungeons.utils;
-  exports com.github.javachaos.chaosdungeons.exceptions;
-  exports com.github.javachaos.chaosdungeons.graphics;
-  exports com.github.javachaos.chaosdungeons.shaders;
-  exports com.github.javachaos.chaosdungeons.ecs.components;
-  exports com.github.javachaos.chaosdungeons.ecs.entities;
-  exports com.github.javachaos.chaosdungeons.geometry;
-  exports com.github.javachaos.chaosdungeons.geometry.gui;
-  exports com.github.javachaos.chaosdungeons.geometry.polygons;
-  exports com.github.javachaos.chaosdungeons.collision;
-  exports com.github.javachaos.chaosdungeons.ecs.entities.factory;
-  exports com.github.javachaos.chaosdungeons.ecs.components.render;
-    exports com.github.javachaos.chaosdungeons.graphics.text;
 }
