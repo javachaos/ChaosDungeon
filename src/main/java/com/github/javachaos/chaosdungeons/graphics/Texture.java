@@ -1,4 +1,4 @@
-package com.github.javachaos.chaosdungeons.graphics.text;
+package com.github.javachaos.chaosdungeons.graphics;
 
 import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGBA;

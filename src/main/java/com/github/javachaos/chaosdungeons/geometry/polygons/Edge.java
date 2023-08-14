@@ -1,12 +1,11 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
-import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.checkIntersection;
-import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.epsPtEquals;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.*;
 
 /**
  * Edge class, defined by two points (a, b).
@@ -21,6 +20,11 @@ public class Edge {
   public Edge(Point2D a, Point2D b) {
     this.pointA = a;
     this.pointB = b;
+  }
+
+  public Edge(double a, double b, double c, double d) {
+    this.pointA = new Point2D.Double(a, b);
+    this.pointB = new Point2D.Double(c, d);
   }
 
   /**
@@ -72,6 +76,16 @@ public class Edge {
    */
   public boolean intersects(Edge e) {
     return checkIntersection(this, e);
+  }
+
+  /**
+   * Checks if this edge intersects with the edge e.
+   *
+   * @param e the other edge.
+   * @return true if this edge and e are intersecting
+   */
+  public boolean strictlyIntersects(Edge e) {
+    return checkIntersectionStrict(this, e);
   }
 
   @Override

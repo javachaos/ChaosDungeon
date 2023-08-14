@@ -59,7 +59,7 @@ public class PhysicsSystem extends System {
     }
     if (Constants.DEBUG) {
       WindowSize ws = GameWindow.getWindowSize();
-      collisionQuadtree.render(256, 256);
+      collisionQuadtree.render(512, 512);
     }
   }
 

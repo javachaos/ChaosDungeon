@@ -33,7 +33,7 @@ public class Vertex implements Iterable<Vertex> {
   private double angle;
   private int index;
   private List<Edge> edges;
-
+  private List<Point2D> points;
   private Rectangle bounds;
 
   public Vertex() {
@@ -46,6 +46,9 @@ public class Vertex implements Iterable<Vertex> {
   public Vertex(double x, double y) {
     this.px = x;
     this.py = y;
+    edges = new ArrayList<>();
+    points = new ArrayList<>();
+    points.add(new Point2D.Double(x, y));
   }
 
   public Vertex(Point2D p) {
@@ -85,7 +88,8 @@ public class Vertex implements Iterable<Vertex> {
     this.setPrevious(prevVertex);
     prevVertex.setNext(this);
     calculateAngles(this);
-    this.edges = getEdges();
+    this.edges = cacheEdges();
+    this.points = p;
     this.bounds = getBounds();
   }
 
@@ -140,6 +144,10 @@ public class Vertex implements Iterable<Vertex> {
     }
   }
 
+  public int getNumVertices() {
+    return points.size();
+  }
+
   /**
    * Get the bounding box of this polygon.
    *
@@ -176,7 +184,7 @@ public class Vertex implements Iterable<Vertex> {
    *
    * @return the list of edges for this polygon
    */
-  public List<Edge> getEdges() {
+  private List<Edge> cacheEdges() {
     List<Edge> e = new ArrayList<>();
     Vertex current = this;
     do {
@@ -186,7 +194,7 @@ public class Vertex implements Iterable<Vertex> {
     return e;
   }
 
-  public List<Edge> getEdgesFast() {
+  public List<Edge> getEdges() {
     return edges;
   }
 
@@ -390,6 +398,8 @@ public class Vertex implements Iterable<Vertex> {
    * @param newVertex the new vertex to be added to this polygon
    */
   public void add(Vertex newVertex) {
+    points.add(new Point2D.Double(newVertex.px, newVertex.py));
+    edges.add(new Edge(px, py, newVertex.px, newVertex.py));
     if (this.next == null) { // Next is null, we have a zero sized polygon
       this.next = newVertex;
       newVertex.next = this;
@@ -449,13 +459,7 @@ public class Vertex implements Iterable<Vertex> {
    * @return the list of points
    */
   public List<Point2D> getPoints() {
-    List<Point2D> pts = new ArrayList<>();
-    Vertex current = this;
-    do {
-      pts.add(current.getPoint());
-      current = current.next;
-    } while (current != this);
-    return pts;
+    return points;
   }
 
   /**
@@ -510,13 +514,7 @@ public class Vertex implements Iterable<Vertex> {
    * @return the size of this polygon
    */
   public int size() {
-    int count = 0;
-    Vertex current = this;
-    do {
-      count++;
-      current = current.next;
-    } while (current != this);
-    return count;
+    return getPoints().size();
   }
 
   /**
@@ -651,7 +649,8 @@ public class Vertex implements Iterable<Vertex> {
               .setCollisionNormal(collisionNormal).build();
     }
     //In this case if it is colliding it will return true, but the rest of the
-    // collision information must be filled in by collision component.
+    // collision information must be filled in by collision component
+    // using continuous collision detection. (keep a fixed stack of position data)
     return new CollisionData.Builder().setPenetrationDepth(totalDistance)
             .setContactPoints(Collections.emptyList())
             .setIncomplete(true)

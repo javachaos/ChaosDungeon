@@ -116,7 +116,7 @@ public class DelaunayTriangulation {
     }
     for (Edge e : constrainedTriangulation) {
       for (Edge o : originalEdges) {
-        if (e.intersects(o)) {
+        if (e.strictlyIntersects(o)) {
           e.setBadEdge(true);
         }
       }

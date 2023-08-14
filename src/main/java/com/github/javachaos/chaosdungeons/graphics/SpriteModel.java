@@ -16,8 +16,6 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.graphics.text.Texture;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.shaders.Shaders;
 
 /**
