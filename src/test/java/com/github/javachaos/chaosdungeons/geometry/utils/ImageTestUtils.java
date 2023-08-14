@@ -19,6 +19,33 @@ import javax.swing.JPanel;
 public class ImageTestUtils {
 
   /**
+   * Draw a vararg list of polygons to a png file at filename.
+   *
+   * @param filename the file to save the PNG to
+   * @param polygons a list of polygon
+   */
+  public static void drawPolygon(String filename, Vertex... polygons) {
+    int w = 512;
+    int h = 512;
+    final BufferedImage img = new BufferedImage(w, h,
+            BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2d = (Graphics2D) img.getGraphics();
+    g2d.setBackground(Color.WHITE);
+    g2d.setColor(Color.WHITE);
+    for (Vertex poly : polygons) {
+      g2d.setPaint(getRandomColor());
+      g2d.setStroke(new BasicStroke(2.0f));
+      drawShape(g2d, poly.getPoints());
+    }
+    JPanel jp = new JPanel();
+    jp.printAll(g2d);
+    jp.setVisible(true);
+    writeBufferedImageToFile(img,
+            new File(filename));
+  }
+
+
+  /**
    * Draw a polygon to a png file at filename.
    *
    * @param poly     the polygon as a vertex
@@ -60,11 +87,13 @@ public class ImageTestUtils {
       i++;
     }
     g2d.drawPolygon(x, y, points.size());
-    //    for (i = 0; i < points.size(); i++) {
-    //      Point2D point = points.get(i);
-    //      //String coordinatesText = "P[ " + i + ": x = " + point.getX() + ", y = " + point.getY() + " ]";
-    //      //g2d.drawString(coordinatesText, (int) point.getX(), (int) point.getY());
-    //    }
+  }
 
+  private static Color getRandomColor() {
+    int red = (int) (Math.random() * 256);   // Random value between 0 and 255
+    int green = (int) (Math.random() * 256); // Random value between 0 and 255
+    int blue = (int) (Math.random() * 256);  // Random value between 0 and 255
+
+    return new Color(red, green, blue);
   }
 }

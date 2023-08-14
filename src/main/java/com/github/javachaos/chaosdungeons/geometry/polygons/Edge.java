@@ -110,6 +110,7 @@ public class Edge {
     return new Point2D.Double(-dirY, dirX);
   }
 
+
   /**
    * Compute the distance between this edge and the point p0.
    *

@@ -13,6 +13,7 @@ public class CollisionData {
   private final double penetrationDepth; // The penetration depth of the collision
   private final List<Vector2f> contactPoints; // List of contact points (optional)
   private final boolean isColliding;
+  private final long currentTimeNanos;
 
   /**
    * Create a new CollisionData object.
@@ -21,11 +22,12 @@ public class CollisionData {
    * @param penetrationDepth the penetration depth
    */
   public CollisionData(Vector2f collisionNormal, double penetrationDepth,
-                       List<Vector2f> contactPoints) {
+                       List<Vector2f> contactPoints, boolean isColliding) {
     this.collisionNormal = collisionNormal;
     this.penetrationDepth = penetrationDepth;
     this.contactPoints = contactPoints;
-    this.isColliding = penetrationDepth > 0.0;
+    this.isColliding = isColliding;
+    this.currentTimeNanos = System.nanoTime();
   }
 
   /**
@@ -34,11 +36,16 @@ public class CollisionData {
    * @param collisionNormal the collision normal vector
    * @param penetrationDepth the penetration depth
    */
-  public CollisionData(Vector2f collisionNormal, double penetrationDepth) {
+  public CollisionData(Vector2f collisionNormal, double penetrationDepth, boolean isColliding) {
     this.collisionNormal = collisionNormal;
     this.penetrationDepth = penetrationDepth;
     this.contactPoints = new ArrayList<>();
-    this.isColliding = penetrationDepth > 0.0;
+    this.isColliding = isColliding;
+    this.currentTimeNanos = System.nanoTime();
+  }
+
+  public long getCurrentTimeNanos() {
+    return currentTimeNanos;
   }
 
   public boolean isColliding() {
@@ -64,6 +71,7 @@ public class CollisionData {
     private Vector2f collisionNormal; // The collision normal vector
     private double penetrationDepth; // The penetration depth of the collision
     private List<Vector2f> contactPoints; // List of contact points (optional)
+    private boolean isColliding;
 
     /**
      * Construct a new builder.
@@ -80,6 +88,11 @@ public class CollisionData {
       return this;
     }
 
+    public Builder setIsColliding(boolean isColliding) {
+      this.isColliding = isColliding;
+      return this;
+    }
+
     public Builder setPenetrationDepth(double penetrationDepth) {
       this.penetrationDepth = penetrationDepth;
       return this;
@@ -91,8 +104,13 @@ public class CollisionData {
     }
 
     public CollisionData build() {
-      return new CollisionData(collisionNormal, penetrationDepth, contactPoints);
+      return new CollisionData(collisionNormal, penetrationDepth, contactPoints, isColliding);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "[ Time: " + currentTimeNanos + ", Normal: " + collisionNormal + " Depth: [" + penetrationDepth + "]";
   }
 
 }

@@ -2,18 +2,15 @@ package com.github.javachaos.chaosdungeons.geometry;
 
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
-import com.github.javachaos.chaosdungeons.collision.CollisionData;
 import com.github.javachaos.chaosdungeons.geometry.gui.ShapeDrawer;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -83,71 +80,6 @@ public class SatCollisionDetector {
       return true;
     }
     return p.isEmpty();
-  }
-
-  /**
-   * Check collision between two polygons defined by two sets of points.
-   * //** unit test this.**
-   *
-   * @param polygon1 set of points defining the first polygon
-   * @param polygon2 set of points defining the second polygon
-   * @return collision data
-   */
-  public static CollisionData checkCollision(Vertex polygon1, Vertex polygon2) {
-
-    List<Vector2f> contactPoints1 = new ArrayList<>();
-    int i = 0;
-    double totalDepth = 0;
-    for (Point2D p : polygon1.getPoints()) {
-      double d = polygon2.contains(p);
-      if (d > 0) {
-        System.out.println("Colliding: " + d);
-        contactPoints1.add(new Vector2f((float) p.getX(), (float) p.getY()));
-        totalDepth += d;
-      }
-      i++;
-    }
-
-    List<Vector2f> contactPoints2 = new ArrayList<>();
-    for (Point2D p : polygon2.getPoints()) {
-      double d = polygon1.contains(p);
-      if (d > 0) {
-        System.out.println("Colliding: " + d);
-        contactPoints2.add(new Vector2f((float) p.getX(), (float) p.getY()));
-        totalDepth += d;
-      }
-      i++;
-    }
-    double totalDistance = 0;
-    double maxDist = 0;
-    int maxDistV2Idx = 0;
-    int maxDistV1Idx = 0;
-    int j = 0;
-    int k = 0;
-    for (Vector2f v1 : contactPoints1) {
-      for (Vector2f v2 : contactPoints2) {
-        double currentDist = v1.distance(v2);
-        if (currentDist > maxDist) {
-          maxDist = currentDist;
-          maxDistV2Idx = j;
-          maxDistV1Idx = k;
-        }
-        totalDistance += currentDist;
-        j++;
-      }
-      k++;
-    }
-    //TODO finish debugging this in ECLIPSE
-    if (!contactPoints1.isEmpty() && !contactPoints2.isEmpty()) {
-      Vector2f collisionNormal = new Vector2f(contactPoints2.get(maxDistV2Idx)
-          .sub(contactPoints1.get(maxDistV1Idx)));
-      List<Vector2f> allPts = new ArrayList<>(contactPoints1);
-      allPts.addAll(contactPoints2);
-      return new CollisionData.Builder().setPenetrationDepth(totalDistance / j)
-          .setContactPoints(allPts).setCollisionNormal(collisionNormal).build();
-    }
-    return new CollisionData.Builder().setPenetrationDepth(0)
-        .setContactPoints(Collections.emptyList()).setCollisionNormal(new Vector2f()).build();
   }
 
   /**
