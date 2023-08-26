@@ -2,8 +2,9 @@ package com.github.javachaos.chaosdungeons.geometry.polygons;
 
 import static com.github.javachaos.chaosdungeons.constants.Constants.EPSILON;
 import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.dotProduct;
+import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.*;
+import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.equalTo;
 
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +25,44 @@ import org.joml.Vector2f;
  */
 @SuppressWarnings("unused")
 public class Vertex implements Iterable<Vertex> {
+
+  public static class Bounds {
+    public double px;
+    public double py;
+    public double w;
+    public double h;
+
+    public Bounds(double x, double y, double w, double h) {
+      this.px = x;
+      this.py = y;
+      this.w = w;
+      this.h = h;
+    }
+
+    /**
+     * Return true if this quad contains the point (x, y).
+     *
+     * @param x the x pos
+     * @param y the y pos
+     * @return true if this quad contains (x, y)
+     */
+    public boolean contains(double x, double y) {
+      double x1 = this.px;
+      double x2 = this.px + w;
+      double y1 = this.py;
+      double y2 = this.py + h;
+      return (greaterThan(x, x1) || equalTo(x, x1))
+              && (lessThan(x, x2)    || equalTo(x, x2))
+              && (greaterThan(y, y1) || equalTo(y, y1))
+              && (lessThan(y, y2)    || equalTo(y, y2));
+    }
+
+    public boolean contains(Point2D p) {
+      return contains(p.getX(), p.getY());
+    }
+  }
   private static final Logger LOGGER = LogManager.getLogger(Vertex.class);
-  private double px;
-  private double py;
+
   private Vertex next;
   private Vertex previous;
   private boolean isAcute;
@@ -34,9 +70,12 @@ public class Vertex implements Iterable<Vertex> {
   private int index;
   private List<Edge> edges;
   private List<Point2D> points;
-  private Rectangle bounds;
+  
+  private Bounds bounds;
+  
 
   public Vertex() {
+    bounds = new Bounds(0,0,0,0);
   }
 
   public Vertex(Triangle t) {
@@ -44,8 +83,9 @@ public class Vertex implements Iterable<Vertex> {
   }
 
   public Vertex(double x, double y) {
-    this.px = x;
-    this.py = y;
+    this();
+    this.bounds.px = x;
+    this.bounds.py = y;
     edges = new ArrayList<>();
     points = new ArrayList<>();
     points.add(new Point2D.Double(x, y));
@@ -61,6 +101,7 @@ public class Vertex implements Iterable<Vertex> {
    * @param p the list of points which define polygon.
    */
   public Vertex(List<Point2D> p) {
+    this();
     if (p == null) {
       throw new NullPointerException("Points list was null.");
     }
@@ -68,8 +109,8 @@ public class Vertex implements Iterable<Vertex> {
       throw new IllegalArgumentException("Not enough points.");
     }
     Point2D first = p.get(0);
-    this.px = first.getX();
-    this.py = first.getY();
+    this.bounds.px = first.getX();
+    this.bounds.py = first.getY();
     this.index = 0;
     next = null; // Initialize to null, to be set later
     previous = null; // Initialize to null, to be set later
@@ -89,8 +130,8 @@ public class Vertex implements Iterable<Vertex> {
     prevVertex.setNext(this);
     calculateAngles(this);
     this.edges = cacheEdges();
+    this.bounds = cacheBounds();
     this.points = p;
-    this.bounds = getBounds();
   }
 
   private static void calculateAngles(Vertex vertices) {
@@ -115,7 +156,7 @@ public class Vertex implements Iterable<Vertex> {
    * @return the determinant
    */
   public static double calculateDeterminant(Vertex a, Vertex b, Vertex c) {
-    return ((b.px - a.px) * (c.py - a.py)) - ((c.px - a.px) * (b.py - a.py));
+    return ((b.bounds.px - a.bounds.px) * (c.bounds.py - a.bounds.py)) - ((c.bounds.px - a.bounds.px) * (b.bounds.py - a.bounds.py));
   }
 
   /**
@@ -130,7 +171,7 @@ public class Vertex implements Iterable<Vertex> {
     double determinant = 0.0;
     Vertex current = v;
     do {
-      determinant += current.px * current.next.py - current.next.px * current.py;
+      determinant += current.bounds.px * current.next.bounds.py - current.next.bounds.px * current.bounds.py;
       current = current.next;
     } while (current != v);
     return determinant;
@@ -148,12 +189,32 @@ public class Vertex implements Iterable<Vertex> {
     return points.size();
   }
 
+  public Bounds getBounds() {
+    return bounds;
+  }
+
+  public float getX() {
+    return (float) bounds.px;
+  }
+
+  public float getY() {
+    return (float) bounds.py;
+  }
+
+  public float getWidth() {
+    return (float) bounds.w;
+  }
+
+  public float getHeight() {
+    return (float) bounds.h;
+  }
+
   /**
    * Get the bounding box of this polygon.
    *
    * @return the Rectangle2D which defines the bounding box of this polygon.
    */
-  public Rectangle getBounds() {
+  public Bounds cacheBounds() {
     double maxY = Double.MIN_VALUE;
     double minY = Double.MAX_VALUE;
     double maxX = Double.MIN_VALUE;
@@ -176,7 +237,7 @@ public class Vertex implements Iterable<Vertex> {
     double w = maxX - x;
     double h = maxY - y;
 
-    return new Rectangle((int) x, (int) y, (int) w, (int) h);
+    return new Bounds(x, y, w, h);
   }
 
   /**
@@ -207,7 +268,7 @@ public class Vertex implements Iterable<Vertex> {
   }
 
   public Point2D getPoint() {
-    return new Point2D.Double(px, py);
+    return new Point2D.Double(bounds.px, bounds.py);
   }
 
   /**
@@ -223,10 +284,10 @@ public class Vertex implements Iterable<Vertex> {
     Vertex c = this.next;
     Vertex a = this.previous;
 
-    double x1 = this.px - a.px;
-    double y1 = this.py - a.py;
-    double x2 = this.px - c.px;
-    double y2 = this.py - c.py;
+    double x1 = this.bounds.px - a.bounds.px;
+    double y1 = this.bounds.py - a.bounds.py;
+    double x2 = this.bounds.px - c.bounds.px;
+    double y2 = this.bounds.py - c.bounds.py;
 
     Point2D v1 = new Point2D.Double(x1, y1);
     Point2D v2 = new Point2D.Double(x2, y2);
@@ -332,8 +393,8 @@ public class Vertex implements Iterable<Vertex> {
   public void translate(double x, double y) {
     Vertex current = this;
     do {
-      current.px += x;
-      current.py += y;
+      current.bounds.px += x;
+      current.bounds.py += y;
       current = current.next;
     } while (current != this);
   }
@@ -398,8 +459,10 @@ public class Vertex implements Iterable<Vertex> {
    * @param newVertex the new vertex to be added to this polygon
    */
   public void add(Vertex newVertex) {
-    points.add(new Point2D.Double(newVertex.px, newVertex.py));
-    edges.add(new Edge(px, py, newVertex.px, newVertex.py));
+    points.add(new Point2D.Double(newVertex.bounds.px,
+            newVertex.bounds.py));
+    edges.add(new Edge(bounds.px, bounds.py,
+            newVertex.bounds.px, newVertex.bounds.py));
     if (this.next == null) { // Next is null, we have a zero sized polygon
       this.next = newVertex;
       newVertex.next = this;
@@ -535,7 +598,7 @@ public class Vertex implements Iterable<Vertex> {
 
   @Override
   public String toString() {
-    return index + " :[" + px + ", " + py + "]";
+    return index + " :[" + bounds.px + ", " + bounds.py + "]";
   }
 
   @Override
@@ -557,8 +620,7 @@ public class Vertex implements Iterable<Vertex> {
 
   /**
    * Return true if this vertex contains the point p within its bounds.
-   * Does not work with shapes that have holes nor shapes with twists (overlapping edges)
-   * (degenerate shapes).
+   * Does not work with degenerate polygons, works with holes or concave shapes.
    *
    * @param p the point to check
    * @return the distance to the nearest edge
@@ -569,8 +631,8 @@ public class Vertex implements Iterable<Vertex> {
     if (!bounds.contains(p)) {
       return false;
     }
-    Point2D horizontalPoint = new Point2D.Double(bounds.x,
-            bounds.height - (bounds.height - p.getY()));
+    Point2D horizontalPoint = new Point2D.Double(bounds.px,
+            bounds.h - (bounds.h - p.getY()));
     Edge e = new Edge(horizontalPoint, p);
     int intersectionCount = 0;
     for (Edge f : edges) {
@@ -603,7 +665,7 @@ public class Vertex implements Iterable<Vertex> {
     do {
       if (contains(current.getPoint())) {
         isColliding = true;
-        contactPoints1.add(new Vector2f((float) current.px, (float) current.py));
+        contactPoints1.add(new Vector2f((float) current.bounds.px, (float) current.bounds.py));
       }
       current = current.next;
     } while (current != otherPolygon);
@@ -612,7 +674,7 @@ public class Vertex implements Iterable<Vertex> {
     do {
       if (otherPolygon.contains(current.getPoint())) {
         isColliding = true;
-        contactPoints2.add(new Vector2f((float) current.px, (float) current.py));
+        contactPoints2.add(new Vector2f((float) current.bounds.px, (float) current.bounds.py));
       }
       current = current.next;
     } while (current != this);
@@ -664,11 +726,18 @@ public class Vertex implements Iterable<Vertex> {
     do {
       if (contains(current.getPoint())) {
         isColliding = true;
-        contactPoints.add(new Vector2f((float) current.px, (float) current.py));
+        contactPoints.add(new Vector2f((float) current.bounds.px, (float) current.bounds.py));
       }
       current = current.next;
     } while (current != polygon);
     return isColliding;
   }
 
+  public boolean contains(double x, double y) {
+    return contains(new Point2D.Double(x, y));
+  }
+
+  public Vector2f getPosition() {
+    return new Vector2f((float) bounds.px, (float) bounds.py);
+  }
 }

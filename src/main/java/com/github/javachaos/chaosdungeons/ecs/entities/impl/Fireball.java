@@ -41,8 +41,6 @@ public class Fireball extends GameEntity {
 
   @Override
   protected void update(float dt) {
-    TextEntity rte = Objects.requireNonNull(System.getEntity(TextEntity.class));
-    rte.setText("Player");
   }
 
   @Override

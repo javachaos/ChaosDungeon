@@ -45,7 +45,6 @@ public class TestCollision {
     LOGGER.debug("Collision: {}", e);
     LOGGER.debug("Collision: {}", a);
     LOGGER.debug("Collision: {}", p);
-
   }
 
   @Test

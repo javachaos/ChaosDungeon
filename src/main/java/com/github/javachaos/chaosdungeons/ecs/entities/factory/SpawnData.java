@@ -3,6 +3,8 @@ package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import java.util.Objects;
+
+import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import org.joml.Vector3f;
 
 /**
@@ -16,7 +18,7 @@ public class SpawnData {
   private final Vector3f angularVelocity;
   private final Vector3f initialVelocity;
   private float gravitationFactor;
-  private QuadTree.Quad shape;
+  private Vertex shape;
   private float mass;
   private float restitution;
   private float spawnRate = 1.0f;
@@ -39,7 +41,7 @@ public class SpawnData {
                     Vector3f scale,
                     Vector3f angularVelocity,
                     Vector3f initialVelocity,
-                    QuadTree.Quad shape,
+                    Vertex shape,
                     float mass,
                     float gravitationFactor,
                     float restitution,
@@ -50,7 +52,7 @@ public class SpawnData {
     this.rotation = Objects.requireNonNullElseGet(rotation, () -> new Vector3f(0));
     this.position = Objects.requireNonNullElseGet(position, () -> new Vector3f(0));
     this.scale = Objects.requireNonNullElseGet(scale, () -> new Vector3f(1));
-    this.shape = Objects.requireNonNullElseGet(shape, () -> new QuadTree.Quad(0, 0, 1, 1));
+    this.shape = Objects.requireNonNullElseGet(shape, () -> new ShapeBuilder.Rectangle().build());
     if (mass > 0) {
       this.mass = mass;
     }
@@ -87,7 +89,7 @@ public class SpawnData {
     return new Vector3f(position);
   }
 
-  public QuadTree.Quad getShape() {
+  public Vertex getShape() {
     return shape;
   }
 
@@ -124,7 +126,7 @@ public class SpawnData {
     private Vector3f scale;
     private Vector3f angularVelocity;
     private Vector3f initialVelocity;
-    private QuadTree.Quad shape;
+    private Vertex shape;
     private float gravitationFactor;
     private float mass;
     private float restitution;
@@ -141,7 +143,7 @@ public class SpawnData {
       position = new Vector3f();
       angularVelocity = new Vector3f();
       initialVelocity = new Vector3f();
-      shape = new QuadTree.Quad(0, 0, 1, 1);
+      shape = new ShapeBuilder.Rectangle().build();
       gravitationFactor = 1.0f;
       mass = 1.0f;
       restitution = 1.0f;
@@ -202,7 +204,7 @@ public class SpawnData {
       return this;
     }
 
-    public Builder setShape(QuadTree.Quad shape) {
+    public Builder setShape(Vertex shape) {
       this.shape = shape;
       return this;
     }

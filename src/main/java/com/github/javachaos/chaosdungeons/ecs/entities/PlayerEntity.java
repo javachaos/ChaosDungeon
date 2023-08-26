@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.ecs.entities;
 
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
+import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 
 /**
@@ -21,7 +22,7 @@ public class PlayerEntity extends GameEntity {
             .setGravitationFactor(0f)
             .setMaxSpawns(1)
             .setSpawnRate(1)
-            .setShape(new QuadTree.Quad(0, 0, 1, 1))
+            .setShape(new ShapeBuilder.Rectangle().build())
             .build());
   }
 

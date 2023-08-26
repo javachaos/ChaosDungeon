@@ -1,14 +1,18 @@
 package com.github.javachaos.chaosdungeons.collision;
 
 import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.equalTo;
-import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.greaterThan;
 import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.lessThan;
 import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
+
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
 import org.joml.Vector3f;
@@ -17,72 +21,6 @@ import org.joml.Vector3f;
  * A simple PR quad tree for collision detection.
  */
 public class QuadTree<T> {
-
-  /**
-   * A simple quad.
-   */
-  public static class Quad {
-    public double xp;
-    public double yp;
-    public double wp;
-    public double hp;
-
-    /**
-     * Create a simple quad.
-     *
-     * @param xp x
-     * @param yp y
-     * @param wp width
-     * @param hp height
-     */
-    public Quad(double xp, double yp, double wp, double hp) {
-      this.xp = xp;
-      this.yp = yp;
-      this.wp = wp;
-      this.hp = hp;
-    }
-
-    /**
-     * Return true if this quad intersects with the other quad.
-     *
-     * @param other the quad to check intersection with
-     * @return true if this quad and other intersect
-     */
-    public boolean intersects(Quad other) {
-      // Calculate the boundaries of the current Quad
-      double x1 = this.xp;
-      double y1 = this.yp;
-      double x2 = this.xp + wp;
-      double y2 = this.yp + hp;
-
-      // Calculate the boundaries of the other Quad
-      double x3 = other.xp;
-      double y3 = other.yp;
-      double x4 = other.xp + other.wp;
-      double y4 = other.yp + other.hp;
-      // Check for intersection using the separating axis theorem
-      return !(lessThan(x2, x3) || greaterThan(x1, x4) || lessThan(y2, y3) || greaterThan(y1, y4));
-    }
-
-    /**
-     * Return true if this quad contains the point (x, y).
-     *
-     * @param x the x pos
-     * @param y the y pos
-     * @return true if this quad contains (x, y)
-     */
-    public boolean contains(double x, double y) {
-      double x1 = this.xp;
-      double x2 = this.xp + wp;
-      double y1 = this.yp;
-      double y2 = this.yp + hp;
-      return (greaterThan(x, x1) || equalTo(x, x1))
-          && (lessThan(x, x2)    || equalTo(x, x2))
-          && (greaterThan(y, y1) || equalTo(y, y1))
-          && (lessThan(y, y2)    || equalTo(y, y2));
-    }
-
-  }
 
   /**
    * A quadtree node.
@@ -114,13 +52,16 @@ public class QuadTree<T> {
     }
   }
 
-  private final Quad boundary;
+  private final Vertex boundary;
 
   private Node root;
 
   public QuadTree(double w, double h) {
     Vector3f pos = GameWindow.getCamera().getPosition();
-    this.boundary = new Quad(pos.x, pos.y, w, h);
+    this.boundary = new ShapeBuilder.Rectangle()
+            .setPosition(pos.x, pos.y)
+            .setWidth(w).setHeight(h)
+            .build();
   }
 
   /**
@@ -186,12 +127,12 @@ public class QuadTree<T> {
     render(n.se, x + halfWidth, y + halfHeight, halfWidth, halfHeight);
   }
 
-  public List<Node> find(Quad q) {
+  public List<Node> find(Vertex.Bounds q) {
     return find(new LinkedList<>(), root, q);
   }
 
-  private List<Node> find(List<Node> nodes, Node n, Quad q) {
-    if (n == null || !boundary.intersects(q)) {
+  private List<Node> find(List<Node> nodes, Node n, Vertex.Bounds q) {
+    if (n == null || !boundary.contains(new Point2D.Double(q.px, q.py))) {
       return nodes;
     }
 
@@ -199,10 +140,10 @@ public class QuadTree<T> {
       nodes.add(n);
     }
 
-    double xmin = q.xp;
-    double ymin = q.yp;
-    double xmax = q.wp + q.xp;
-    double ymax = q.hp + q.yp;
+    double xmin = q.px;
+    double ymin = q.py;
+    double xmax = q.w + q.px;
+    double ymax = q.h + q.py;
     if (lessThan(xmin, n.xp) && lessThan(ymin, n.yp)) {
       find(nodes, n.sw, q);
     }

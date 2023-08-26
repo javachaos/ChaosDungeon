@@ -4,11 +4,8 @@ import com.github.javachaos.chaosdungeons.geometry.DelaunayTriangulation;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -32,7 +29,8 @@ public class ShapePanel extends JPanel {
    */
   public ShapePanel(Color background, Vertex polygon) {
     setBackground(background);
-    bounds = polygon.getBounds();
+    bounds = new Rectangle((int) polygon.getBounds().px, (int) polygon.getBounds().py,
+            (int) polygon.getBounds().w, (int) polygon.getBounds().h);
     setBounds(bounds);
     setPreferredSize(bounds.getSize());
     setBorder(BorderFactory.createLineBorder(Color.RED));

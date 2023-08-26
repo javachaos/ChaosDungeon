@@ -8,6 +8,7 @@ import static org.lwjgl.opengl.GL11.glVertex2f;
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.shaders.Shaders;
 import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
@@ -17,9 +18,9 @@ import org.joml.Vector3f;
  * A class to draw simple debugging lines over the attached entity.
  */
 public class DebugCollisionRenderer extends RenderComponent {
-  private final QuadTree.Quad shape;
+  private final Vertex shape;
 
-  public DebugCollisionRenderer(QuadTree.Quad v) {
+  public DebugCollisionRenderer(Vertex v) {
     this.shape = v;
   }
 
@@ -41,18 +42,22 @@ public class DebugCollisionRenderer extends RenderComponent {
 
     glBegin(GL_LINES);
 
-    glVertex2f((float) (p.x - shape.wp / 2), (float) (p.y - shape.hp / 2));
+    glVertex2f(p.x - shape.getWidth() / 2, p.y - shape.getHeight() / 2);
 
-    glVertex2f((float) (p.x - shape.wp / 2), (float) (p.y - shape.hp / 2 + shape.hp));
-    glVertex2f((float) (p.x - shape.wp / 2), (float) (p.y - shape.hp / 2 + shape.hp));
+    glVertex2f(p.x - shape.getWidth() / 2, p.y - shape.getHeight() / 2 + shape.getHeight());
+    glVertex2f(p.x - shape.getWidth() / 2, p.y - shape.getHeight() / 2 + shape.getHeight());
 
-    glVertex2f((float) (p.x - shape.wp / 2 + shape.wp), (float) (p.y - shape.hp / 2 + shape.hp));
+    glVertex2f(p.x - shape.getWidth() / 2
+            + shape.getWidth(), p.y - shape.getHeight() / 2 + shape.getHeight());
 
-    glVertex2f((float) (p.x - shape.wp / 2 + shape.wp), (float) (p.y - shape.hp / 2 + shape.hp));
-    glVertex2f((float) (p.x - shape.wp / 2 + shape.wp), (float) (p.y - shape.hp / 2));
+    glVertex2f(p.x - shape.getWidth() / 2
+            + shape.getWidth(), p.y - shape.getHeight() / 2 + shape.getHeight());
+    glVertex2f(p.x - shape.getWidth() / 2
+            + shape.getWidth(), p.y - shape.getHeight() / 2);
 
-    glVertex2f((float) (p.x - shape.wp / 2 + shape.wp), (float) (p.y - shape.hp / 2));
-    glVertex2f((float) (p.x - shape.wp / 2), (float) (p.y - shape.hp / 2));
+    glVertex2f(p.x - shape.getWidth() / 2
+            + shape.getWidth(), p.y - shape.getHeight() / 2);
+    glVertex2f(p.x - shape.getWidth() / 2, p.y - shape.getHeight() / 2);
 
     glEnd();
 

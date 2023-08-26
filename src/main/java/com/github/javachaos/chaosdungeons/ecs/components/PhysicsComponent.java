@@ -3,10 +3,13 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
+import java.awt.*;
 
 /**
  * A simple physics component.
@@ -223,9 +226,9 @@ public class PhysicsComponent extends Component {
    * @return the center point as a Vector 3.
    */
   public Vector3f getCenter() {
-    QuadTree.Quad shape = gameEntity.getCollisionComponent().getShape();
-    return new Vector3f((float) (getPosition().x + shape.wp / 2f),
-        (float) (getPosition().y + shape.hp / 2f),
+    Vertex shape = gameEntity.getCollisionComponent().getShape();
+    return new Vector3f(getPosition().x + shape.getWidth() / 2f,
+            getPosition().y + shape.getHeight() / 2f,
         0);
   }
 

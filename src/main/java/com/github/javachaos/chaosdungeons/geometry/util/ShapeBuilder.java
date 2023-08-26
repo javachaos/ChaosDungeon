@@ -26,6 +26,11 @@ public class ShapeBuilder {
       return this;
     }
 
+    public Rectangle setPosition(float x, float y) {
+      this.pos = new Vector2f(x, y);
+      return this;
+    }
+
     public Rectangle setWidth(double w) {
       this.width = w;
       return this;
@@ -60,6 +65,11 @@ public class ShapeBuilder {
 
     public Triangle setPosition(Vector2f pos) {
       this.pos = pos;
+      return this;
+    }
+
+    public Triangle setPosition(float x, float y) {
+      this.pos = new Vector2f(x, y);
       return this;
     }
 
@@ -120,6 +130,11 @@ public class ShapeBuilder {
       return this;
     }
 
+    public Circle setPosition(float x, float y) {
+      this.pos = new Vector2f(x, y);
+      return this;
+    }
+
     public Circle setNumPoints(int numPoints) {
       this.numPoints = numPoints;
       return this;
@@ -135,5 +150,6 @@ public class ShapeBuilder {
           calculateEllipsePoints(
               new Ellipse2D.Double(pos.x, pos.y, radius * 2, radius * 2), numPoints)));
     }
+
   }
 }

@@ -1,8 +1,9 @@
 package com.github.javachaos.chaosdungeons.ecs.components;
 
-import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.collision.CollisionData;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
 import org.joml.Vector3f;
 
 /**
@@ -11,12 +12,12 @@ import org.joml.Vector3f;
 public class CollisionComponent extends Component {
 
   private final PhysicsComponent physicsComponent;
-  private QuadTree.Quad shape;
+  private Vertex shape;
 
   /**
    * Create a new component.
    */
-  public CollisionComponent(QuadTree.Quad shape, PhysicsComponent physicsComponent) {
+  public CollisionComponent(Vertex shape, PhysicsComponent physicsComponent) {
     super();
     this.shape = shape;
     this.physicsComponent = physicsComponent;
@@ -30,7 +31,8 @@ public class CollisionComponent extends Component {
    */
   public void onCollision(GameEntity other, CollisionComponent otherCc) {
     GameEntity thisGe = (GameEntity) getEntity();
-    if (thisGe != other && shape.intersects(otherCc.getShape())) {
+    CollisionData c = shape.checkCollision(otherCc.getShape());
+    if (thisGe != other && c.isColliding()) {
       resolveCollision(otherCc.physicsComponent, physicsComponent);
     }
   }
@@ -67,14 +69,12 @@ public class CollisionComponent extends Component {
    *
    * @return the shape of this collision component
    */
-  public QuadTree.Quad getShape() {
+  public Vertex getShape() {
     return shape;
   }
 
   @Override
   public void update(double dt) {
-    shape.xp = ((GameEntity) getEntity()).getPosition().x;
-    shape.yp = ((GameEntity) getEntity()).getPosition().y;
     physicsComponent.update(dt);
   }
 
