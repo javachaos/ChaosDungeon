@@ -3,7 +3,7 @@ package com.github.javachaos.chaosdungeons.utils;
 /**
  * Floating point tools.
  */
-public class strictfp PrecisionUtils {
+public class PrecisionUtils {
   private static final double EPSILON_D = 1e-9d;
   private static final float EPSILON_F = 1e-6f;
 
