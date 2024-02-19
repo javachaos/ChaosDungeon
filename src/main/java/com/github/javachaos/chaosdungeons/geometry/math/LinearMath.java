@@ -2,6 +2,7 @@ package com.github.javachaos.chaosdungeons.geometry.math;
 
 import static com.github.javachaos.chaosdungeons.constants.Constants.EPSILON;
 
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import java.awt.geom.Point2D;
 
@@ -9,6 +10,10 @@ import java.awt.geom.Point2D;
  * Linear math helper functions.
  */
 public class LinearMath {
+
+  private LinearMath() {
+    //Unused
+  }
 
   /**
    * Check if two lines represented by (p1, p2) and (p3, p4) intersect.
@@ -19,27 +24,27 @@ public class LinearMath {
    * @param p4 the second point of the second line
    * @return true if the two lines intersect
    */
-  public static boolean checkIntersectionStrict(Point2D p1, Point2D p2, Point2D p3, Point2D p4) {
-    double orientation1 = (p2.getY() - p1.getY()) * (p3.getX() - p2.getX())
-            - (p2.getX() - p1.getX()) * (p3.getY() - p2.getY());
-    double orientation2 = (p2.getY() - p1.getY()) * (p4.getX() - p2.getX())
-            - (p2.getX() - p1.getX()) * (p4.getY() - p2.getY());
-    double orientation3 = (p4.getY() - p3.getY()) * (p1.getX() - p4.getX())
-            - (p4.getX() - p3.getX()) * (p1.getY() - p4.getY());
-    double orientation4 = (p4.getY() - p3.getY()) * (p2.getX() - p4.getX())
-            - (p4.getX() - p3.getX()) * (p2.getY() - p4.getY());
+  public static boolean checkIntersectionStrict(Polygon.Point p1, Polygon.Point p2, Polygon.Point p3, Polygon.Point p4) {
+    double orientation1 = (p2.y() - p1.y()) * (p3.x() - p2.x())
+            - (p2.x() - p1.x()) * (p3.y() - p2.y());
+    double orientation2 = (p2.y() - p1.y()) * (p4.x() - p2.x())
+            - (p2.x() - p1.x()) * (p4.y() - p2.y());
+    double orientation3 = (p4.y() - p3.y()) * (p1.x() - p4.x())
+            - (p4.x() - p3.x()) * (p1.y() - p4.y());
+    double orientation4 = (p4.y() - p3.y()) * (p2.x() - p4.x())
+            - (p4.x() - p3.x()) * (p2.y() - p4.y());
     return (orientation1 * orientation2 < 0) && (orientation3 * orientation4 < 0);
   }
 
-  public static boolean checkIntersection(Point2D p1, Point2D p2, Point2D p3, Point2D p4) {
-    double orientation1 = (p2.getY() - p1.getY()) * (p3.getX() - p2.getX())
-            - (p2.getX() - p1.getX()) * (p3.getY() - p2.getY());
-    double orientation2 = (p2.getY() - p1.getY()) * (p4.getX() - p2.getX())
-            - (p2.getX() - p1.getX()) * (p4.getY() - p2.getY());
-    double orientation3 = (p4.getY() - p3.getY()) * (p1.getX() - p4.getX())
-            - (p4.getX() - p3.getX()) * (p1.getY() - p4.getY());
-    double orientation4 = (p4.getY() - p3.getY()) * (p2.getX() - p4.getX())
-            - (p4.getX() - p3.getX()) * (p2.getY() - p4.getY());
+  public static boolean checkIntersection(Polygon.Point p1, Polygon.Point p2, Polygon.Point p3, Polygon.Point p4) {
+    double orientation1 = (p2.y() - p1.y()) * (p3.x() - p2.x())
+            - (p2.x() - p1.x()) * (p3.y() - p2.y());
+    double orientation2 = (p2.y() - p1.y()) * (p4.x() - p2.x())
+            - (p2.x() - p1.x()) * (p4.y() - p2.y());
+    double orientation3 = (p4.y() - p3.y()) * (p1.x() - p4.x())
+            - (p4.x() - p3.x()) * (p1.y() - p4.y());
+    double orientation4 = (p4.y() - p3.y()) * (p2.x() - p4.x())
+            - (p4.x() - p3.x()) * (p2.y() - p4.y());
     return (orientation1 * orientation2 <= 0) && (orientation3 * orientation4 <= 0);
   }
 
@@ -55,8 +60,8 @@ public class LinearMath {
     return Math.abs(d1 - d2) < EPSILON;
   }
 
-  public static boolean epsPtEquals(Point2D p1, Point2D p2) {
-    return epsEquals(p1.getX(), p2.getX()) && epsEquals(p1.getY(), p2.getY());
+  public static boolean epsPtEquals(Polygon.Point p1, Polygon.Point p2) {
+    return epsEquals(p1.x(), p2.x()) && epsEquals(p1.y(), p2.y());
   }
 
   /**
@@ -67,9 +72,9 @@ public class LinearMath {
    * @param r point r
    * @return the orientation -1 for clockwise, 1 for counterclockwise and 0 for co-linear
    */
-  public static int orientation(Point2D p, Point2D q, Point2D r) {
-    double val = (q.getY() - p.getY()) * (r.getX() - q.getX())
-        - (q.getX() - p.getX()) * (r.getY() - q.getY());
+  public static int orientation(Polygon.Point p, Polygon.Point q, Polygon.Point r) {
+    double val = (q.y() - p.y()) * (r.x() - q.x())
+        - (q.x() - p.x()) * (r.y() - q.y());
     if (val == 0) {
       return 0;  // Collinear
     }
@@ -79,7 +84,7 @@ public class LinearMath {
   /**
    * Helper function to calculate the dot product of two 2D vectors.
    */
-  public static double dotProduct(Point2D a, Point2D b) {
-    return a.getX() * b.getX() + a.getY() * b.getY();
+  public static double dotProduct(Polygon.Point a, Polygon.Point b) {
+    return a.x() * b.x() + a.y() * b.y();
   }
 }

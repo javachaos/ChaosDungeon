@@ -23,6 +23,7 @@ public class InputListener extends MouseAdapter implements KeyListener {
 
   @Override
   public void keyTyped(KeyEvent e) {
+    //Unused
   }
 
   @Override
@@ -37,6 +38,7 @@ public class InputListener extends MouseAdapter implements KeyListener {
 
   @Override
   public void keyReleased(KeyEvent e) {
+    //Unused
   }
 
   @Override

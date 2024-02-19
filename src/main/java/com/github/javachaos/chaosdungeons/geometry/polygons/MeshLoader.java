@@ -54,13 +54,11 @@ public class MeshLoader {
   }
 
   public static Mesh createMesh(float[] positions, int[] indices, int dimensions) {
-    LOGGER.debug(Arrays.toString(positions));
-    LOGGER.debug(Arrays.toString(indices));
     int vao = genVAO();
     storeData(0, dimensions, positions);
     bindIndices(indices);
     GL30.glBindVertexArray(0);
-    return new Mesh(vao,indices.length);
+    return new Mesh(vao, indices.length);
   }
 
   private static int genVAO() {

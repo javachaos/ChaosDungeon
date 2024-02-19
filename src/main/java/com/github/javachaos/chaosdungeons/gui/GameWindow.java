@@ -39,10 +39,10 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.graphics.Camera;
-import com.github.javachaos.chaosdungeons.shaders.Shaders;
-import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
+
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -54,10 +54,7 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryStack;
 
 
@@ -112,7 +109,7 @@ public class GameWindow {
     setupLogging();
     camera = new Camera();
     window = createGlfwWindow();
-    setupInputCallbacks(gameLoop);
+    setupInputCallbacks();
     addWindowResizeCallback();
     windowSize = new WindowSize(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
     showWindow(window);
@@ -130,10 +127,10 @@ public class GameWindow {
     long fpsTimer = System.currentTimeMillis();
     while (!glfwWindowShouldClose(window)) {
       if (!gameLoop.isInitialized()) {
-        gameLoop.init(this);
+        gameLoop.init();
         GLUtil.setupDebugMessageCallback(log);
       }
-      Shaders.init();
+      gameLoop.getGameContext().init();
       GL11.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       long now = System.nanoTime();
       double dt = (now - lastUpdateTime) / 1_000_000_000.0; // Convert to seconds
@@ -145,7 +142,7 @@ public class GameWindow {
         LOGGER.error("OpenGL error: " + errorCode);
       }
       gameLoop.update(dt);
-      gameLoop.render((float) dt);
+      gameLoop.render(dt);
       frameCount++;
 
       // Sleep to maintain desired FPS
@@ -175,7 +172,7 @@ public class GameWindow {
     int w = windowSize.getWidth();
     int h = windowSize.getHeight();
 
-    glEnable(GL20.GL_MULTISAMPLE);
+    glEnable(GL13.GL_MULTISAMPLE);
     GL11.glViewport(0, 0, w, h);
     GL11.glMatrixMode(GL11.GL_MODELVIEW);
     GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -188,7 +185,9 @@ public class GameWindow {
     // Setup an error callback.
     log = IoBuilder.forLogger(GameWindow.class)
         .setLevel(Level.DEBUG).buildPrintStream();
-    GLFWErrorCallback.createPrint(log).set();
+    try (GLFWErrorCallback callback = GLFWErrorCallback.createPrint(log)) {
+      callback.set();
+    }
   }
 
   private long createGlfwWindow() {
@@ -205,7 +204,7 @@ public class GameWindow {
     window = glfwCreateWindow(Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT,
         Constants.TITLE, NULL, NULL);
     if (window == NULL) {
-      throw new RuntimeException("Failed to create the GLFW window");
+      throw new GeneralGameException("Failed to create the GLFW window");
     }
     return window;
   }
@@ -222,7 +221,7 @@ public class GameWindow {
     });
   }
 
-  private void setupInputCallbacks(GameLoop gameLoop) {
+  private void setupInputCallbacks() {
     glfwSetKeyCallback(window, camera);
   }
 

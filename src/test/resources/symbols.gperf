@@ -1,0 +1,56 @@
+/* symbols.gperf */
+struct sym_entry {
+    const char *name;
+    int value;
+};
+
+%%
+"{",       OPEN_BRACE,
+"}",       CLOSE_BRACE,
+",",       COMMA,
+":",       COLON,
+"[",       OPEN_BRACKET,
+"]",       CLOSE_BRACKET,
+"true",    TRUE,
+"false",   FALSE,
+"null",    NULL_VALUE,
+"\"",      DOUBLE_QUOTE,
+"\\",      BACKSLASH,
+"/",       SLASH,
+"b",       BACKSPACE,
+"f",       FORM_FEED,
+"n",       NEWLINE,
+"r",       CARRIAGE_RETURN,
+"t",       TAB,
+"u",       UNICODE,
+"e",       LETTER_E,
+"E",       LETTER_CAPITAL_E,
+"-",       MINUS,
+"+",       PLUS,
+".",       DOT,
+"0",       DIGIT_ZERO,
+"1",       DIGIT_ONE,
+"2",       DIGIT_TWO,
+"3",       DIGIT_THREE,
+"4",       DIGIT_FOUR,
+"5",       DIGIT_FIVE,
+"6",       DIGIT_SIX,
+"7",       DIGIT_SEVEN,
+"8",       DIGIT_EIGHT,
+"9",       DIGIT_NINE
+%%
+
+int get_sym_value(const char *str) {
+    register int h = hash(str, strlen(str));
+    if (h <= MAX_WORD_LENGTH && h >= MIN_WORD_LENGTH) {
+        register const char *s = str;
+        switch (h) {
+            #line 1 "symbols.gperf"
+            default: break;
+            #line 59 "symbols.gperf"
+        }
+    }
+    return -1;
+}
+
+

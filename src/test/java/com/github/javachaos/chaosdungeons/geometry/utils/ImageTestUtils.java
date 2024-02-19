@@ -1,14 +1,17 @@
 package com.github.javachaos.chaosdungeons.geometry.utils;
 
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+
+import java.util.Set;
+
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
@@ -24,7 +27,7 @@ public class ImageTestUtils {
    * @param filename the file to save the PNG to
    * @param polygons a list of polygon
    */
-  public static void drawPolygon(String filename, Vertex... polygons) {
+  public static void drawPolygon(String filename, Polygon... polygons) {
     int w = 512;
     int h = 512;
     final BufferedImage img = new BufferedImage(w, h,
@@ -32,7 +35,7 @@ public class ImageTestUtils {
     Graphics2D g2d = (Graphics2D) img.getGraphics();
     g2d.setBackground(Color.WHITE);
     g2d.setColor(Color.WHITE);
-    for (Vertex poly : polygons) {
+    for (Polygon poly : polygons) {
       g2d.setPaint(getRandomColor());
       g2d.setStroke(new BasicStroke(2.0f));
       drawShape(g2d, poly.getPoints());
@@ -51,7 +54,7 @@ public class ImageTestUtils {
    * @param poly     the polygon as a vertex
    * @param filename the file to save the PNG to
    */
-  public static void drawPolygon(Vertex poly, String filename) {
+  public static void drawPolygon(Polygon poly, String filename) {
     int w = 512;
     int h = 512;
     final BufferedImage img = new BufferedImage(w, h,
@@ -77,13 +80,13 @@ public class ImageTestUtils {
     }
   }
 
-  private static void drawShape(Graphics2D g2d, List<Point2D> points) {
+  private static void drawShape(Graphics2D g2d, Set<Polygon.Point> points) {
     int[] x = new int[points.size()];
     int[] y = new int[points.size()];
     int i = 0;
-    for (Point2D point : points) {
-      x[i] = (int) point.getX();
-      y[i] = (int) point.getY();
+    for (Polygon.Point point : points) {
+      x[i] = (int) point.x();
+      y[i] = (int) point.y();
       i++;
     }
     g2d.drawPolygon(x, y, points.size());

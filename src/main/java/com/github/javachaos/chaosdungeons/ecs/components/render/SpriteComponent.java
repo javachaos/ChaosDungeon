@@ -1,9 +1,6 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
 import com.github.javachaos.chaosdungeons.graphics.Model;
-import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,17 +23,7 @@ public class SpriteComponent extends RenderComponent {
 
   @Override
   public void render(double dt) {
-    if (!isRemoved()) {
-      img.render();
-    }
-  }
-
-  @Override
-  public void onAdded(Entity e) {
-  }
-
-  @Override
-  public void onRemoved(Entity e) {
+    img.render();
   }
 
   @Override

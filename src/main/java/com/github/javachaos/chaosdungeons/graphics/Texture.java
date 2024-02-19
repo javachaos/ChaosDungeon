@@ -1,23 +1,13 @@
 package com.github.javachaos.chaosdungeons.graphics;
 
-import static org.lwjgl.opengl.GL11.GL_REPEAT;
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.GL_UNPACK_ALIGNMENT;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL11.glGetInteger;
-import static org.lwjgl.opengl.GL11.glPixelStorei;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.GL_BGRA;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS;
+import static org.lwjgl.opengl.GL30.GL_BGRA_INTEGER;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.lwjgl.opengl.GL42.glTexStorage2D;
 import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
@@ -25,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
@@ -58,7 +50,7 @@ public class Texture {
     InputStream resource = Texture.class.getResourceAsStream("/" + imagePath);
     ByteBuffer buffer = BufferUtils.createByteBuffer(initialSize);
     if (resource == null) {
-      throw new RuntimeException("Texture not found: " + imagePath);
+      throw new GeneralGameException("Texture not found: " + imagePath);
     }
 
     int pixel;
@@ -86,23 +78,19 @@ public class Texture {
       this.width = w.get();
       this.height = h.get();
 
-
       // Create a new OpenGL texture
       this.id = glGenTextures();
       glBindTexture(GL_TEXTURE_2D, this.id);
+      glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+      assert decodedImage != null;
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                decodedImage);
+      glGenerateMipmap(GL_TEXTURE_2D);  //Generate num_mipmaps number of mipmaps here.
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-      // Tell OpenGL how to unpack the RGBA bytes. Each component is 1 byte size
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
-
-      // Upload the texture data
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-          this.width, this.height, 0,
-          GL_RGBA, GL_UNSIGNED_BYTE, decodedImage);
-
-      // Generate Mip Map
-      glGenerateMipmap(GL_TEXTURE_2D);
     }
   }
 
@@ -112,11 +100,9 @@ public class Texture {
    * @param s the sampler index
    */
   public void bind(int s) {
-    if (s >= 0 && s < glGetInteger(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)) {
       // Bind the texture
       glActiveTexture(GL_TEXTURE0 + s);
       glBindTexture(GL_TEXTURE_2D, this.id);
-    }
   }
 
   public void unbind() {

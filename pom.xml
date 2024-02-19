@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.0</junit.version>
         <log4j.version>2.20.0</log4j.version>
-        <lwjgl.version>3.3.2</lwjgl.version>
+        <lwjgl.version>3.3.3</lwjgl.version>
         <shade.version>3.5.0</shade.version>
         <main.class>com.github.javachaos.chaosdungeons.Main</main.class>
     </properties>
@@ -167,8 +167,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
 			<plugin>

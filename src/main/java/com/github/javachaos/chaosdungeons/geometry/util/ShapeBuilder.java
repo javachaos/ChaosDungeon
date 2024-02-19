@@ -1,18 +1,46 @@
 package com.github.javachaos.chaosdungeons.geometry.util;
 
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+
 import org.joml.Vector2f;
 
 public class ShapeBuilder {
+
+  private ShapeBuilder() {
+    //Unused
+  }
+
+  public static class Random {
+    private Vector2f pos;
+
+    public Random setPosition(Vector2f pos) {
+      this.pos = pos;
+      return this;
+    }
+
+    public Random setPosition(float x, float y) {
+      return setPosition(new Vector2f(x, y));
+    }
+
+    public Polygon build() {
+      java.util.Random rand = new java.util.Random(System.nanoTime());
+      int r = rand.nextInt(10);
+      return switch (r) {
+          case 1 -> new Rectangle().setPosition(pos).setHeight(rand.nextFloat() * 5.0f).setWidth(rand.nextFloat() * 5.0f).build();
+          case 2 -> new Triangle().setPosition(pos).setP0(new Vector2f(rand.nextFloat() * 5f, rand.nextFloat() * 5f))
+                  .setP1(new Vector2f(rand.nextFloat() * 5f, rand.nextFloat() * 5f))
+                  .setP2(new Vector2f(rand.nextFloat() * 5f, rand.nextFloat() * 5f)).build();
+          default -> new Circle().setPosition(pos).setNumPoints(r).setRadius(rand.nextFloat() * 5f).build();
+      };
+    }
+  }
   public static class Rectangle {
-    private double width;
-    private double height;
+    private float width;
+    private float height;
     private Vector2f pos;
 
     public Rectangle() {
@@ -22,7 +50,7 @@ public class ShapeBuilder {
     }
 
     public Rectangle setPosition(Vector2f pos) {
-      this.pos = pos;
+      this.pos = new Vector2f(pos);
       return this;
     }
 
@@ -31,22 +59,22 @@ public class ShapeBuilder {
       return this;
     }
 
-    public Rectangle setWidth(double w) {
+    public Rectangle setWidth(float w) {
       this.width = w;
       return this;
     }
 
-    public Rectangle setHeight(double h) {
+    public Rectangle setHeight(float h) {
       this.height = h;
       return this;
     }
 
-    public Vertex build() {
-      Point2D.Double p0 = new Point2D.Double(pos.x, pos.y);
-      Point2D.Double p1 = new Point2D.Double(pos.x + width, pos.y);
-      Point2D.Double p2 = new Point2D.Double(pos.x + width, pos.y + height);
-      Point2D.Double p3 = new Point2D.Double(pos.x, pos.y + height);
-      return new Vertex(List.of(p0, p1, p2, p3));
+    public Polygon build() {
+      Polygon.Point p0 = new Polygon.Point(pos.x, pos.y);
+      Polygon.Point p1 = new Polygon.Point(pos.x + width, pos.y);
+      Polygon.Point p2 = new Polygon.Point(pos.x + width, pos.y + height);
+      Polygon.Point p3 = new Polygon.Point(pos.x, pos.y + height);
+      return new Polygon(Set.of(p0, p1, p2, p3));
     }
   }
 
@@ -88,11 +116,11 @@ public class ShapeBuilder {
       return this;
     }
 
-    public Vertex build() {
-      Point2D.Double p00 = new Point2D.Double(pos.x + p0.x, pos.y + p0.y);
-      Point2D.Double p01 = new Point2D.Double(pos.x + p1.x, pos.y + p1.y);
-      Point2D.Double p02 = new Point2D.Double(pos.x + p2.x, pos.y + p2.y);
-      return new Vertex(List.of(p00, p01, p02));
+    public Polygon build() {
+      Polygon.Point p00 = new Polygon.Point(pos.x + p0.x, pos.y + p0.y);
+      Polygon.Point p01 = new Polygon.Point(pos.x + p1.x, pos.y + p1.y);
+      Polygon.Point p02 = new Polygon.Point(pos.x + p2.x, pos.y + p2.y);
+      return new Polygon(Set.of(p00, p01, p02));
     }
   }
 
@@ -107,7 +135,7 @@ public class ShapeBuilder {
       this.pos = new Vector2f();
     }
 
-    private static Set<Point2D> calculateEllipsePoints(Ellipse2D ellipse, int segments) {
+    private static Set<Polygon.Point> calculateEllipsePoints(Ellipse2D ellipse, int segments) {
       double centerX = ellipse.getCenterX();
       double centerY = ellipse.getCenterY();
       double width = ellipse.getWidth();
@@ -115,12 +143,12 @@ public class ShapeBuilder {
       if (segments <= 5) {
         segments = 5;
       }
-      Set<Point2D> points = new LinkedHashSet<>();
+      Set<Polygon.Point> points = new LinkedHashSet<>();
       for (double angle = 0.0; angle < 360.0; angle += (double) 360 / segments) {
         double radians = Math.toRadians(angle);
-        double x = centerX + width * Math.cos(radians) / 2;
-        double y = centerY + height * Math.sin(radians) / 2;
-        points.add(new Point2D.Double(x, y));
+        float x = (float) (centerX + width * Math.cos(radians) / 2f);
+        float y = (float) (centerY + height * Math.sin(radians) / 2f);
+        points.add(new Polygon.Point(x, y));
       }
       return points;
     }
@@ -145,10 +173,9 @@ public class ShapeBuilder {
       return this;
     }
 
-    public Vertex build() {
-      return new Vertex(new ArrayList<>(
-          calculateEllipsePoints(
-              new Ellipse2D.Double(pos.x, pos.y, radius * 2, radius * 2), numPoints)));
+    public Polygon build() {
+      return new Polygon(calculateEllipsePoints(
+              new Ellipse2D.Double(pos.x, pos.y, radius * 2, radius * 2), numPoints));
     }
 
   }

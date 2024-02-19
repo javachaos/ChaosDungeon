@@ -1,10 +1,10 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.math.Hull;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import java.awt.geom.Point2D;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.Set;
 /**
  * Simple helper class for constructing delaunay triangulations.
  */
+@SuppressWarnings("all")
 public class DelaunayTriangulation {
 
   /**
@@ -21,31 +22,19 @@ public class DelaunayTriangulation {
    * @param points points representing a polygon, orientation is assumed clockwise
    * @return a new list of triangles representing a delaunay triangulation
    */
-  public static List<Triangle> delaunayTriangulation(List<Point2D> points) {
+  public static List<Triangle> delaunayTriangulation(Set<Polygon.Point> points) {
 
-    // Create a super triangle that covers all the points
-    double maxX = Double.MIN_VALUE;
-    double maxY = Double.MIN_VALUE;
-    double minX = Double.MAX_VALUE;
-    double minY = Double.MAX_VALUE;
-    for (Point2D point : points) {
-      maxX = Math.max(maxX, point.getX());
-      maxY = Math.max(maxY, point.getY());
-      minX = Math.min(minX, point.getX());
-      minY = Math.min(minY, point.getY());
-    }
-
-    double delta = Math.max(maxX - minX, maxY - minY) * 10.0;
-    Point2D p1 = new Point2D.Double(minX - delta, minY - delta);
-    Point2D p2 = new Point2D.Double(maxX + delta, minY - delta);
-    Point2D p3 = new Point2D.Double(minX + (maxX - minX) / 2.0, maxY + delta);
+    MinMaxPoints result = getMinMaxPoints(points);
+    Polygon.Point p1 = new Polygon.Point((float) (result.minX() - result.delta()), (float) (result.minY() - result.delta()));
+    Polygon.Point p2 = new Polygon.Point((float) (result.maxX() + result.delta()), (float) (result.minY() - result.delta()));
+    Polygon.Point p3 = new Polygon.Point((float) (result.minX() + (result.maxX() - result.minX()) / 2.0), (float) (result.maxY() + result.delta()));
 
     Triangle superTriangle = new Triangle(p1, p2, p3);
     List<Triangle> triangles = new ArrayList<>();
     triangles.add(superTriangle);
 
     // Incrementally add each point to the triangulation
-    for (Point2D point : points) {
+    for (Polygon.Point point : points) {
       List<Edge> edges = new ArrayList<>();
 
       // Find all edges affected by adding the current point
@@ -82,6 +71,26 @@ public class DelaunayTriangulation {
     return triangles;
   }
 
+  private static MinMaxPoints getMinMaxPoints(Set<Polygon.Point> points) {
+    // Create a super triangle that covers all the points
+    double maxX = Double.MIN_VALUE;
+    double maxY = Double.MIN_VALUE;
+    double minX = Double.MAX_VALUE;
+    double minY = Double.MAX_VALUE;
+    for (Polygon.Point point : points) {
+      maxX = Math.max(maxX, point.x());
+      maxY = Math.max(maxY, point.y());
+      minX = Math.min(minX, point.x());
+      minY = Math.min(minY, point.y());
+    }
+
+    double delta = Math.max(maxX - minX, maxY - minY) * 10.0;
+    return new MinMaxPoints(maxX, maxY, minX, minY, delta);
+  }
+
+  private record MinMaxPoints(double maxX, double maxY, double minX, double minY, double delta) {
+  }
+
   /**
    * Create a constrained delauney triangulation.
    *
@@ -90,11 +99,11 @@ public class DelaunayTriangulation {
    * @return the list of edges for the final triangulation
    */
   public static List<Edge> constrainDelaunayTriangulation(List<Triangle> triangulation,
-                                                          Vertex polygon) {
-    List<Edge> originalEdges = polygon.getEdges();
+                                                          Polygon polygon) {
+    Set<Edge> originalEdges = polygon.getEdges();
     List<Edge> badEdges = Hull.convexHull(polygon);
     badEdges.removeAll(originalEdges);
-    List<Point2D> badPoints = new ArrayList<>();
+    List<Polygon.Point> badPoints = new ArrayList<>();
     for (Edge be : badEdges) {
       for (Edge oe : badEdges) {
         if (be.getA() == oe.getA()) {

@@ -11,6 +11,10 @@ import java.nio.ByteBuffer;
 public class FileUtils {
     private static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
+    private FileUtils() {
+        //Unused
+    }
+
     public static ByteBuffer loadFontFile(String filePath) {
         try (InputStream inputStream = FileUtils.class.getResourceAsStream(filePath)) {
             if (inputStream == null) {

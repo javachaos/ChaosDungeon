@@ -1,10 +1,11 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
-import com.github.javachaos.chaosdungeons.collision.QuadTree;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+
 import java.util.Objects;
 
 import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 /**
@@ -13,16 +14,17 @@ import org.joml.Vector3f;
 @SuppressWarnings("unused")
 public class SpawnData {
   private final Vector3f rotation;
-  private final Vector3f position;
-  private final Vector3f scale;
+  private final Vector2f position;
+  private final Vector2f scale;
   private final Vector3f angularVelocity;
-  private final Vector3f initialVelocity;
+  private final Vector2f initialVelocity;
   private float gravitationFactor;
-  private Vertex shape;
+  private final Polygon shape;
   private float mass;
   private float restitution;
   private float spawnRate = 1.0f;
   private int maxSpawns;
+  private final boolean isDynamic;
 
   /**
    * Create a new spawn data instance.
@@ -37,21 +39,22 @@ public class SpawnData {
    * @param scale initial scale of this spawner
    */
   private SpawnData(Vector3f rotation,
-                    Vector3f position,
-                    Vector3f scale,
+                    Vector2f position,
+                    Vector2f scale,
                     Vector3f angularVelocity,
-                    Vector3f initialVelocity,
-                    Vertex shape,
+                    Vector2f initialVelocity,
+                    Polygon shape,
                     float mass,
                     float gravitationFactor,
                     float restitution,
                     float spawnRate,
-                    int maxSpawns) {
+                    int maxSpawns,
+                    boolean isDynamic) {
     this.angularVelocity = Objects.requireNonNullElseGet(angularVelocity, () -> new Vector3f(0));
-    this.initialVelocity = Objects.requireNonNullElseGet(initialVelocity, () -> new Vector3f(0));
+    this.initialVelocity = Objects.requireNonNullElseGet(initialVelocity, () -> new Vector2f(0));
     this.rotation = Objects.requireNonNullElseGet(rotation, () -> new Vector3f(0));
-    this.position = Objects.requireNonNullElseGet(position, () -> new Vector3f(0));
-    this.scale = Objects.requireNonNullElseGet(scale, () -> new Vector3f(1));
+    this.position = Objects.requireNonNullElseGet(position, () -> new Vector2f().zero());
+    this.scale = Objects.requireNonNullElseGet(scale, () -> new Vector2f(1));
     this.shape = Objects.requireNonNullElseGet(shape, () -> new ShapeBuilder.Rectangle().build());
     if (mass > 0) {
       this.mass = mass;
@@ -66,18 +69,19 @@ public class SpawnData {
       this.spawnRate = spawnRate;
     }
     this.maxSpawns = maxSpawns;
+    this.isDynamic = isDynamic;
   }
 
   public Vector3f getAngularVelocity() {
     return new Vector3f(angularVelocity);
   }
 
-  public Vector3f getInitialVelocity() {
-    return new Vector3f(initialVelocity);
+  public Vector2f getInitialVelocity() {
+    return new Vector2f(initialVelocity);
   }
 
-  public Vector3f getScale() {
-    return new Vector3f(scale);
+  public Vector2f getScale() {
+    return new Vector2f(scale);
   }
 
   // Getter methods for rotation and position
@@ -85,11 +89,11 @@ public class SpawnData {
     return new Vector3f(rotation);
   }
 
-  public Vector3f getPosition() {
-    return new Vector3f(position);
+  public Vector2f getPosition() {
+    return new Vector2f(position);
   }
 
-  public Vertex getShape() {
+  public Polygon getShape() {
     return shape;
   }
 
@@ -117,36 +121,42 @@ public class SpawnData {
     return restitution;
   }
 
+  public boolean isDynamic() {
+    return isDynamic;
+  }
+
   /**
    * Builder class.
    */
   public static class Builder {
     private Vector3f rotation;
-    private Vector3f position;
-    private Vector3f scale;
+    private Vector2f position;
+    private Vector2f scale;
     private Vector3f angularVelocity;
-    private Vector3f initialVelocity;
-    private Vertex shape;
+    private Vector2f initialVelocity;
+    private Polygon shape;
     private float gravitationFactor;
     private float mass;
     private float restitution;
     private float spawnRate = 1.0f;
     private int maxSpawns = 1;
+    private boolean isDynamic;
 
     /**
      * Create a new builder.
      */
     public Builder() {
       // Set default values if needed
-      scale = new Vector3f(1);
+      scale = new Vector2f(1);
       rotation = new Vector3f();
-      position = new Vector3f();
+      position = new Vector2f();
       angularVelocity = new Vector3f();
-      initialVelocity = new Vector3f();
+      initialVelocity = new Vector2f();
       shape = new ShapeBuilder.Rectangle().build();
       gravitationFactor = 1.0f;
       mass = 1.0f;
       restitution = 1.0f;
+      isDynamic = false;
     }
 
     public Builder setAngularVelocity(Vector3f angularVelocity) {
@@ -154,7 +164,7 @@ public class SpawnData {
       return this;
     }
 
-    public Builder setInitialVelocity(Vector3f initialVelocity) {
+    public Builder setInitialVelocity(Vector2f initialVelocity) {
       this.initialVelocity = initialVelocity;
       return this;
     }
@@ -164,18 +174,18 @@ public class SpawnData {
       return this;
     }
 
-    public Builder setScale(Vector3f scale) {
+    public Builder setScale(Vector2f scale) {
       this.scale = scale;
       return this;
     }
 
-    public Builder setPosition(Vector3f position) {
+    public Builder setPosition(Vector2f position) {
       this.position = position;
       return this;
     }
 
-    public Builder setPosition(float x, float y, float z) {
-      this.position = new Vector3f(x, y, z);
+    public Builder setPosition(float x, float y) {
+      this.position = new Vector2f(x, y);
       return this;
     }
 
@@ -204,8 +214,13 @@ public class SpawnData {
       return this;
     }
 
-    public Builder setShape(Vertex shape) {
+    public Builder setShape(Polygon shape) {
       this.shape = shape;
+      return this;
+    }
+
+    public Builder setDynamic(boolean isDynamic) {
+      this.isDynamic = isDynamic;
       return this;
     }
 
@@ -219,7 +234,7 @@ public class SpawnData {
       return new SpawnData(rotation, position, scale,
           angularVelocity, initialVelocity, shape,
           mass, gravitationFactor, restitution,
-          spawnRate, maxSpawns);
+          spawnRate, maxSpawns, isDynamic);
     }
   }
 }

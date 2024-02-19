@@ -6,8 +6,11 @@ import java.util.Random;
  * Utility class to get a random generator.
  */
 public class RandomUtils {
-  private static final Random random = new Random(
-      (long) (System.nanoTime() * 3.141592654 * 299792458));
+  private static final Random random = new Random(System.nanoTime());
+
+  private RandomUtils() {
+    //Unused
+  }
 
   /**
    * Get random number generator.

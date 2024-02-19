@@ -2,19 +2,15 @@ package com.github.javachaos.chaosdungeons.collision;
 
 import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.equalTo;
 import static com.github.javachaos.chaosdungeons.utils.PrecisionUtils.lessThan;
-import static org.lwjgl.opengl.GL11.GL_LINES;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL11.*;
 
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 
-import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
+
 import org.joml.Vector3f;
 
 /**
@@ -52,11 +48,11 @@ public class QuadTree<T> {
     }
   }
 
-  private final Vertex boundary;
+  private final Polygon boundary;
 
   private Node root;
 
-  public QuadTree(double w, double h) {
+  public QuadTree(float w, float h) {
     Vector3f pos = GameWindow.getCamera().getPosition();
     this.boundary = new ShapeBuilder.Rectangle()
             .setPosition(pos.x, pos.y)
@@ -71,7 +67,7 @@ public class QuadTree<T> {
    * @param y y pos
    * @param value the value
    */
-  public void insert(double x, double y, T value) {
+  public void insert(float x, float y, T value) {
     if (boundary.contains(x, y)) {
       root = insert(root, x, y, value);
     }
@@ -93,11 +89,11 @@ public class QuadTree<T> {
     return n;
   }
 
-  public void render(double w, double h) {
-    render(root, 0, 0, w, h);
+  public void render(double w, double h, GameContext gameContext) {
+    render(root, 0, 0, w, h, gameContext);
   }
 
-  private void render(Node n, double x, double y, double w, double h) {
+  private void render(Node n, double x, double y, double w, double h, GameContext gameContext) {
     if (n == null) {
       return;
     }
@@ -121,29 +117,29 @@ public class QuadTree<T> {
     double halfWidth = w / 2f;
     double halfHeight = h / 2f;
 
-    render(n.nw, x, y, halfWidth, halfHeight);
-    render(n.ne, x + halfWidth, y, halfWidth, halfHeight);
-    render(n.sw, x, y + halfHeight, halfWidth, halfHeight);
-    render(n.se, x + halfWidth, y + halfHeight, halfWidth, halfHeight);
+    render(n.nw, x, y, halfWidth, halfHeight, gameContext);
+    render(n.ne, x + halfWidth, y, halfWidth, halfHeight, gameContext);
+    render(n.sw, x, y + halfHeight, halfWidth, halfHeight, gameContext);
+    render(n.se, x + halfWidth, y + halfHeight, halfWidth, halfHeight, gameContext);
   }
 
-  public List<Node> find(Vertex.Bounds q) {
+  public List<Node> find(Polygon.Bounds q) {
     return find(new LinkedList<>(), root, q);
   }
 
-  private List<Node> find(List<Node> nodes, Node n, Vertex.Bounds q) {
-    if (n == null || !boundary.contains(new Point2D.Double(q.px, q.py))) {
+  private List<Node> find(List<Node> nodes, Node n, Polygon.Bounds q) {
+    if (n == null || !boundary.contains(q.x(), q.y())) {
       return nodes;
     }
 
-    if (q.contains(n.xp, n.yp)) {
+    if (q.contains((float) n.xp, (float) n.yp)) {
       nodes.add(n);
     }
 
-    double xmin = q.px;
-    double ymin = q.py;
-    double xmax = q.w + q.px;
-    double ymax = q.h + q.py;
+    double xmin = q.x();
+    double ymin = q.y();
+    double xmax = q.w() + q.x();
+    double ymax = q.h() + q.y();
     if (lessThan(xmin, n.xp) && lessThan(ymin, n.yp)) {
       find(nodes, n.sw, q);
     }

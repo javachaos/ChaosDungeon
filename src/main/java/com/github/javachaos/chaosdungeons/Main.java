@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons;
 
 import com.github.javachaos.chaosdungeons.ecs.GameLoop;
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.utils.PropertyManager;
@@ -33,12 +34,17 @@ public class Main {
    * @param args application arguments.
    */
   public static void main(String[] args) {
+    GameWindow gw = new GameWindow();
     GameLoop gl = new GameLoop();
     try {
-      new GameWindow().run(gl);
-    } catch (ShaderLoadException | InterruptedException e) {
+      gw.run(gl);
+    } catch (ShaderLoadException e) {
       LOGGER.error("Error: {}", e.getMessage());
-      throw new RuntimeException(e);
+      throw new GeneralGameException(e);
+    } catch (InterruptedException e) {
+      LOGGER.error("Thread interrupted: {}", e.getMessage());
+      Thread.currentThread().interrupt();
+      throw new GeneralGameException(e);
     }
   }
 }

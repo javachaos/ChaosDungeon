@@ -10,5 +10,5 @@ module com.github.javachaos.chaosdungeons {
     requires org.lwjgl.opengl.natives;
     requires org.joml;
     requires org.lwjgl.stb;
-  exports com.github.javachaos.chaosdungeons;
+    exports com.github.javachaos.chaosdungeons;
 }

@@ -5,6 +5,10 @@ package com.github.javachaos.chaosdungeons.geometry.math;
  */
 public class Matrix3x3Det {
 
+  private Matrix3x3Det() {
+    //Unused
+  }
+
   /**
    * Calculate the determinant of the 3x3 matrix m.
    *

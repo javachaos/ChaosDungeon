@@ -2,8 +2,8 @@ package com.github.javachaos.chaosdungeons.geometry;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.github.javachaos.chaosdungeons.collision.CollisionData;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.collision.Collision;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import com.github.javachaos.chaosdungeons.geometry.utils.ImageTestUtils;
 import org.apache.logging.log4j.LogManager;
@@ -16,26 +16,26 @@ import org.junit.jupiter.api.Test;
  *
  * @author javachaos
  */
-public class TestCollision {
+class TestCollision {
 
   private static final Logger LOGGER = LogManager.getLogger(TestCollision.class);
 
   @Test
-  public void testCollisionPartialOverlap() {
-    Vertex circle = new ShapeBuilder.Circle().setNumPoints(50).setRadius(160).build();
-    Vertex square =
+  void testCollisionPartialOverlap() {
+    Polygon circle = new ShapeBuilder.Circle().setNumPoints(50).setRadius(160).build();
+    Polygon square =
         new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
             .build();
-    Vertex rand = new Vertex(GenerationUtils.generateNonRegularPolygon(160, 160, 6, 128, 128));
+    Polygon rand = new Polygon(GenerationUtils.generateNonRegularPolygon(160, 160, 6, 128, 128));
     ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square, rand);
-    circle.print();
-    square.print();
-    CollisionData d = circle.checkCollision(square);
-    CollisionData e = square.checkCollision(circle);
+//    circle.print();
+//    square.print();
+    Collision d = circle.checkCollision(square);
+    Collision e = square.checkCollision(circle);
     long start = System.nanoTime();
-    CollisionData a = rand.checkCollision(circle);
+    Collision a = rand.checkCollision(circle);
     long end = System.nanoTime();
-    CollisionData p = rand.checkCollision(square);
+    Collision p = rand.checkCollision(square);
     LOGGER.debug("Runtime: {}", end - start);
     assertTrue(d.isColliding());
     assertTrue(e.isColliding());
@@ -48,21 +48,21 @@ public class TestCollision {
   }
 
   @Test
-  public void testCollisionFullOverlap() {
-    Vertex circle = new ShapeBuilder.Circle().setPosition(new Vector2f(65, 150)).setNumPoints(20).setRadius(55).build();
-    Vertex square =
+  void testCollisionFullOverlap() {
+    Polygon circle = new ShapeBuilder.Circle().setPosition(new Vector2f(65, 150)).setNumPoints(20).setRadius(55).build();
+    Polygon square =
             new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
                     .build();
     ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square);
-    circle.print();
-    square.print();
+//    circle.print();
+//    square.print();
     LOGGER.debug("Square");
     long start = System.nanoTime();
-    CollisionData d = circle.checkCollision(square);
+    Collision d = circle.checkCollision(square);
     long end = System.nanoTime();
     LOGGER.debug("Runtime: {}", end - start);
     LOGGER.debug("Circle");
-    CollisionData e = square.checkCollision(circle);
+    Collision e = square.checkCollision(circle);
     assertTrue(d.isColliding());
     assertTrue(e.isColliding());
     LOGGER.debug("Collision: {}", d);

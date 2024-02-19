@@ -1,6 +1,8 @@
 package com.github.javachaos.chaosdungeons.shaders;
 
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
+import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
 
 /**
  * UI shader class.
@@ -16,7 +18,12 @@ public class UiShader extends ShaderProgram {
 
   @Override
   public void addUniforms() {
-    //no uniforms for UI shader. (yet)
+    try {
+      createUniform("pos");
+    } catch (UniformLoadException e) {
+      LOGGER.error("Error loading uniforms: {}", e.getMessage());
+      throw new GeneralGameException(e);
+    }
   }
 
   @Override

@@ -1,15 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs;
 
-import com.github.javachaos.chaosdungeons.ecs.systems.LoadSystem;
-import com.github.javachaos.chaosdungeons.ecs.systems.PhysicsSystem;
-import com.github.javachaos.chaosdungeons.ecs.systems.RenderSystem;
-import com.github.javachaos.chaosdungeons.ecs.systems.System;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.github.javachaos.chaosdungeons.shaders.Shaders;
-import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 
 /**
  * Main game loop class.
@@ -17,41 +9,30 @@ import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 public class GameLoop {
 
   private boolean init;
-  private List<System> systems;
-  private RenderSystem renderSystem;
-
-  private static final double FIXED_TIME_STEP = .016; // 16 milliseconds
-
+  private final GameContext gameContext;
+  private static final float FIXED_TIME_STEP = .0016F; // 16 milliseconds
   private double accumulatedTime = 0.0;
-  private PhysicsSystem physicsSystem;
+
+  public GameLoop() {
+    gameContext = new GameContext();
+  }
 
   /**
    * Initialize the game loop.
    */
-  public void init(GameWindow window) {
-    systems = new ArrayList<>();
-    renderSystem = new RenderSystem(window);
-    physicsSystem = new PhysicsSystem(window);
-    systems.add(physicsSystem);
-    systems.add(renderSystem);
-    systems.add(new LoadSystem(window));
-    // add more later
-    for (System system : systems) {
-      system.initSystem();
-    }
+  public void init() {
+    //note: init order matters, load system should always be last
+    gameContext.getRenderSystem().initSystem();
+    gameContext.getPhysicsSystem().initSystem();
+    gameContext.getLoadSystem().initSystem();
     init = true;
   }
 
   /**
    * Update render system.
    */
-  public void render(float dt) {
-    Shaders.getCurrentShader().bind();
-    Shaders.getCurrentShader().loadProjection();
-    Shaders.getCurrentShader().setUniform("view",
-            MatrixUtils.createViewMatrix(GameWindow.getCamera()));
-    renderSystem.update(dt);
-    Shaders.getCurrentShader().unbind();
+  public void render(double dt) {
+    gameContext.getRenderSystem().update(dt);
   }
 
   /**
@@ -61,24 +42,25 @@ public class GameLoop {
    */
   public void update(double dt) {
     GameWindow.getCamera().update();
-
     // Accumulate time
     accumulatedTime += dt;
-    systems.stream().filter(s -> !(s instanceof RenderSystem) && !(s instanceof PhysicsSystem))
-        .forEach(t -> t.update(dt));
-
+    gameContext.getLoadSystem().update(dt);
     // Perform physics updates for each fixed time step
     while (accumulatedTime >= FIXED_TIME_STEP) {
-      physicsSystem.update(FIXED_TIME_STEP);
+      gameContext.getPhysicsSystem().update(FIXED_TIME_STEP);
       accumulatedTime = 0;
     }
   }
 
   public void shutdown() {
-    System.shutdown();
+    gameContext.shutdown();
   }
 
   public boolean isInitialized() {
     return init;
+  }
+
+  public GameContext getGameContext() {
+    return gameContext;
   }
 }

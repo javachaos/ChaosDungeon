@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
+
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,20 +32,9 @@ public final class PropertyManager {
   private final Properties props = new Properties();
 
   /**
-   * Property file name.
-   */
-  private final String fileName = Constants.PROPERTY_FILE_NAME;
-
-  /**
    * True if the property file has been loaded into memory.
    */
   private boolean isLoaded = false;
-
-  /**
-   * PropertyManager ctor.
-   */
-  public PropertyManager() {
-  }
 
   /**
    * Initialize the property manager.
@@ -56,15 +48,16 @@ public final class PropertyManager {
    * Load properties into memory from file.
    */
   private void loadProperties() {
-    InputStream inputStream = getClass().getResourceAsStream(fileName);
+    InputStream inputStream = getClass().getResourceAsStream(Constants.PROPERTY_FILE_NAME);
     try {
       props.load(inputStream);
     } catch (IOException e) {
       LOGGER.error(e);
-      throw new RuntimeException(e);
+      throw new GeneralGameException(e);
     }
     LOGGER.debug("Properties loaded into memory.");
-    LOGGER.debug(props.stringPropertyNames().toString());
+    Set<String> propertyNames = props.stringPropertyNames();
+    LOGGER.debug("{}", propertyNames);
     isLoaded = true;
   }
 
@@ -72,7 +65,7 @@ public final class PropertyManager {
    * Write properties to file.
    */
   private void writeProperties() {
-    try (FileOutputStream fos = new FileOutputStream(fileName)) {
+    try (FileOutputStream fos = new FileOutputStream(Constants.PROPERTY_FILE_NAME)) {
       props.store(fos, null);
       LOGGER.debug("Properties written to disk.");
     } catch (final IOException e) {

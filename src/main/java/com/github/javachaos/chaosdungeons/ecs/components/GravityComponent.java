@@ -3,6 +3,7 @@ package com.github.javachaos.chaosdungeons.ecs.components;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 /**
@@ -19,18 +20,18 @@ public class GravityComponent extends PhysicsComponent {
   /**
    * Create a new component.
    */
-  public GravityComponent(double mass,
+  public GravityComponent(float mass,
                           double restitution,
-                          Vector3f initialVelocity) {
+                          Vector2f initialVelocity) {
     super(mass, restitution, initialVelocity, false);
   }
 
   /**
    * Create a new component.
    */
-  public GravityComponent(double mass,
+  public GravityComponent(float mass,
                           double restitution,
-                          Vector3f initialVelocity,
+                          Vector2f initialVelocity,
                           Vector3f initialAngularVelocity) {
     super(mass, restitution, initialVelocity, initialAngularVelocity, false);
   }
@@ -38,9 +39,9 @@ public class GravityComponent extends PhysicsComponent {
   /**
    * Create a new component.
    */
-  public GravityComponent(double mass,
+  public GravityComponent(float mass,
                           double restitution,
-                          Vector3f initialVelocity,
+                          Vector2f initialVelocity,
                           double gravitationalMultiplier) {
     super(mass, restitution, initialVelocity, false);
     this.fg = gravitationalMultiplier;
@@ -49,9 +50,9 @@ public class GravityComponent extends PhysicsComponent {
   /**
    * Create a new component.
    */
-  public GravityComponent(double mass,
+  public GravityComponent(float mass,
                           double restitution,
-                          Vector3f initialVelocity,
+                          Vector2f initialVelocity,
                           Vector3f initialAngularVelocity,
                           double gravitationalMultiplier) {
     super(mass, restitution, initialVelocity, initialAngularVelocity, false);
@@ -64,18 +65,4 @@ public class GravityComponent extends PhysicsComponent {
     applyForce(0.0, fg * GRAVITATIONAL_FACTOR);
   }
 
-  @Override
-  public void destroy() {
-    super.destroy();
-  }
-
-  @Override
-  public void onAdded(Entity e) {
-    super.onAdded(e);
-  }
-
-  @Override
-  public void onRemoved(Entity e) {
-    super.onRemoved(e);
-  }
 }

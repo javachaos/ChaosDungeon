@@ -1,7 +1,6 @@
 package com.github.javachaos.chaosdungeons.graphics.text;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.shaders.Shaders;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
 
 public class UiTextModel extends TextModel {
 
@@ -12,6 +11,6 @@ public class UiTextModel extends TextModel {
      * @param ge
      */
     public UiTextModel(String fontPath, GameEntity ge) {
-        super(Shaders.getShader("ui"), fontPath, ge);
+        super(fontPath, ge);
     }
 }

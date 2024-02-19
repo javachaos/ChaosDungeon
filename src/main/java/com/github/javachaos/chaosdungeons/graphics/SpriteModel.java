@@ -11,12 +11,9 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL20.*;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.shaders.Shaders;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
 
 /**
  * Sprite model.
@@ -66,22 +63,20 @@ public class SpriteModel implements Model {
    */
   @Override
   public void render() {
-    Shaders.getCurrentShader().setSampleTexture(0);
-    Shaders.getCurrentShader().setUniform("transformation", ge.getModelMatrix());
-    texture.bind(0);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexId);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, textureId);
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
-    glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    texture.unbind();
+      texture.bind(0);
+      glEnableVertexAttribArray(0);
+      glEnableVertexAttribArray(1);
+      glBindBuffer(GL_ARRAY_BUFFER, vertexId);
+      glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+      glBindBuffer(GL_ARRAY_BUFFER, textureId);
+      glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesId);
+      glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, 0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glDisableVertexAttribArray(0);
+      glDisableVertexAttribArray(1);
+      texture.unbind();
   }
 
   /**
@@ -89,7 +84,7 @@ public class SpriteModel implements Model {
    */
   @Override
   public void delete() {
-    if (!deleted) {
+    if (!deleted && texture != null) {
       texture.delete();
       deleted = true;
     }

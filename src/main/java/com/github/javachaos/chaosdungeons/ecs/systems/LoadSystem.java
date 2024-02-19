@@ -1,7 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,12 +12,13 @@ public class LoadSystem extends System {
 
   private static final Logger LOGGER = LogManager.getLogger(LoadSystem.class);
 
-  public LoadSystem(GameWindow window) {
-    super(window);
+  public LoadSystem(GameContext gameContext) {
+    super(gameContext);
   }
 
   @Override
-  protected void update(float dt) {
+  public void update(double dt) {
+    //Unused
   }
 
   /**
@@ -25,7 +26,7 @@ public class LoadSystem extends System {
    */
   @Override
   public void initSystem() {
-    getEntities().forEach(Entity::init);
+    gameContext.getEntities().forEach(Entity::init);
   }
 
   @Override

@@ -11,12 +11,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryStack;
@@ -43,7 +48,7 @@ public abstract class ShaderProgram {
    * @throws ShaderLoadException if the file path does not match
    *                             ^([a-z])+([_]){0,1}([a-z])+([.]){1}([a-z])+$
    */
-  public ShaderProgram(String vertexShaderPath, String fragmentShaderPath) throws
+  protected ShaderProgram(String vertexShaderPath, String fragmentShaderPath) throws
       ShaderLoadException {
     if (!vertexShaderPath.matches(Constants.FILENAME_REGEX)
         || !fragmentShaderPath.matches(Constants.FILENAME_REGEX)) {
@@ -100,6 +105,34 @@ public abstract class ShaderProgram {
         FloatBuffer fb = stack.mallocFloat(4);
         value.get(fb);
         glUniform4fv(loc, fb);
+      }
+    }
+  }
+
+  /**
+   * Set the uniform for name.
+   *
+   * @param name  the name of the uniform
+   * @param value the 4D vector value
+   */
+  public void setUniform(String name, Vector3f value) {
+    int loc = glGetUniformLocation(programId, name);
+    if (loc != -1) {
+      try (MemoryStack stack = MemoryStack.stackPush()) {
+        FloatBuffer fb = stack.mallocFloat(3);
+        value.get(fb);
+        glUniform4fv(loc, fb);
+      }
+    }
+  }
+
+  public void setUniform(String name, Vector2f value) {
+    int loc = glGetUniformLocation(programId, name);
+    if (loc != -1) {
+      try (MemoryStack stack = MemoryStack.stackPush()) {
+        FloatBuffer fb = stack.mallocFloat(2);
+        value.get(fb);
+        glUniform2fv(loc, fb);
       }
     }
   }
@@ -179,8 +212,8 @@ public abstract class ShaderProgram {
           + glGetProgramInfoLog(programId, 1024));
     } else {
       LOGGER.debug("Shaders linked successfully.");
-      LOGGER.debug("Vertex Source: " + vertexSrc);
-      LOGGER.debug("Fragment Source: " + fragSrc);
+      LOGGER.debug("Vertex Source: {}", vertexSrc);
+      LOGGER.debug("Fragment Source: {}", fragSrc);
     }
 
     glDetachShader(programId, vertexShader);
@@ -234,10 +267,11 @@ public abstract class ShaderProgram {
   }
 
   public void unbind() {
-    glUseProgram(0);
+      glUseProgram(0);
   }
 
   public boolean isInitialized() {
     return isInitialized;
   }
+
 }

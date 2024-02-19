@@ -1,6 +1,7 @@
-package com.github.javachaos.chaosdungeons.ecs.entities;
+package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
-import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
+import com.github.javachaos.chaosdungeons.ecs.components.render.UiSpriteComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.graphics.text.TextModel;
 import com.github.javachaos.chaosdungeons.graphics.text.UiTextModel;
 
@@ -12,15 +13,16 @@ public class TextEntity extends GameEntity {
   private final String fontPath;
   private TextModel tm;
 
-  public TextEntity(String fontPath) {
-    super(null);
+  public TextEntity(String fontPath, GameContext gameContext) {
+    super(null, gameContext);
     this.fontPath = fontPath;
   }
 
   @Override
   public void init() {
+    super.init();
     tm = new UiTextModel(fontPath, this);
-    sprite = new SpriteComponent(tm);
+    sprite = new UiSpriteComponent(tm);
     addComponent(sprite);
   }
 
@@ -29,18 +31,12 @@ public class TextEntity extends GameEntity {
   }
 
   @Override
-  public void onAdded(Entity e) {
-  }
-
-  @Override
-  public void onRemoved(Entity e) {
-  }
-
-  @Override
   protected void update(float dt) {
+    //Unused
   }
 
   @Override
   public void destroy() {
+    //Unused
   }
 }

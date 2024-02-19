@@ -2,8 +2,6 @@ package com.github.javachaos.chaosdungeons.graphics.text;
 
 import static com.github.javachaos.chaosdungeons.utils.FileUtils.loadFontFile;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM;
-import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.stb.STBTruetype.stbtt_GetPackedQuad;
 import static org.lwjgl.stb.STBTruetype.stbtt_PackBegin;
 import static org.lwjgl.stb.STBTruetype.stbtt_PackEnd;
@@ -13,18 +11,15 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAllocFloat;
 import static org.lwjgl.system.MemoryUtil.memFree;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.ecs.components.TransformComponent;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
 import com.github.javachaos.chaosdungeons.graphics.Model;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.WindowSize;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import com.github.javachaos.chaosdungeons.shaders.ShaderProgram;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
 import org.lwjgl.stb.STBTTPackContext;
@@ -62,17 +57,15 @@ public class TextModel implements Model {
 
   private String text = "";
 
-  private ShaderProgram program;
 
   /**
    * Create a new RenderedTextEntity given the font path.
    *
    * @param fontPath the path to the ttf font file used to construct this text entity.
    */
-  protected TextModel(ShaderProgram program, String fontPath, GameEntity ge) {
+  protected TextModel(String fontPath, GameEntity ge) {
     this.fontPath = fontPath;
     this.pos = ge;
-    this.program = program;
     init();
   }
 
@@ -82,8 +75,15 @@ public class TextModel implements Model {
 
 
 
-  private static void drawSquareTexCoords(float x0, float y0, float x1, float y1,
-                                          float s0, float t0, float s1, float t1) {
+  private static void drawSquareTexCoords(final float[] texCoords) {
+    float x0 = texCoords[0];
+    float y0 = texCoords[1];
+    float x1 = texCoords[2];
+    float y1 = texCoords[3];
+    float s0 = texCoords[4];
+    float t0 = texCoords[5];
+    float s1 = texCoords[6];
+    float t1 = texCoords[7];
     glTexCoord2f(s0, t0);
     glVertex2f(x0, y0);
     glTexCoord2f(s1, t0);
@@ -114,9 +114,9 @@ public class TextModel implements Model {
     for (int i = 0; i < text.length(); i++) {
       stbtt_GetPackedQuad(chardata, BITMAP_W, BITMAP_H,
           text.charAt(i), xb, yb, quad, font == 0);
-      drawSquareTexCoords(
+      drawSquareTexCoords(new float[] {
           quad.x0(), quad.y0(), quad.x1(), quad.y1(),
-          quad.s0(), quad.t0(), quad.s1(), quad.t1()
+          quad.s0(), quad.t0(), quad.s1(), quad.t1() }
       );
     }
     glEnd();
@@ -124,8 +124,6 @@ public class TextModel implements Model {
 
   @Override
   public void render() {
-    int currentProgramBak = glGetInteger(GL_CURRENT_PROGRAM);
-    program.bind();
     glDisable(GL_CULL_FACE);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -140,12 +138,13 @@ public class TextModel implements Model {
     int sfont = sf[font];
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    print(pos.getPosition().x + (ws.getWidth() / 2f),
-          pos.getPosition().y + (ws.getHeight() / 2f),
-        sfont, text);
-    print(ws.getWidth() - 256, ws.getHeight() - 64, sfont, "FPS: " + GameWindow.getFps());
-    program.unbind();
-    glUseProgram(currentProgramBak);
+    TransformComponent transform = pos.getComponent(TransformComponent.class);
+    if (transform != null) {
+      print(transform.getPosition().x + (ws.getWidth() / 2f),
+              transform.getPosition().y + (ws.getHeight() / 2f),
+              sfont, text);
+    }
+    print(ws.getWidth() - 256f, ws.getHeight() - 64f, sfont, "FPS: " + GameWindow.getFps());
   }
 
   @Override

@@ -1,6 +1,7 @@
-package com.github.javachaos.chaosdungeons.ecs.entities;
+package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
-import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
 import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
@@ -14,37 +15,25 @@ public class PlayerEntity extends GameEntity {
   /**
    * Create a new player entity.
    */
-  public PlayerEntity() {
+  public PlayerEntity(GameContext gameContext) {
     super("assets/textures/player.png",
         new SpawnData.Builder()
-            .setRestitution(100f)
-            .setMass(10f)
+            .setRestitution(1f)
+            .setMass(1f)
             .setGravitationFactor(0f)
             .setMaxSpawns(1)
             .setSpawnRate(1)
             .setShape(new ShapeBuilder.Rectangle().build())
-            .build());
-  }
-
-  @Override
-  public void init() {
-    super.init();
+            .build(), gameContext);
   }
 
   @Override
   public void update(float dt) {
-    updateModelMatrix(GameWindow.getCamera().getPosition(), getRotation(), getScale());
+    //Unused
   }
 
   @Override
   public void destroy() {
-  }
-
-  @Override
-  public void onAdded(Entity e) {
-  }
-
-  @Override
-  public void onRemoved(Entity e) {
+    //Unused
   }
 }

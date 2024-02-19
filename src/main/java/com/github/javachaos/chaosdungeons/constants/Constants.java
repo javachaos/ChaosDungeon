@@ -42,7 +42,7 @@ public class Constants {
   public static final float FOV = (float) Math.toRadians(
       Main.getPropertyManager().getFloatProperty("game.fov", 70f));
     public static final String JAVA_PATH_SEPARATOR = "/";
-    public static boolean DEBUG = Main.getPropertyManager().getBooleanProperty("game.debug",
+    public static final boolean DEBUG = Main.getPropertyManager().getBooleanProperty("game.debug",
       false);
   /**
    * Unused constructor.

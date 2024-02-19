@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.math.Matrix3x3Det;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -11,9 +12,9 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class Triangle {
 
-  private Point2D pointA;
-  private Point2D pointB;
-  private Point2D pointC;
+  private Polygon.Point pointA;
+  private Polygon.Point pointB;
+  private Polygon.Point pointC;
 
   boolean badTriangle;
 
@@ -24,33 +25,33 @@ public class Triangle {
    * @param b the second point
    * @param c the third point
    */
-  public Triangle(Point2D a, Point2D b, Point2D c) {
+  public Triangle(Polygon.Point a, Polygon.Point b, Polygon.Point c) {
     this.pointA = a;
     this.pointB = b;
     this.pointC = c;
   }
 
-  public Point2D getA() {
+  public Polygon.Point getA() {
     return pointA;
   }
 
-  public Point2D getB() {
+  public Polygon.Point getB() {
     return pointB;
   }
 
-  public Point2D getC() {
+  public Polygon.Point getC() {
     return pointC;
   }
 
-  public void setA(Point2D p) {
+  public void setA(Polygon.Point p) {
     this.pointA = p;
   }
 
-  public void setB(Point2D p) {
+  public void setB(Polygon.Point p) {
     this.pointB = p;
   }
 
-  public void setC(Point2D p) {
+  public void setC(Polygon.Point p) {
     this.pointC = p;
   }
 
@@ -60,21 +61,21 @@ public class Triangle {
    * @param p the Point2D point to check.
    * @return true if the point p is contained in this triangle
    */
-  public boolean contains(Point2D p) {
-    Point2D a = pointA;
-    Point2D b = pointB;
-    Point2D c = pointC;
+  public boolean contains(Polygon.Point p) {
+    Polygon.Point a = pointA;
+    Polygon.Point b = pointB;
+    Polygon.Point c = pointC;
 
-    double delta = a.getX() - p.getX();
-    double gamma = a.getY() - p.getY();
-    double epsilon = b.getX() - p.getX();
-    double iota = b.getY() - p.getY();
-    double phi = c.getX() - p.getX();
-    double theta = c.getY() - p.getY();
+    double delta = a.x() - p.x();
+    double gamma = a.y() - p.y();
+    double epsilon = b.x() - p.x();
+    double iota = b.y() - p.y();
+    double phi = c.x() - p.x();
+    double theta = c.y() - p.y();
     double[][] temp = {
-        {a.getX() - p.getX(), a.getY() - p.getY(), delta * delta + gamma * gamma},
-        {b.getX() - p.getX(), b.getY() - p.getY(), epsilon * epsilon + iota * iota},
-        {c.getX() - p.getX(), c.getY() - p.getY(), phi * phi + theta * theta}
+        {a.x() - p.x(), a.y() - p.y(), delta * delta + gamma * gamma},
+        {b.x() - p.x(), b.y() - p.y(), epsilon * epsilon + iota * iota},
+        {c.x() - p.x(), c.y() - p.y(), phi * phi + theta * theta}
     };
 
     return Matrix3x3Det.compute(temp) > 1e-6;
@@ -99,11 +100,11 @@ public class Triangle {
    * @param p the point to check.
    * @return true if any of the vertices of this triangle equal p
    */
-  public boolean containsVertex(Point2D p) {
+  public boolean containsVertex(Polygon.Point p) {
     return pointA.equals(p) || pointB.equals(p) || pointC.equals(p);
   }
 
-  public Set<Point2D> getPoints() {
+  public Set<Polygon.Point> getPoints() {
     return Set.of(pointA, pointB, pointC);
   }
 

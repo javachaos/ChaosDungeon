@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.factory;
 
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
 
 /**
  * EntityFactory interface.
@@ -15,5 +16,5 @@ public interface EntityFactory<T extends GameEntity> {
    * @param data the spawn data used to create each entity.
    * @return a new instance of this entity.
    */
-  T create(SpawnData data);
+  T create(SpawnData data, GameContext gameContext);
 }

@@ -3,13 +3,14 @@ package com.github.javachaos.chaosdungeons.geometry.gui;
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -57,7 +58,7 @@ public class ShapeDrawer extends JFrame {
    */
   public ShapeDrawer(Triangle t) {
     this();
-    Vertex v = new Vertex(t);
+    Polygon v = new Polygon(t.getPoints());
     this.shapes.add(new ShapePanel(Color.WHITE, v));
     addShapesAndShow();
   }
@@ -67,9 +68,9 @@ public class ShapeDrawer extends JFrame {
    *
    * @param points1 the first polygon point list
    */
-  public ShapeDrawer(List<Point2D> points1) {
+  public ShapeDrawer(Set<Polygon.Point> points1) {
     this();
-    Vertex v = new Vertex(points1);
+    Polygon v = new Polygon(points1);
     this.shapes.add(new ShapePanel(Color.WHITE, v));
     addShapesAndShow();
   }
@@ -79,7 +80,7 @@ public class ShapeDrawer extends JFrame {
    *
    * @param polygon the polygon to draw
    */
-  public ShapeDrawer(Vertex polygon) {
+  public ShapeDrawer(Polygon polygon) {
     this(polygon.getPoints());
   }
 
@@ -91,8 +92,8 @@ public class ShapeDrawer extends JFrame {
    */
   public ShapeDrawer(Triangle t1, Triangle t2) {
     this();
-    this.shapes.add(new ShapePanel(Color.WHITE, new Vertex(t1)));
-    this.shapes.add(new ShapePanel(Color.WHITE, new Vertex(t2)));
+    this.shapes.add(new ShapePanel(Color.WHITE, new Polygon(t1.getPoints())));
+    this.shapes.add(new ShapePanel(Color.WHITE, new Polygon(t2.getPoints())));
     addShapesAndShow();
   }
 
@@ -121,7 +122,7 @@ public class ShapeDrawer extends JFrame {
 
   private void addShape(int i) {
     shapes.add(new ShapePanel(Color.WHITE,
-        new Vertex(generateNonRegularPolygon(
+        new Polygon(generateNonRegularPolygon(
             96, 96, i, 64, 64))));
   }
 

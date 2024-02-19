@@ -2,22 +2,21 @@ package com.github.javachaos.chaosdungeons.geometry;
 
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
+import com.github.javachaos.chaosdungeons.collision.Collision;
 import com.github.javachaos.chaosdungeons.geometry.gui.ShapeDrawer;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-import java.awt.Polygon;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import javax.swing.SwingUtilities;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector2f;
 
 /**
@@ -26,7 +25,7 @@ import org.joml.Vector2f;
 @SuppressWarnings("unused")
 public class SatCollisionDetector {
 
-  //TODO finish cleaning up the style issues.
+  private static final Logger LOGGER = LogManager.getLogger(SatCollisionDetector.class);
 
   /**
    * Main entry point.
@@ -37,8 +36,7 @@ public class SatCollisionDetector {
 
     int[] xpoints = {0, 315, 115, 299, 47, 55, 26, 0};
     int[] ypoints = {0, 53, 115, 234, 176, 271, 383, 0};
-    List<Point2D> pts = generateNonRegularPolygon(100, 100, 120, 100, 100);
-    Polygon concavePentagon = new Polygon(xpoints, ypoints, 5);
+    Set<Polygon.Point> pts = generateNonRegularPolygon(100, 100, 120, 100, 100);
 
     // Example usage
     Rectangle redRect = new Rectangle(0, 0, 150, 200);
@@ -46,17 +44,13 @@ public class SatCollisionDetector {
     Ellipse2D ellipse2D = new Ellipse2D.Double();
     ellipse2D.setFrame(redRect);
 
-    // you can change 10 here to draw more segments and see how the runtime scales.
-    //Set<Point2D> red = calculateEllipsePoints(ellipse2D, 6);
-    List<Point2D> blue = calculateRectanglePoints(blueRect);
-    List<Point2D> red = calculateRectanglePoints(redRect);
+    List<Polygon.Point> blue = calculateRectanglePoints(blueRect);
+    List<Polygon.Point> red = calculateRectanglePoints(redRect);
 
-    SwingUtilities.invokeLater(() -> new ShapeDrawer(red));
+    SwingUtilities.invokeLater(() -> new ShapeDrawer(new LinkedHashSet<>(red)));
     long start = System.nanoTime();
-    boolean colliding = checkCollisionDelaunay(pts, blue);
     long end = System.nanoTime();
-    System.out.println("Colliding: " + colliding);
-    System.out.println("Runtime: " + (end - start) / 1000000.0 + " ms");
+    LOGGER.debug("Runtime: {} ms", (end - start) / 1000000.0);
   }
 
   /**
@@ -66,13 +60,13 @@ public class SatCollisionDetector {
    * @param polygon2 set of points defining the second polygon
    * @return true if the two polygons collide
    */
-  public static boolean checkCollision(Set<Point2D> polygon1, Set<Point2D> polygon2) {
-    List<Point2D> axes = getAxes(polygon1, polygon2);
-    Optional<Point2D> p;
+  public static boolean checkCollision(Set<Polygon.Point> polygon1, Set<Polygon.Point> polygon2) {
+    List<Polygon.Point> axes = getAxes(polygon1, polygon2);
+    Optional<Polygon.Point> p;
     if (axes.size() > 100) {
       p = axes.parallelStream().filter(x -> isSeparatingAxis(x, polygon1, polygon2)).findAny();
     } else {
-      for (Point2D point : axes) {
+      for (Polygon.Point point : axes) {
         if (isSeparatingAxis(point, polygon1, polygon2)) {
           return false;
         }
@@ -80,6 +74,15 @@ public class SatCollisionDetector {
       return true;
     }
     return p.isEmpty();
+  }
+
+  public static Collision checkCollision(Polygon a, Polygon b) {
+    Vector2f normal = checkCollisionDelaunay(a.getPoints(), b.getPoints());
+    if (normal != null) {
+      //colliding
+      return new Collision.Builder().setCollisionNormal(normal).setIsColliding(true).build();
+    }
+    return new Collision.Builder().setIsColliding(false).build();
   }
 
   /**
@@ -90,13 +93,13 @@ public class SatCollisionDetector {
    * @return true if the two polygons collide
    */
   public static boolean checkCollision(Triangle t1, Triangle t2) {
-    List<Point2D> axes = getAxes(t1.getPoints(), t2.getPoints());
-    Optional<Point2D> p;
+    List<Polygon.Point> axes = getAxes(t1.getPoints(), t2.getPoints());
+    Optional<Polygon.Point> p;
     if (axes.size() > 100) {
       p = axes.parallelStream()
           .filter(x -> isSeparatingAxis(x, t1.getPoints(), t2.getPoints())).findAny();
     } else {
-      for (Point2D point : axes) {
+      for (Polygon.Point point : axes) {
         if (isSeparatingAxis(point, t1.getPoints(), t2.getPoints())) {
           return false;
         }
@@ -113,65 +116,65 @@ public class SatCollisionDetector {
    * @param polygon2 set of points defining the second polygon
    * @return true if the two polygons collide
    */
-  public static boolean checkCollisionDelaunay(List<Point2D> polygon1, List<Point2D> polygon2) {
+  public static Vector2f checkCollisionDelaunay(Set<Polygon.Point> polygon1, Set<Polygon.Point> polygon2) {
     List<Triangle> triangles1 = DelaunayTriangulation.delaunayTriangulation(polygon1);
     List<Triangle> triangles2 = DelaunayTriangulation.delaunayTriangulation(polygon2);
 
     for (Triangle t : triangles1) {
       for (Triangle t2 : triangles2) {
         if (checkCollision(t, t2)) {
-          return true;
+          return calculateCollisionNormal(t, t2);
         }
       }
     }
-    return false;
+    return null;
   }
 
-  private static List<Point2D> getAxes(Set<Point2D> polygon1, Set<Point2D> polygon2) {
-    List<Point2D> axes = new CopyOnWriteArrayList<>();
+  private static List<Polygon.Point> getAxes(Set<Polygon.Point> polygon1, Set<Polygon.Point> polygon2) {
+    List<Polygon.Point> axes = new CopyOnWriteArrayList<>();
     axes.addAll(getEdgesAsAxes(polygon1));
     axes.addAll(getEdgesAsAxes(polygon2));
     return axes;
   }
 
   @SuppressWarnings("all")
-  private static List<Point2D> getEdgesAsAxes(Set<Point2D> polygon) {
-    List<Point2D> axes = new CopyOnWriteArrayList<>();
-    List<Point2D> points = new CopyOnWriteArrayList<>(polygon);
+  private static List<Polygon.Point> getEdgesAsAxes(Set<Polygon.Point> polygon) {
+    List<Polygon.Point> axes = new CopyOnWriteArrayList<>();
+    List<Polygon.Point> points = new CopyOnWriteArrayList<>(polygon);
     int numPoints = points.size();
     if (numPoints > 10000) {
       IntStream.range(0, numPoints).parallel().forEach(i -> {
-        Point2D p1 = points.get(i);
-        Point2D p2 = points.get((i + 1) % numPoints);
-        double edgeX = p2.getX() - p1.getX();
-        double edgeY = p2.getY() - p1.getY();
-        axes.add(new Point2D.Double(edgeY, -edgeX));
+        Polygon.Point p1 = points.get(i);
+        Polygon.Point p2 = points.get((i + 1) % numPoints);
+        double edgeX = p2.x() - p1.x();
+        double edgeY = p2.y() - p1.y();
+        axes.add(new Polygon.Point((float) edgeY, (float) -edgeX));
       });
     } else {
       for (int i = 0; i < numPoints; i++) {
-        Point2D p1 = points.get(i);
-        Point2D p2 = points.get((i + 1) % numPoints);
-        double edgeX = p2.getX() - p1.getX();
-        double edgeY = p2.getY() - p1.getY();
-        axes.add(new Point2D.Double(edgeY, -edgeX));
+        Polygon.Point p1 = points.get(i);
+        Polygon.Point p2 = points.get((i + 1) % numPoints);
+        double edgeX = p2.x() - p1.x();
+        double edgeY = p2.y() - p1.y();
+        axes.add(new Polygon.Point((float) edgeY, (float) -edgeX));
       }
     }
     return axes;
   }
 
-  private static boolean isSeparatingAxis(Point2D axis, Set<Point2D> polygon1,
-                                          Set<Point2D> polygon2) {
+  private static boolean isSeparatingAxis(Polygon.Point axis, Set<Polygon.Point> polygon1,
+                                          Set<Polygon.Point> polygon2) {
     Projection p1 = projectPolygonOntoAxis(axis, polygon1);
     Projection p2 = projectPolygonOntoAxis(axis, polygon2);
     return p1.max < p2.min || p2.max < p1.min;
   }
 
-  private static Projection projectPolygonOntoAxis(Point2D axis, Set<Point2D> polygon) {
+  private static Projection projectPolygonOntoAxis(Polygon.Point axis, Set<Polygon.Point> polygon) {
     double min = Double.POSITIVE_INFINITY;
     double max = Double.NEGATIVE_INFINITY;
-    for (Point2D point : polygon) {
-      double projection = (axis.getX() * point.getX()
-          + axis.getY() * point.getY()) / (axis.getX() * axis.getX() + axis.getY() * axis.getY());
+    for (Polygon.Point point : polygon) {
+      double projection = (axis.x() * point.x()
+          + axis.y() * point.y()) / (axis.x() * axis.x() + axis.y() * axis.y());
       min = Math.min(min, projection);
       max = Math.max(max, projection);
     }
@@ -184,16 +187,16 @@ public class SatCollisionDetector {
    * @param rect the rectangle to be converted
    * @return a list of all four corner points
    */
-  public static List<Point2D> calculateRectanglePoints(Rectangle rect) {
-    List<Point2D> points = new ArrayList<>();
+  public static List<Polygon.Point> calculateRectanglePoints(Rectangle rect) {
+    List<Polygon.Point> points = new ArrayList<>();
     int x = rect.x;
     int y = rect.y;
     int width = rect.width;
     int height = rect.height;
-    points.add(new Point2D.Double(x, y));
-    points.add(new Point2D.Double((double) x + width, y));
-    points.add(new Point2D.Double((double) x + width, (double) y + height));
-    points.add(new Point2D.Double(x, (double) y + height));
+    points.add(new Polygon.Point(x, y));
+    points.add(new Polygon.Point((float) x + width, y));
+    points.add(new Polygon.Point((float) x + width,(float) y + height));
+    points.add(new Polygon.Point(x, (float) y + height));
     return points;
   }
 
@@ -207,7 +210,7 @@ public class SatCollisionDetector {
    * @param segments the desired number of line segments
    * @return the set of points representing the final polygon
    */
-  public static Set<Point2D> calculateEllipsePoints(Ellipse2D ellipse, int segments) {
+  public static Set<Polygon.Point> calculateEllipsePoints(Ellipse2D ellipse, int segments) {
     double centerX = ellipse.getCenterX();
     double centerY = ellipse.getCenterY();
     double width = ellipse.getWidth();
@@ -215,12 +218,12 @@ public class SatCollisionDetector {
     if (segments <= 5) {
       segments = 5;
     }
-    Set<Point2D> points = new LinkedHashSet<>();
+    Set<Polygon.Point> points = new LinkedHashSet<>();
     for (double angle = 0.0; angle < 360.0; angle += (double) 360 / segments) {
       double radians = Math.toRadians(angle);
       double x = centerX + width * Math.cos(radians) / 2;
       double y = centerY + height * Math.sin(radians) / 2;
-      points.add(new Point2D.Double(x, y));
+      points.add(new Polygon.Point((float) x, (float) y));
     }
     return points;
   }
@@ -230,8 +233,8 @@ public class SatCollisionDetector {
     Edge intersectionEdge = findIntersectionEdge(t1, t2);
     if (intersectionEdge != null) {
       // Calculate the collision normal as the perpendicular vector to the edge
-      double nx = -(intersectionEdge.getB().getY() - intersectionEdge.getA().getY());
-      double ny = intersectionEdge.getB().getX() - intersectionEdge.getA().getX();
+      double nx = -(intersectionEdge.getB().y() - intersectionEdge.getA().y());
+      double ny = intersectionEdge.getB().x() - intersectionEdge.getA().x();
 
       // Normalize the collision normal
       double length = Math.sqrt(nx * nx + ny * ny);
@@ -255,17 +258,17 @@ public class SatCollisionDetector {
 
       // Project the vertices of t1 onto the collision normal to find the minimum overlap
       double minOverlap = Double.POSITIVE_INFINITY;
-      for (Point2D point : t1.getPoints()) {
-        double projection = collisionNormal.x * point.getX() + collisionNormal.y
-            * point.getY();
+      for (Polygon.Point point : t1.getPoints()) {
+        double projection = collisionNormal.x * point.x() + collisionNormal.y
+            * point.y();
         double overlap = projection - intersectionEdge.projectPoint(point);
         minOverlap = Math.min(minOverlap, overlap);
       }
 
       // Project the vertices of t2 onto the collision normal to find the minimum overlap
-      for (Point2D point : t2.getPoints()) {
-        double projection = collisionNormal.x * point.getX() + collisionNormal.y
-            * point.getY();
+      for (Polygon.Point point : t2.getPoints()) {
+        double projection = collisionNormal.x * point.x() + collisionNormal.y
+            * point.y();
         double overlap = intersectionEdge.projectPoint(point) - projection;
         minOverlap = Math.min(minOverlap, overlap);
       }
@@ -292,33 +295,33 @@ public class SatCollisionDetector {
         }
       }
     }
-    // If no intersection edge is found, you may handle this case based on your needs
+    // If no intersection edge is found.
     // For example, return an arbitrary edge, throw an exception, or return null.
     // In the context of your physics simulation, you may want to handle this differently.
     return null;
   }
 
   private static double calculateEdgeOverlap(Edge edge, Triangle t1, Triangle t2) {
-    Point2D normal = edge.getNormal(); // Get the normal vector of the edge
+    Polygon.Point normal = edge.getNormal(); // Get the normal vector of the edge
     double minProjection1 = Double.POSITIVE_INFINITY;
     double maxProjection1 = Double.NEGATIVE_INFINITY;
     double minProjection2 = Double.POSITIVE_INFINITY;
     double maxProjection2 = Double.NEGATIVE_INFINITY;
 
     // Project the vertices of triangle 1 onto the edge's normal vector
-    for (Point2D vertex : t1.getPoints()) {
+    for (Polygon.Point vertex : t1.getPoints()) {
       double projection = LinearMath.dotProduct(normal,
-          new Point2D.Double(vertex.getX() - edge.getA().getX(),
-              vertex.getY() - edge.getA().getY()));
+          new Polygon.Point(vertex.x() - edge.getA().x(),
+              vertex.y() - edge.getA().y()));
       minProjection1 = Math.min(minProjection1, projection);
       maxProjection1 = Math.max(maxProjection1, projection);
     }
 
     // Project the vertices of triangle 2 onto the edge's normal vector
-    for (Point2D vertex : t2.getPoints()) {
+    for (Polygon.Point vertex : t2.getPoints()) {
       double projection = LinearMath.dotProduct(normal,
-          new Point2D.Double(vertex.getX() - edge.getA().getX(),
-              vertex.getY() - edge.getA().getY()));
+          new Polygon.Point(vertex.x() - edge.getA().x(),
+              vertex.y() - edge.getA().y()));
       minProjection2 = Math.min(minProjection2, projection);
       maxProjection2 = Math.max(maxProjection2, projection);
     }

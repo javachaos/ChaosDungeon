@@ -1,15 +1,21 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import com.github.javachaos.chaosdungeons.collision.Collision;
 import com.github.javachaos.chaosdungeons.collision.QuadTree;
+import com.github.javachaos.chaosdungeons.collision.Solver;
 import com.github.javachaos.chaosdungeons.constants.Constants;
-import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
-import com.github.javachaos.chaosdungeons.ecs.entities.GameEntity;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
+import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
+import com.github.javachaos.chaosdungeons.geometry.GJKDetector2D;
 import com.github.javachaos.chaosdungeons.gui.GameWindow;
 import com.github.javachaos.chaosdungeons.gui.WindowSize;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Physics system class.
@@ -23,9 +29,11 @@ public class PhysicsSystem extends System {
   float maxX = Float.MIN_VALUE;
   float maxY = Float.MIN_VALUE;
   private QuadTree<GameEntity> collisionQuadtree;
+  private final Solver solver;
 
-  public PhysicsSystem(GameWindow window) {
-    super(window);
+  public PhysicsSystem(GameContext gameContext) {
+    super(gameContext);
+    this.solver = new Solver();
   }
 
   /**
@@ -35,48 +43,54 @@ public class PhysicsSystem extends System {
    */
   public void addEntity(GameEntity e) {
     if (e.getComponent(PhysicsComponent.class) != null) {
-      getEntities().add(e);
+      gameContext.getEntities().add(e);
     } else {
       throw new IllegalArgumentException("Entity MUST have a physics component.");
     }
   }
 
   @Override
-  public void update(float dt) {
+  public void update(double dt) {
     buildQuadTree();
-    for (GameEntity e : gameEntityList) {
-      CollisionComponent cc = e.getCollisionComponent();
-      Vertex.Bounds v;
-      if (cc != null) {
-        v = cc.getShape().getBounds();
-        if (v != null) {
-          for (QuadTree<GameEntity>.Node n : collisionQuadtree.find(v)) {
-            GameEntity ge = n.getValue();
-            CollisionComponent occ = ge.getCollisionComponent();
-            occ.onCollision(e, e.getCollisionComponent());
+    List<GameEntity> entityList = gameContext.getEntitiesWithComponent(PhysicsComponent.class);
+    for (GameEntity e : entityList) {
+     for (QuadTree<GameEntity>.Node j : collisionQuadtree.find(e.getCollisionComponent().getShape().getBounds())) {
+        if (e.getEntityId() != j.getValue().getEntityId()) {
+          Collision c = GJKDetector2D.checkCollision(e, j.getValue());
+          if (c.isColliding()) {
+            e.getCollisionComponent().onCollision(e, j.getValue());
+            solver.addCollision(c);
           }
         }
       }
     }
+    solver.solve();
+    for (GameEntity e1 : entityList) {
+      e1.update(dt);
+    }
     if (Constants.DEBUG) {
       WindowSize ws = GameWindow.getWindowSize();
-      collisionQuadtree.render(256, 256);
+      collisionQuadtree.render(256, 256, gameContext);
     }
   }
 
   private void buildQuadTree() {
     WindowSize ws = GameWindow.getWindowSize();
     collisionQuadtree = new QuadTree<>(ws.getWidth(), ws.getHeight());
-    for (GameEntity e : gameEntityList) {
-        collisionQuadtree.insert(
-            e.getPosition().x,
-            e.getPosition().y,
-            e);
-    }
+    Set<GameEntity> entitySet = gameContext.getEntityStream().collect(Collectors.toSet());
+      for (GameEntity e : entitySet) {
+          if (e.getTransformComponent() != null) {
+              collisionQuadtree.insert(
+                      e.getTransformComponent().getPosition().x,
+                      e.getTransformComponent().getPosition().y,
+                      e);
+          }
+      }
   }
 
   @Override
   public void initSystem() {
+    //Unused
   }
 
   @Override

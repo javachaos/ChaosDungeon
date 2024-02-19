@@ -29,9 +29,6 @@ public class Camera implements GLFWKeyCallbackI {
 
   private final boolean[] pressedKeys = new boolean[2048];
 
-  public Camera() {
-  }
-
   /**
    * Set the rotation of this camera.
    *
@@ -56,16 +53,13 @@ public class Camera implements GLFWKeyCallbackI {
   }
 
   public Vector3f getPosition() {
-    return pos;
+    return new Vector3f(pos);
   }
 
   @Override
   public void invoke(long window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
       glfwSetWindowShouldClose(window, true);
-    }
-    if (key == GLFW_KEY_F1 && action == GLFW_RELEASE) {
-      Constants.DEBUG = !Constants.DEBUG;
     }
     // Update the pressedKeys flags based on the key event
     if (action == GLFW_PRESS) {

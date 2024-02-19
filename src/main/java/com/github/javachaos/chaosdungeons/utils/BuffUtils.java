@@ -12,6 +12,10 @@ import org.lwjgl.system.MemoryStack;
  */
 public class BuffUtils {
 
+  private BuffUtils() {
+    //Unused
+  }
+
   /**
    * Create a buffer from the data array.
    *

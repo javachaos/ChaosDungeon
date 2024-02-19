@@ -1,63 +1,113 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
-import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
 
 /**
  * Helper class to generate things.
  */
 public class GenerationUtils {
+  private static final Random random = new Random();
 
-  private static double calculateAngle(Point2D p) {
-    return Math.atan2(p.getY(), p.getX());
+  private GenerationUtils() {
+    //Unused
   }
 
-  /**
-   * Generate a Non-regular polygon as a list of points (clockwise orientation).
-   *
-   * @param xpos the x starting pos
-   * @param ypos the y starting pos
-   * @param numVertices the number of verticies in the polygon
-   * @param maxX the maximum width of the polygon
-   * @param maxY the maximum height of the polygon
-   * @return a new random non-regular polygon
-   */
-  public static List<Point2D> generateNonRegularPolygon(int xpos, int ypos, int numVertices,
-                                                        double maxX, double maxY) {
-    List<Point2D> vertices = new ArrayList<>();
+  private static double calculateAngle(Polygon.Point p) {
+    return Math.atan2(p.x(), p.y());
+  }
 
-    for (int i = 0; i < numVertices; i++) {
-      vertices.add(getRandomPoint2D(xpos, ypos, maxX, maxY));
-    }
+//  /**
+//   * Generate a Non-regular polygon as a list of points (clockwise orientation).
+//   *
+//   * @param xpos the x starting pos
+//   * @param ypos the y starting pos
+//   * @param numVertices the number of verticies in the polygon
+//   * @param maxX the maximum width of the polygon
+//   * @param maxY the maximum height of the polygon
+//   * @return a new random non-regular polygon
+//   */
+//  public static Set<Polygon.Point> generateNonRegularPolygon(int xpos, int ypos, int numVertices,
+//                                                             double maxX, double maxY) {
+//    List<Polygon.Point> vertices = new ArrayList<>();
+//
+//    for (int i = 0; i < numVertices; i++) {
+//      vertices.add(getRandomPoint2D(xpos, ypos, maxX, maxY));
+//    }
+//
+//    Polygon.Point center = new Polygon.Point(0, 0);
+//    for (Polygon.Point vertex : vertices) {
+//      center.x += (int) vertex.x();
+//      center.y += (int) vertex.y();
+//    }
+//    center.x /= numVertices;
+//    center.y /= numVertices;
+//
+//    vertices.sort(Comparator.comparingDouble(p -> calculateAngle(p) - calculateAngle(center)));
+//
+//    for (int i = 0; i < numVertices; i++) {
+//      Polygon.Point p1 = vertices.get(i);
+//      Polygon.Point p2 = vertices.get((i + 1) % numVertices);
+//      for (int j = i + 2; j < i + numVertices - 1; j++) {
+//        Polygon.Point p3 = vertices.get(j % numVertices);
+//        Polygon.Point p4 = vertices.get((j + 1) % numVertices);
+//        if (LinearMath.checkIntersection(p1, p2, p3, p4)) {
+//          return generateNonRegularPolygon(xpos, ypos, numVertices, maxX, maxY);
+//        }
+//      }
+//    }
+//
+//    return new LinkedHashSet<>(vertices);
+//  }
 
-    Point center = new Point(0, 0);
-    for (Point2D vertex : vertices) {
-      center.x += (int) vertex.getX();
-      center.y += (int) vertex.getY();
-    }
-    center.x /= numVertices;
-    center.y /= numVertices;
 
-    vertices.sort(Comparator.comparingDouble(p -> calculateAngle(p) - calculateAngle(center)));
+  public static Set<Polygon.Point> generateNonRegularPolygon(int xpos, int ypos, int numVertices,
+                                                                      double maxX, double maxY) {
+    final int MAX_ATTEMPTS = 100;
+    int attemptCount = 0;
+    while (attemptCount < MAX_ATTEMPTS) {
+      List<Polygon.Point> vertices = new ArrayList<>();
 
-    for (int i = 0; i < numVertices; i++) {
-      Point2D p1 = vertices.get(i);
-      Point2D p2 = vertices.get((i + 1) % numVertices);
-      for (int j = i + 2; j < i + numVertices - 1; j++) {
-        Point2D p3 = vertices.get(j % numVertices);
-        Point2D p4 = vertices.get((j + 1) % numVertices);
-        if (LinearMath.checkIntersection(p1, p2, p3, p4)) {
-          return generateNonRegularPolygon(xpos, ypos, numVertices, maxX, maxY);
+      for (int i = 0; i < numVertices; i++) {
+        vertices.add(getRandomPoint2D(xpos, ypos, maxX, maxY));
+      }
+
+      Polygon.Point center = new Polygon.Point(0, 0);
+      for (Polygon.Point vertex : vertices) {
+        center.x += (int) vertex.x();
+        center.y += (int) vertex.y();
+      }
+      center.x /= numVertices;
+      center.y /= numVertices;
+
+      vertices.sort(Comparator.comparingDouble(p -> calculateAngle(p) - calculateAngle(center)));
+
+      boolean intersectionFound = false;
+      for (int i = 0; i < numVertices; i++) {
+        Polygon.Point p1 = vertices.get(i);
+        Polygon.Point p2 = vertices.get((i + 1) % numVertices);
+        for (int j = i + 2; j < i + numVertices - 1; j++) {
+          Polygon.Point p3 = vertices.get(j % numVertices);
+          Polygon.Point p4 = vertices.get((j + 1) % numVertices);
+          if (LinearMath.checkIntersection(p1, p2, p3, p4)) {
+            intersectionFound = true;
+            break;
+          }
+        }
+        if (intersectionFound) {
+          break;
         }
       }
-    }
 
-    return vertices;
+      if (!intersectionFound) {
+        return new LinkedHashSet<>(vertices);
+      }
+      attemptCount++;
+    }
+    throw new GeneralGameException("Count not generate polygon in under 100 attempts with given input.");
   }
 
   /**
@@ -69,11 +119,10 @@ public class GenerationUtils {
    * @param maxY the end position in the y-direction
    * @return a new random point (x,y) as (xPos+x, yPos+y)
    */
-  public static Point2D getRandomPoint2D(double xpos, double ypos,
+  public static Polygon.Point getRandomPoint2D(double xpos, double ypos,
                                          double maxX, double maxY) {
-    Random random = new Random();
     double x = random.nextDouble() * 2 * maxX - maxX + xpos;
     double y = random.nextDouble() * 2 * maxY - maxY + ypos;
-    return new Point2D.Double(x, y);
+    return new Polygon.Point((float) x, (float) y);
   }
 }

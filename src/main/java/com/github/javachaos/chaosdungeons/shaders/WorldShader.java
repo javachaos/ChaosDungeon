@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.shaders;
 
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.exceptions.UniformLoadException;
 import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
@@ -26,7 +27,7 @@ public class WorldShader extends ShaderProgram {
       createUniform("projection");
     } catch (UniformLoadException e) {
       LOGGER.error("Error loading uniforms: {}", e.getMessage());
-      throw new RuntimeException(e);
+      throw new GeneralGameException(e);
     }
   }
 
