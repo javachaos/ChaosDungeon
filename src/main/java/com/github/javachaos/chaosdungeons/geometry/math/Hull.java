@@ -2,20 +2,22 @@ package com.github.javachaos.chaosdungeons.geometry.math;
 
 import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.orientation;
 
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Vertex;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Stack;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Convex hull helper functions.
  */
 public class Hull {
 
-  public static List<Edge> convexHull(Vertex polygon) {
+  private Hull() {
+    //Unused
+  }
+
+  public static List<Edge> convexHull(Polygon polygon) {
     return convexHull(polygon.getPoints());
   }
 
@@ -25,24 +27,24 @@ public class Hull {
    * @param points the points to find the convex hull of.
    * @return the edges of the convex hull
    */
-  public static List<Edge> convexHull(List<Point2D> points) {
+  public static List<Edge> convexHull(Set<Polygon.Point> points) {
     // Find the point with the lowest y-coordinate (and leftmost if tie)
-    Point2D lowestPoint = points.get(0);
+    Iterator<Polygon.Point> iter = points.iterator();
+    Polygon.Point lowestPoint = iter.next();
     for (int i = 1; i < points.size(); i++) {
-      Point2D current = points.get(i);
-      if (current.getY() < lowestPoint.getY()
-          || (current.getY() == lowestPoint.getY() && current.getX() < lowestPoint.getX())) {
+      Polygon.Point current = iter.next();
+      if (current.y() < lowestPoint.y()
+          || (current.y() == lowestPoint.y() && current.x() < lowestPoint.x())) {
         lowestPoint = current;
       }
     }
-    Stack<Point2D> stack = new Stack<>();
-    stack.addAll(convexHullPoints(points));
+    Deque<Polygon.Point> stack = new ArrayDeque<>(convexHullPoints(points));
 
     // Convert stack to list of edges and return the convex hull
     List<Edge> convexHullEdges = new ArrayList<>();
-    Point2D lastPoint = stack.pop();
+    Polygon.Point lastPoint = stack.pop();
     while (!stack.isEmpty()) {
-      Point2D currentPoint = stack.pop();
+      Polygon.Point currentPoint = stack.pop();
       convexHullEdges.add(new Edge(currentPoint, lastPoint));
       lastPoint = currentPoint;
     }
@@ -56,47 +58,49 @@ public class Hull {
    * @param points point cloud
    * @return points of the convex hull
    */
-  public static List<Point2D> convexHullPoints(List<Point2D> points) {
+  public static Set<Polygon.Point> convexHullPoints(Set<Polygon.Point> points) {
     int n = points.size();
     if (n <= 3) {
       return points; // Convex hull is the same as the original points
     }
 
+    Iterator<Polygon.Point> iter = points.iterator();
     // Find the point with the lowest y-coordinate (and leftmost if tie)
-    Point2D lowestPoint = points.get(0);
+    Polygon.Point lowestPoint = iter.next();
     for (int i = 1; i < n; i++) {
-      Point2D current = points.get(i);
-      if (current.getY() < lowestPoint.getY()
-          || (current.getY() == lowestPoint.getY() && current.getX() < lowestPoint.getX())) {
+      Polygon.Point current = iter.next();
+      if (current.y() < lowestPoint.y()
+          || (current.y() == lowestPoint.y() && current.x() < lowestPoint.x())) {
         lowestPoint = current;
       }
     }
 
     // Sort points by polar angle with respect to the lowest point
-    Point2D finalLowestPoint = lowestPoint;
-    points.sort(Comparator.comparingDouble(p -> {
+    Polygon.Point finalLowestPoint = lowestPoint;
+    Set<Polygon.Point> sorted = points.stream().sorted(Comparator.comparingDouble(p -> {
       double angle =
-          Math.atan2(p.getY() - finalLowestPoint.getY(), p.getX() - finalLowestPoint.getX());
+              Math.atan2(p.y() - finalLowestPoint.y(), p.x() - finalLowestPoint.x());
       return angle < 0 ? angle + 2 * Math.PI : angle;
-    }));
+    })).collect(Collectors.toCollection(LinkedHashSet::new));
 
     // Build the convex hull using a stack
-    Stack<Point2D> stack = new Stack<>();
-    stack.push(points.get(0));
-    stack.push(points.get(1));
+    Deque<Polygon.Point> stack = new ArrayDeque<>();
+    Iterator<Polygon.Point> sortedIter = sorted.iterator();
+    stack.push(sortedIter.next());
+    stack.push(sortedIter.next());
 
     for (int i = 2; i < n; i++) {
+      Polygon.Point curr = sortedIter.next();
       while (!stack.isEmpty()
           && orientation(
-          stack.get(stack.size() - 1), //last
-          stack.peek(),
-          points.get(i)) <= 0) {
+          stack.getLast(), //last
+          stack.peek(), curr) <= 0) {
         stack.pop();
       }
-      stack.push(points.get(i));
+      stack.push(curr);
     }
 
-    // Convert stack to list and return the convex hull
-    return new ArrayList<>(stack);
+    // Convert stack to set and return the convex hull
+    return new LinkedHashSet<>(stack);
   }
 }
