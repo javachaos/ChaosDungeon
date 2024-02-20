@@ -1,5 +1,6 @@
 package com.github.javachaos.chaosdungeons.utils;
 
+import com.github.javachaos.chaosdungeons.utils.exceptions.JsonParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -162,13 +163,19 @@ public class JsonParser {
     }
 
     /**
+     * Peek the next token, accept if it matches.
+     */
+    private boolean acceptPeek(Token token) {
+        return peekNextToken() == token;
+    }
+
+    /**
      * Expect the next token to be token and advance if flag is true.
      *
      * @param token   the token we expect to see
-     * @param advance the boolean flag to know if we should advance after expecting the token
      */
-    private boolean expect(Token token, boolean advance) {
-        if (accept(token, advance)) {
+    private boolean expect(Token token) {
+        if (accept(token, false)) {
             return true;
         }
         LOGGER.debug("Expected: {} at line: {}", token, lineCount);
@@ -177,7 +184,8 @@ public class JsonParser {
 
     private Map<String, Object> object() {
         Map<String, Object> map = new HashMap<>();
-        expect(Token.LBRACE, true);
+        getNextToken();
+        expect(Token.LBRACE);
         whitespace();
         if (accept(Token.RBRACE, false)) {
             getNextToken();
@@ -188,14 +196,20 @@ public class JsonParser {
             if (accept(Token.DQUOTE, true)) {//Start of string
                 String name = string();
                 whitespace();
-                expect(Token.COLON, true);
+                getNextToken();
+                expect(Token.COLON);
                 Object value = value();
                 map.put(name, value);
                 whitespace();
-                if (accept(Token.RBRACE, false)) {
-                    expect(Token.RBRACE, true);
+                if (acceptPeek(Token.RBRACE)) {
+                    getNextToken();
+                    expect(Token.RBRACE);
                     return map;
                 }
+                //TODO figure out how to detect extra trailing commas here,
+                // my first idea is to use a 2 character lookahead (peek)
+                // first peek 1, if its a comma, thats ok, peek one more,
+                // if its a RBRACE, backtrack to 0 and report error.
             }
         } while (accept(Token.COMMA, true));
         return map;
@@ -207,28 +221,19 @@ public class JsonParser {
         return result;
     }
 
-    private String number() {//Done. needs testing
-        StringBuilder num = new StringBuilder();
-        switch (curr) {
+    private String number(StringBuilder num) {//Done. needs testing
+        switch (peekNextToken()) {
             case DASH:
                 num.append("-");
-                curr = getNextToken();
-                return number();
+                getNextToken();
+                return number(num);
             case ZERO:
                 num.append("0");
                 curr = getNextToken();
                 fraction(num);
                 exponent(num);
                 return num.append(digit()).toString();
-            case ONE:
-            case TWO:
-            case THREE:
-            case FOUR:
-            case FIVE:
-            case SIX:
-            case SEVEN:
-            case EIGHT:
-            case NINE:
+            case ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE:
                 num.append(digit());
                 fraction(num);
                 exponent(num);
@@ -249,7 +254,7 @@ public class JsonParser {
                 list.add(s);
                 return list;
             case DASH, ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE:
-                String num = number();
+                String num = number(new StringBuilder());
                 list.add(num);
                 return list;
             case LBRACE:
@@ -276,7 +281,8 @@ public class JsonParser {
 
     private List<Object> array() {//Tested (not covered)
         List<Object> values = new ArrayList<>();
-        expect(Token.LBRAC, true);
+        getNextToken();
+        expect(Token.LBRAC);
         whitespace();
         if (accept(Token.RBRAC, false)) {
             getNextToken();
@@ -293,36 +299,43 @@ public class JsonParser {
                     return values;
                 }
             } while (accept(Token.COMMA, false));
-            expect(Token.RBRAC, false);
+            expect(Token.RBRAC);
             getNextToken();
         }
         return values;
     }
 
     private void exponent(StringBuilder num) {//Done. Needs testing
-        if (accept(Token.E, true)) {
+        if (acceptPeek(Token.E)) {
             num.append("e");
-            if (accept(Token.DASH, true)) {
+            getNextToken();
+            if (acceptPeek(Token.DASH)) {
                 num.append("-");
+                getNextToken();
             }
-            if (accept(Token.PLUS, true)) {
+            if (acceptPeek(Token.PLUS)) {
                 num.append("+");
+                getNextToken();
             }
-        }
-        if (accept(Token.UE, true)) {
+        } else if (acceptPeek(Token.UE)) {
             num.append("E");
-            if (accept(Token.DASH, true)) {
+            getNextToken();
+            if (acceptPeek(Token.DASH)) {
                 num.append("-");
+                getNextToken();
             }
-            if (accept(Token.PLUS, true)) {
+            if (acceptPeek(Token.PLUS)) {
                 num.append("+");
+                getNextToken();
             }
         }
+        num.append(digit());
     }
 
-    private void fraction(StringBuilder num) {//Done. Needs testing
-        if (accept(Token.PER, true)) {
+    private void fraction(StringBuilder num) {
+        if (acceptPeek(Token.PER)) {
             num.append(".");
+            getNextToken();
             num.append(digit());
         }
     }
@@ -335,45 +348,35 @@ public class JsonParser {
      */
     private String digit() {
         StringBuilder str = new StringBuilder();
-        char nextChar;
-        while (inputStream.hasNext()) {
-            nextChar = inputStream.next();
-            if (!isDigit(nextChar)) {
-                break;
-            }
-            str.append(nextChar);
+        Token nextDigit = peekNextToken();
+        while (isDigit(nextDigit)) {
+            getNextToken();
+            str.append(getDigit(nextDigit));
+            nextDigit = peekNextToken();
         }
         return str.toString();
     }
 
-    private boolean isDigit(char d) {
+    private boolean isDigit(Token d) {
         return switch (d) {
-            case '0' -> true;
-            case '1' -> true;
-            case '2' -> true;
-            case '3' -> true;
-            case '4' -> true;
-            case '5' -> true;
-            case '6' -> true;
-            case '7' -> true;
-            case '8' -> true;
-            case '9' -> true;
+            case ZERO, ONE, TWO ,THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE -> true;
             default -> false;
         };
     }
 
-    private boolean isDigit19(char d) {
+    private char getDigit(Token d) {
         return switch (d) {
-            case '1' -> true;
-            case '2' -> true;
-            case '3' -> true;
-            case '4' -> true;
-            case '5' -> true;
-            case '6' -> true;
-            case '7' -> true;
-            case '8' -> true;
-            case '9' -> true;
-            default -> false;
+            case ZERO  -> '0';
+            case ONE   -> '1';
+            case TWO   -> '2';
+            case THREE -> '3';
+            case FOUR  -> '4';
+            case FIVE  -> '5';
+            case SIX   -> '6';
+            case SEVEN -> '7';
+            case EIGHT -> '8';
+            case NINE  -> '9';
+            default -> throw new JsonParseException("Not a digit: " + d + " on line: " + lineCount);
         };
     }
 
