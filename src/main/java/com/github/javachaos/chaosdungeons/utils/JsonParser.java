@@ -1,6 +1,7 @@
 package com.github.javachaos.chaosdungeons.utils;
 
 import com.github.javachaos.chaosdungeons.utils.exceptions.JsonParseException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,26 +19,23 @@ public class JsonParser {
             "3", "",  "", "", "b", "2", "", "", "", "]", "1", "", "", "", "\\", "0", "", "", "",  "[", "/", "", "",
             "", "E", "."};
     private CharacterStreamReader inputStream;
+
     private char prev;
     private Token curr;
     private int lineCount;
 
     public JsonParser(String jsonFilename) {
         this.filename = jsonFilename;
-        reset();
     }
 
-    private void reset() {
+    public String printFile() throws Exception {
         InputStream is = Objects.requireNonNull(getClass().getResourceAsStream(filename));
-        inputStream = new CharacterStreamReader(is);
-    }
-
-    public String printFile() {
+        CharacterStreamReader charStream = new CharacterStreamReader(is);
         StringBuilder stringBuilder = new StringBuilder();
-        while (inputStream.hasNext()) {
-            stringBuilder.append(inputStream.next());
+        while (charStream.hasNext()) {
+            stringBuilder.append(charStream.next());
         }
-        reset();
+        charStream.close();
         return stringBuilder.toString();
     }
 
@@ -135,17 +133,51 @@ public class JsonParser {
         if (inputStream.hasNext() && prev == '"') {
             prevChar = inputStream.next();
         } else {
-            LOGGER.debug("Not a string: {} line: {}", inputStream.peek(), lineCount);
+            throw new JsonParseException("Not a string: " + inputStream.peek());
         }
-        int i = 0;
+        if (prevChar == '"' && prev == '"') {
+            return "";
+        }
         while (inputStream.hasNext()) {
             str.append(prevChar);
-            i++;
-            if ((i == 1 && prevChar == '"') || (prevChar != '\\' && (prevChar = inputStream.next()) == '"')) {
+            if (prevChar == '\\') {
+                prevChar = inputStream.next();
+                switch (prevChar) {
+                    case '"', '\\', '/', 'b', 'f', 'n', 't':
+                        str.append(prevChar);
+                        break;
+                    case 'u': // next four digits should be hex.
+                        str.append(prevChar);
+                        parseHexDigit(str);
+                        parseHexDigit(str);
+                        parseHexDigit(str);
+                        parseHexDigit(str);
+                        inputStream.next();
+                        return str.toString();
+                    default:
+                        throw new JsonParseException("Unexpected value: " + prevChar);
+                }
+            } else if ((prevChar = inputStream.next()) == '"') {
                 break;
             }
         }
         return str.toString();
+    }
+
+    private void parseHexDigit(StringBuilder str) {
+        char nextChar = inputStream.next();
+        if (isHex(nextChar)) {
+            str.append(nextChar);
+        } else {
+            throw new JsonParseException("Unexpected value: " + nextChar);
+        }
+    }
+
+    private boolean isHex(char character) {
+        return isDigit(Token.get(hasSymbol(new char[] {character}))) || switch (character) {
+            case 'a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F' -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -182,8 +214,8 @@ public class JsonParser {
         return false;
     }
 
-    private Map<String, Object> object() {
-        Map<String, Object> map = new HashMap<>();
+    private Set<Pair<String, Object>> object() {
+        Set<Pair<String, Object>> map = new HashSet<>();
         getNextToken();
         expect(Token.LBRACE);
         whitespace();
@@ -193,31 +225,37 @@ public class JsonParser {
         }
         do {
             whitespace();
-            if (accept(Token.DQUOTE, true)) {//Start of string
+            getNextToken();
+            if (expect(Token.DQUOTE)) {//Start of string
                 String name = string();
                 whitespace();
                 getNextToken();
                 expect(Token.COLON);
                 Object value = value();
-                map.put(name, value);
+                map.add(new Pair<>(name, value));
                 whitespace();
                 if (acceptPeek(Token.RBRACE)) {
                     getNextToken();
                     expect(Token.RBRACE);
                     return map;
                 }
-                //TODO figure out how to detect extra trailing commas here,
-                // my first idea is to use a 2 character lookahead (peek)
-                // first peek 1, if its a comma, thats ok, peek one more,
-                // if its a RBRACE, backtrack to 0 and report error.
             }
         } while (accept(Token.COMMA, true));
         return map;
     }
 
-    public Map<String, Object> parse() throws Exception {
-        Map<String, Object> result = object();
-        inputStream.close();
+    public Set<Pair<String, Object>> parse() {
+        Set<Pair<String, Object>> result = new HashSet<>();
+        InputStream is = Objects.requireNonNull(getClass().getResourceAsStream(filename));
+        try (CharacterStreamReader charStream = new CharacterStreamReader(is)) {
+            this.inputStream = charStream;
+            long start = System.nanoTime();
+            result.addAll(object());
+            long end = System.nanoTime();
+            LOGGER.debug("JsonParse completed in {} ns", end - start);
+        } catch (Exception e) {
+            LOGGER.fatal("Exception while parsing object: {}", e.getMessage());
+        }
         return result;
     }
 
@@ -258,7 +296,7 @@ public class JsonParser {
                 list.add(num);
                 return list;
             case LBRACE:
-                Map<String, Object> o = object();
+                Set<Pair<String, Object>> o = object();
                 list.add(o);
                 return list;
             case LBRAC:
@@ -293,9 +331,10 @@ public class JsonParser {
                 o = value();
                 if (!o.isEmpty()) {
                     values.add(o);
+                } else {
+                    throw new JsonParseException("Expected a value at line:  " + lineCount);
                 }
                 if (accept(Token.RBRAC, true)) {
-                    getNextToken();
                     return values;
                 }
             } while (accept(Token.COMMA, false));
@@ -404,7 +443,7 @@ public class JsonParser {
                 if (s.length < 1) {
                     return 0;
                 }
-                if (str[0] == s[0] && new String(str).substring(1).equals(new String(s).substring(1))) {
+                if (str[0] == s[0] && Arrays.equals(str, s)) {
                     return key;
                 }
             }
