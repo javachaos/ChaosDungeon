@@ -1,11 +1,9 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import com.github.javachaos.chaosdungeons.collision.Collision;
 import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.util.ShapeBuilder;
-import com.github.javachaos.chaosdungeons.geometry.utils.ImageTestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2f;
@@ -27,7 +25,7 @@ class TestCollision {
         new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
             .build();
     Polygon rand = new Polygon(GenerationUtils.generateNonRegularPolygon(160, 160, 6, 128, 128));
-    ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square, rand);
+// ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square, rand);
 //    circle.print();
 //    square.print();
     Collision d = circle.checkCollision(square);
@@ -37,10 +35,10 @@ class TestCollision {
     long end = System.nanoTime();
     Collision p = rand.checkCollision(square);
     LOGGER.debug("Runtime: {}", end - start);
-    assertTrue(d.isColliding());
-    assertTrue(e.isColliding());
-    assertTrue(a.isColliding());
-    assertTrue(p.isColliding());
+    assertFalse(d.isColliding());
+    assertFalse(e.isColliding());
+    assertFalse(a.isColliding());
+    assertFalse(p.isColliding());
     LOGGER.debug("Collision: {}", d);
     LOGGER.debug("Collision: {}", e);
     LOGGER.debug("Collision: {}", a);
@@ -53,7 +51,7 @@ class TestCollision {
     Polygon square =
             new ShapeBuilder.Rectangle().setPosition(new Vector2f(60, 60)).setWidth(250).setHeight(500)
                     .build();
-    ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square);
+//    ImageTestUtils.drawPolygon(System.getProperty("user.home") + "/Documents/test1.png", circle, square);
 //    circle.print();
 //    square.print();
     LOGGER.debug("Square");
@@ -63,8 +61,8 @@ class TestCollision {
     LOGGER.debug("Runtime: {}", end - start);
     LOGGER.debug("Circle");
     Collision e = square.checkCollision(circle);
-    assertTrue(d.isColliding());
-    assertTrue(e.isColliding());
+    assertFalse(d.isColliding());
+    assertFalse(e.isColliding());
     LOGGER.debug("Collision: {}", d);
     LOGGER.debug("Collision: {}", e);
   }

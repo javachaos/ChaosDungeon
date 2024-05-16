@@ -1,13 +1,15 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
-import com.github.javachaos.chaosdungeons.ecs.components.Component;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
-
-import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2f;
+
+import com.github.javachaos.chaosdungeons.ecs.components.Component;
+import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 
 /**
  * Simple Entity class.

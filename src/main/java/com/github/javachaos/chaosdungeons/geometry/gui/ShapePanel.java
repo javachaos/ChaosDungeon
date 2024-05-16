@@ -1,18 +1,23 @@
 package com.github.javachaos.chaosdungeons.geometry.gui;
 
-import com.github.javachaos.chaosdungeons.collision.Polygon;
-import com.github.javachaos.chaosdungeons.geometry.DelaunayTriangulation;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+import com.github.javachaos.chaosdungeons.geometry.DelaunayTriangulation;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 
 /**
  * A JPanel to draw a shape on.

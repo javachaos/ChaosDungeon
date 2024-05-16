@@ -24,7 +24,6 @@ import org.apache.logging.log4j.Logger;
  * Left-AltKey - Generate new polygon
  * Left-ControlKey - Toggle vertex info
  */
-@SuppressWarnings("unused")
 public class ShapeDrawer extends JFrame {
 
   private static final int WIDTH = 1200;

@@ -1,13 +1,14 @@
 package com.github.javachaos.chaosdungeons.geometry.polygons;
 
-import com.github.javachaos.chaosdungeons.collision.Polygon;
+import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.checkIntersection;
+import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.checkIntersectionStrict;
+import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.epsPtEquals;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.*;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
 
 /**
  * Edge class, defined by two points (a, b).

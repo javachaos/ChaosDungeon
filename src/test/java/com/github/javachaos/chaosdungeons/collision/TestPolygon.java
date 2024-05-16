@@ -1,14 +1,25 @@
 package com.github.javachaos.chaosdungeons.collision;
 
-import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
 
 class TestPolygon {
 

@@ -1,21 +1,24 @@
 package com.github.javachaos.chaosdungeons.ecs.systems;
 
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.javachaos.chaosdungeons.constants.Constants;
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
-import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.impl.FireballEntityFactory;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.impl.RandomFireballSpawnDataFactory;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.impl.RandomShapeSpawnDataFactory;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.impl.ShapeEntityFactory;
-import com.github.javachaos.chaosdungeons.ecs.entities.impl.*;
-import com.github.javachaos.chaosdungeons.gui.GameWindow;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-
-import java.util.List;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.FireballEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.PlayerEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.RandomShapeEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.SpawnerEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.SquareEntity;
+import com.github.javachaos.chaosdungeons.ecs.entities.impl.TextEntity;
 
 /**
  * Rendering system class.

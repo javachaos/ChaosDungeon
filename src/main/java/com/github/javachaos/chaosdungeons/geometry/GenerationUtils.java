@@ -1,10 +1,15 @@
 package com.github.javachaos.chaosdungeons.geometry;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
 import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
 import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
-
-import java.util.*;
 
 /**
  * Helper class to generate things.

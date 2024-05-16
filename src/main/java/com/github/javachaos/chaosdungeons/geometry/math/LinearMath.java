@@ -4,7 +4,6 @@ import static com.github.javachaos.chaosdungeons.constants.Constants.EPSILON;
 
 import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
-import java.awt.geom.Point2D;
 
 /**
  * Linear math helper functions.

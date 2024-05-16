@@ -8,7 +8,6 @@ import com.github.javachaos.chaosdungeons.utils.MatrixUtils;
 /**
  * World shader class.
  */
-@SuppressWarnings("unused")
 public class WorldShader extends ShaderProgram {
 
   /**

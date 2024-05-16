@@ -5,7 +5,6 @@ import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 /**
  * System class for ECS.
  */
-@SuppressWarnings("unused")
 public abstract class System {
   protected final GameContext gameContext;
 

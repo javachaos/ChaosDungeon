@@ -2,11 +2,18 @@ package com.github.javachaos.chaosdungeons.geometry.math;
 
 import static com.github.javachaos.chaosdungeons.geometry.math.LinearMath.orientation;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.github.javachaos.chaosdungeons.collision.Polygon;
 import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Convex hull helper functions.

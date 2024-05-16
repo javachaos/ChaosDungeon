@@ -37,15 +37,10 @@ import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import com.github.javachaos.chaosdungeons.constants.Constants;
-import com.github.javachaos.chaosdungeons.ecs.GameLoop;
-import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
-import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
-import com.github.javachaos.chaosdungeons.graphics.Camera;
-
 import java.io.PrintStream;
 import java.nio.IntBuffer;
 import java.util.Objects;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,14 +49,22 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
+
+import com.github.javachaos.chaosdungeons.constants.Constants;
+import com.github.javachaos.chaosdungeons.ecs.GameLoop;
+import com.github.javachaos.chaosdungeons.exceptions.GeneralGameException;
+import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
+import com.github.javachaos.chaosdungeons.graphics.Camera;
 
 
 /**
  * Game window.
  */
-@SuppressWarnings("unused")
 public class GameWindow {
 
   private static final int TARGET_FPS = 60;

@@ -1,6 +1,12 @@
 package com.github.javachaos.chaosdungeons.ecs.entities.impl;
 
-import com.github.javachaos.chaosdungeons.constants.Constants;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.joml.Quaternionf;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+
 import com.github.javachaos.chaosdungeons.ecs.components.CollisionComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.GravityComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.PhysicsComponent;
@@ -8,21 +14,15 @@ import com.github.javachaos.chaosdungeons.ecs.components.TransformComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.render.DebugCollisionRenderer;
 import com.github.javachaos.chaosdungeons.ecs.components.render.RenderComponent;
 import com.github.javachaos.chaosdungeons.ecs.components.render.SpriteComponent;
-import com.github.javachaos.chaosdungeons.ecs.components.render.UiRenderComponent;
 import com.github.javachaos.chaosdungeons.ecs.entities.Entity;
 import com.github.javachaos.chaosdungeons.ecs.entities.GameContext;
 import com.github.javachaos.chaosdungeons.ecs.entities.factory.SpawnData;
 import com.github.javachaos.chaosdungeons.graphics.SpriteModel;
 import com.github.javachaos.chaosdungeons.graphics.Texture;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.joml.*;
 
 /**
  * Game entity class.
  */
-@SuppressWarnings("unused")
 public abstract class GameEntity extends Entity {
 
   protected static final Map<String, Texture> textureMap = new HashMap<>();

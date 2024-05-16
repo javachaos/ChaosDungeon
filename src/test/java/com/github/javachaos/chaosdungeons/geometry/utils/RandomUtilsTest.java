@@ -1,12 +1,10 @@
 package com.github.javachaos.chaosdungeons.geometry.utils;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.javachaos.chaosdungeons.geometry.math.RandomUtils;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 /**

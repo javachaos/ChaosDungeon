@@ -24,6 +24,7 @@ public class Main {
    *
    * @return the property manager.
    */
+  @SuppressWarnings("exports")
   public static PropertyManager getPropertyManager() {
     return propertyManager;
   }

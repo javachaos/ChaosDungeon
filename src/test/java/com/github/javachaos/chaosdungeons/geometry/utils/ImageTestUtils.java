@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 /**
  * Image Test utility class for drawing a polygon to a png image.
  */
-@SuppressWarnings("unused")
 public class ImageTestUtils {
 
   /**

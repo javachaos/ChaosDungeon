@@ -9,7 +9,6 @@ import org.joml.Vector3f;
 /**
  * Matrix utilities.
  */
-@SuppressWarnings("unused")
 public class MatrixUtils {
 
   private MatrixUtils() {

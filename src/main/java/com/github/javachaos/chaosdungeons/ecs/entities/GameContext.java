@@ -1,5 +1,13 @@
 package com.github.javachaos.chaosdungeons.ecs.entities;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
+
 import com.github.javachaos.chaosdungeons.ecs.components.Component;
 import com.github.javachaos.chaosdungeons.ecs.entities.impl.GameEntity;
 import com.github.javachaos.chaosdungeons.ecs.systems.LoadSystem;
@@ -10,10 +18,6 @@ import com.github.javachaos.chaosdungeons.exceptions.ShaderLoadException;
 import com.github.javachaos.chaosdungeons.shaders.ShaderProgram;
 import com.github.javachaos.chaosdungeons.shaders.UiShader;
 import com.github.javachaos.chaosdungeons.shaders.WorldShader;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 
 /**
  * Helper class to store shared state of game entities between

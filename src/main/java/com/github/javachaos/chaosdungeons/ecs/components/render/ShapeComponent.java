@@ -1,14 +1,14 @@
 package com.github.javachaos.chaosdungeons.ecs.components.render;
 
-import com.github.javachaos.chaosdungeons.geometry.polygons.Mesh;
-import com.github.javachaos.chaosdungeons.collision.Polygon;
+import java.awt.Color;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
-import java.awt.*;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Mesh;
 
 /**
  * Shape Renderer class.

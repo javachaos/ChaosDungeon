@@ -2,22 +2,28 @@ package com.github.javachaos.chaosdungeons.geometry;
 
 import static com.github.javachaos.chaosdungeons.geometry.GenerationUtils.generateNonRegularPolygon;
 
-import com.github.javachaos.chaosdungeons.collision.Collision;
-import com.github.javachaos.chaosdungeons.geometry.gui.ShapeDrawer;
-import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
-import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
-import com.github.javachaos.chaosdungeons.collision.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
+
 import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector2f;
+
+import com.github.javachaos.chaosdungeons.collision.Collision;
+import com.github.javachaos.chaosdungeons.collision.Polygon;
+import com.github.javachaos.chaosdungeons.geometry.gui.ShapeDrawer;
+import com.github.javachaos.chaosdungeons.geometry.math.LinearMath;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Edge;
+import com.github.javachaos.chaosdungeons.geometry.polygons.Triangle;
 
 /**
  * Separating Axis Theorem collision detector.

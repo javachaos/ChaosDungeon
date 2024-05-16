@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
  *
  * @author javachaos
  */
-@SuppressWarnings("unused")
 public final class PropertyManager {
 
   /**
