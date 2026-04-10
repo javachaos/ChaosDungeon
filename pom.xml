@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.0</junit.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
         <lwjgl.version>3.3.3</lwjgl.version>
         <shade.version>3.5.0</shade.version>
         <main.class>com.github.javachaos.chaosdungeons.Main</main.class>
